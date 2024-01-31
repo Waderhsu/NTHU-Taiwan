@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="https://static.igem.wiki/common/icons/favicons/igem-2022.svg"/>
+    <link rel="license" href="https://creativecommons.org/licenses/by/4.0/"/>
+
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename = 'bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename = 'style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'slick.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'slick-theme.css') }}">
+
+    <title>{% block title %}{% endblock %} | NTHU-Taiwan - iGEM 2023</title>
+
+</head>
+<body>
+  <!-- Loading -->
+  <div id="loader-wrapper">
+
+    <img style="position:relative; margin-top: -100px; width:80%"
+      src="https://static.igem.wiki/teams/4636/wiki/loadingpanda.gif">
+  </div>
+
+  <script>
+    var loader = document.getElementById("loader-wrapper");
+    window.addEventListener("load", function () {
+        loader.style.display = "none";
+        document.getElementById('content').style.opacity = 1;
+        document.getElementById('content').style.visibility = 'visible';
+    })
+  </script>
+
+  <!-- Navigation -->
+  {% include 'menu.html' %}
+
+  <!-- Page Content -->
+  {% block page_content %}{% endblock %}
+
+  <script src="{{ url_for('static', filename = 'expand-button.js') }}"></script>
+
+  <!-- Footer: MUST mention license AND have a link to team wiki's repository on gitlab.igem.org -->
+  {% include 'footer.html' %}
+  
+  <script src="{{ url_for('static', filename = 'fade.js') }}"></script>
+  <!-- Bootstrap Bundle with Popper -->
+  <!-- <script src="{{ url_for('static', filename = 'bootstrap.bundle.min.js') }}"></script> -->
+  <!--
+  <script>
+      $(".collapse .navbar-collapse").click(function (event) {
+          var clickover = $(event.target);
+          var $navbar = $(".navbar-collapse");
+          var _opened = $navbar.hasClass("show");
+          if (_opened === true && !clickover.hasClass("navbar-toggle")) {
+              $navbar.collapse('hide');
+          }
+      });
+  </script>-->
+  <div id="scroll-to-top-btn"><span class="icon-position icon-style"></span></div>
+  <script>
+      const scrollToTopBtn = document.querySelector("#scroll-to-top-btn");
+
+      window.addEventListener("scroll", () => {
+          if (window.pageYOffset > 100) {
+              scrollToTopBtn.classList.add("show");
+          } else {
+              scrollToTopBtn.classList.remove("show");
+          }
+      });
+
+      scrollToTopBtn.addEventListener("click", () => {
+          window.scrollTo({
+              top: 0,
+              behavior: "smooth"
+          });
+      }); 
+  </script>
+
+</body>
+</html>

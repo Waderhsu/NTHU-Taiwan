@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@arcgis/core": "^4.27.6"
+  },
+  "name": "nthu-taiwan",
+  "description": "This repository **MUST** contain all coding assets to generate your team's wiki (HTML, CSS, JavaScript, TypeScript, Python, etc).",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.igem.org/2023/nthu-taiwan.git"
+  },
+  "author": "",
+  "license": "ISC"
+}

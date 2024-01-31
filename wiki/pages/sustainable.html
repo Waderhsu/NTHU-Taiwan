@@ -1,0 +1,498 @@
+{% extends "layout.html" %}
+  
+{% block title %}Sustainable Development Impact{% endblock %}
+
+{% block page_content %}
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Sustainable Development Impact', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                    <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                    <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                    ${firstLetter}
+                </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "Earth care is self-care.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container" style="top: 50px;">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -270px;
+        color: aliceblue;
+        /* font-style: unset; */
+        font-size: xx-large;
+        font-weight: 800;
+        letter-spacing: 8px;
+        font-size: 110px;
+        font-family: inherit;
+        align-content: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 120px;"
+    >
+            Sustainable<br>Development Impact
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#Problem" class="sidebaritem">Introduction</a></li>
+                    <li><a href="#Inspiration" class="sidebaritem">3 - Good Health And Well-Being</a></li>
+                    <li><a href="#Our Goal" class="sidebaritem">4 - Quality Education</a></li>
+                    <li><a href="#Solution" class="sidebaritem">9 - Industry, Innovation, And Infrastructure</a></li>
+                    <li><a href="#Advantages and innovations" class="sidebaritem">17 - Partnerships For The Goals</a></li>
+                    <li><a href="#Reference" class="sidebaritem">Reference</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Problem">Introduction</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+                <p class="des-paragraph fade_from_right">
+                    The Sustainable Development
+                    Goals(SDGs) are a set of 17 global goals established by the United Nations (UN) designed to
+                    address a wide range of global challenges and provide a shared framework for countries,
+                    organizations, and individuals to work towards a more sustainable and equitable future. During
+                    the development of our project, we kept these SDGs in mind, aiming to develop an accessible,
+                    low-cost, and convenient colorectal cancer screening platform. We combined our ideas with five
+                    SDGs to serve as a guideline for our compliance with the SDGs and contribute to the creation of
+                    a sustainable life.<a href="[1]">[1]</a>
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Inspiration">3 - Good Health And Well-Being</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact/sustainable-development-impact-fig1.png" style="width: 40%; padding-top: 20px;">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                    As the saying goes: "Time is
+                    money." According to research, if colorectal cancer is detected in stages zero or one, the
+                    chances of a patient recovering are as high as 90%. However, if it is only discovered in stages
+                    four or later, the patient's treatment chances drop substantially to only 10-20%. This shows the
+                    importance of regular colorectal cancer detection, which helps patients receive treatment early
+                    to improve their chances of recovery.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    However, the current colorectal
+                    cancer screening method- colonoscopy has several disadvantages including invasiveness,
+                    inconvenience, and high cost. These would lead to a lower willingness to undergo colonoscopy
+                    regularly, resulting in delays in seeking medical treatment. Our research is dedicated to
+                    developing a minimally invasive, highly accurate, and cost-effective method for colorectal
+                    cancer detection. We aim to estimate the likelihood of cancer in individuals by measuring the
+                    concentration of Circular RNA in their blood, with the hope of increasing public screening
+                    willingness and consequently reducing the mortality rate associated with colorectal cancer.
+                    Therefore, our project contributes to the SDG 3: Good Health and Well-Being．
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Our Goal">4 - Quality Education</h1>
+                <button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3">
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact/sustainable-development-impact-fig2.png" style="width: 40%; padding-top: 20px;">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                     As the saying goes, "Prevention is
+                    better than cure." We firmly believe that disseminating knowledge about colorectal cancer
+                    prevention and encouraging regular screenings represents the most effective strategy for
+                    combating the ongoing increase in colorectal cancer cases. Consequently, our team is committed
+                    not only to advancing innovative detection technologies but also to raising public awareness
+                    regarding the critical importance of early colorectal cancer screening.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                     Through our dedicated social media
+                    platforms, we actively provide the public with informative content related to cancer knowledge
+                    and prevention methods. By consistently updating our content, we aspire to expand our social
+                    reach and promote synthetic biology to a broader audience. Moreover, we enthusiastically
+                    introduce students to the field of synthetic biology and the techniques we employ through our
+                    camp programs. To date, we have successfully engaged over 80 elementary to high school students
+                    in these educational camps. Our objective is to equip students with a foundational understanding
+                    of synthetic biology while instilling an awareness of the gravity of colorectal cancer,
+                    ultimately contributing to its prevention.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                     Furthermore, our website serves as
+                    a valuable resource for synthetic biology and general biology knowledge, featuring an engaging
+                    research topic presented in the form of a game. Our goal is to facilitate comprehension for the
+                    general public, reaching individuals across various age groups and eliminating disparities in
+                    educational access. Consequently, we firmly believe that our initiative aligns seamlessly with
+                    the principles of Sustainable Development Goal 4: Quality Education.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    See the <a href="{{ url_for('pages', page='education') }}">Education page</a> for detailed information.
+                </p>
+                
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Solution">9 - Industry, Innovation, And Infrastructure</h1>
+                <button class="expandbutton" id="expandbutton4"></button>
+            </div>
+            <div id="article4">
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact/sustainable-development-impact-fig7.png" style="width: 40%; padding-top: 20px;">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                    Throughout the course of our
+                    project's development, our focus remained steadfast on the twin goals of product
+                    commercialization and creating a meaningful impact on a global scale. To ascertain the true
+                    demand for our offering within the public sphere, we conducted a comprehensive survey, amassing
+                    a total of 408 responses. Among the survey questions, we posed the inquiry, "Do you consider
+                    colorectal cancer to be a common and serious disease?" The results indicate an overwhelming
+                    84.6% agreement among respondents, underscoring a clear and pressing demand for an efficacious
+                    solution to address the escalating prevalence of colorectal cancer.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact/sustainable-development-impact-fig3.png">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                    Another set of questions delved
+                    into the public's perspectives on the existing colorectal screening methods. Strikingly, the
+                    statistics reveal that even in a country like Taiwan with comprehensive health insurance
+                    coverage, a substantial 51.4% of respondents believe that the cost of Colorectal Cancer
+                    detection remains prohibitively high for the general public. This issue becomes even more
+                    concerning when considering countries without such healthcare coverage. Furthermore, the
+                    database highlights that an overwhelming 76.2% of respondents find the current methods for
+                    early-stage Colorectal Cancer detection to be exceedingly inconvenient.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact/sustainable-development-impact-fig4.png">
+                </div>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact/sustainable-development-impact-fig5.png">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                    Moreover, NanoCircDx is acceptable
+                    to the public according to our public survey. 96.3% of the respondents are willing to use our
+                    product for early detection of Colorectal Cancer due to its convenience, accuracy, minimal
+                    invasiveness, and efficiency.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact/sustainable-development-impact-fig6.png">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                    In addition to the detection
+                    technology, we have also developed corresponding fully automated hardware and software
+                    equipment. Our device's key advantage lies in its remarkable simplicity, enabling usage even in
+                    remote rural health centers, with a full test completed in just 2.5 hours. Gone are the
+                    complexities of hospital procedures, the need for costly machinery, or specialized expertise. By
+                    introducing this device to Taiwan's 20 million-strong population, a substantial reduction in the
+                    economic strain on Taiwan's healthcare system becomes tangible. Consequently, this device
+                    enhances the value of technological products, expanding their utility. Furthermore, its
+                    applicability extends to less developed regions, fostering a positive bridge between urban and
+                    rural areas.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In addition to its impact on
+                    healthcare in Taiwan, our vision is progressively extending to the international arena. Should
+                    we continue to delve into circular RNA-related research in the future, we intend to venture into
+                    entrepreneurship, creating more job opportunities and accelerating innovation within the liquid
+                    biopsy technology sector. This aligns closely with the objectives outlined in "SDG 9: Industry,
+                    Innovation, and Infrastructure."
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    See the <a href="{{ url_for('pages', page='entrepreneurship') }}">Entrepreneurship page</a> for detailed information.
+                </p>
+                
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Advantages and innovations">17 - Partnerships For The Goals.</h1>
+                <button class="expandbutton" id="expandbutton5"></button>
+            </div>
+            <div id="article5">
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/sustainable-development-impact/sustainable-development-impact-fig8.png" style="width: 40%; padding-top: 20px;">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                    The Sustainable Development Goals
+                    (SDGs) are global, long-term aspirations that cannot be
+                    realized overnight. Despite the time constraints of the iGEM competition, our team has adeptly
+                    managed our time. Over the course of this year, we have engaged in cross-border and
+                    cross-disciplinary collaborations with numerous iGEM teams both domestically and
+                    internationally.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    We initiated the iGEM Map, a
+                    comprehensive map displaying iGEM teams worldwide. Each team participating in this initiative is
+                    featured on this map, pinpointing their location and providing information about their
+                    individual projects. Our objective with the iGEM map is to bolster the cohesion of the iGEM
+                    community, streamline information sharing, and establish a platform for teams to connect and
+                    collaborate.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In addition, we actively engage in
+                    various collaborative activities initiated by other iGEM teams. These collaborations encompass
+                    thematic exchange meetings, joint initiatives to promote synthetic biology, efforts to raise
+                    awareness about wildlife and plants, and the production of podcasts. To date, we have
+                    collaborated with 21 different iGEM teams. Furthermore, we have established a long-term
+                    partnership with NYCU_Formosa, with the overarching goal of contributing to the global endeavor
+                    outlined in "SDG 17: Partnership for the Goal."
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    See the <a href="{{ url_for('pages', page='collaborations') }}">Collaboration page</a> for detailed information.
+                </p>
+                
+            </div>
+            <div id="Reference">
+                <h1 class="des-ref-heading">Reference</h1>
+                <p id="[1]" class="des-ref-paragraph">[1] <a href="https://www.globalgoals.org/">https://www.globalgoals.org/</a></p>
+            </div>
+        </div>
+
+    </section>
+</div>
+
+{% endblock %}

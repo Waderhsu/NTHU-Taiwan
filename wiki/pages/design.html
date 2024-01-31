@@ -1,0 +1,1396 @@
+{% extends "layout.html" %}
+
+{% block title %}Design{% endblock %}
+
+{% block page_content %}
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/design.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/design.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Design', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                    <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                    <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                    ${firstLetter}
+                </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "The best way to predict the future is to create it.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+        color: aliceblue;
+        /* font-style: unset; */
+        font-size: xx-large;
+        font-weight: 800;
+        letter-spacing: 8px;
+        font-size: 140px;
+        font-family: inherit;">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container">
+            Design
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+        </div>
+        <a href="#" class="scroll-down" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#Overview" class="sidebaritem">Overview</a></li>
+                    <li><a href="#Mechanism & Design" class="sidebaritem">Mechanism & Design</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+                    <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a href="#CircRNA synthesis">CircRNA synthesis</a></li>
+                            <button class="sideexpandbutton" id="sideexpandbutton2"></button>
+                            <div id="sidebaritem_item2" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                                <ul>
+                                    <li class="sidebaritem_item"><a href="#Path A">Path A</a></li>
+                                </ul>
+                            </div>
+                            <li class="sidebaritem_item"><a href="#Gold nanoparticle-based colorimetric assay">Gold nanoparticle-based colorimetric assay</a></li>
+                            <button class="sideexpandbutton" id="sideexpandbutton3"></button>
+
+                            <div id="sidebaritem_item3" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                                <ul>
+                                    <li class="sidebaritem_item"><a href="#Path B">Path B</a></li>
+                                    <li class="sidebaritem_item"><a href="#Path C">Path C</a></li>
+                                    <li class="sidebaritem_item"><a href="#Path D">Path D</a></li>
+                                </ul>
+                            </div>
+                            <li class="sidebaritem_item"><a href="#Lateral flow test">Lateral flow test</a>
+                            </li>
+                            <button class="sideexpandbutton" id="sideexpandbutton4"></button>
+
+                            <div id="sidebaritem_item4" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                                <ul>
+                                    <li class="sidebaritem_item"><a href="#Path E">Path E</a></li>
+                                    <li class="sidebaritem_item"><a href="#Path F">Path F</a></li>
+                                    <li class="sidebaritem_item"><a href="#Path G">Path G</a></li>
+                                </ul>
+                            </div>
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                        const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+                        sideexpandbutton1.addEventListener("click", function () {
+                            if (sidebaritem_item1.style.display == "none") {
+                                sidebaritem_item1.style.display = "block";
+                                sideexpandbutton1.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item1.style.display = "none";
+                                sideexpandbutton1.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                        const sideexpandbutton2 = document.getElementById("sideexpandbutton2");
+                        const sidebaritem_item2 = document.getElementById("sidebaritem_item2");
+
+                        sideexpandbutton2.addEventListener("click", function () {
+                            if (sidebaritem_item2.style.display == "none") {
+                                sidebaritem_item2.style.display = "block";
+                                sideexpandbutton2.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item2.style.display = "none";
+                                sideexpandbutton2.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                        const sideexpandbutton3 = document.getElementById("sideexpandbutton3");
+                        const sidebaritem_item3 = document.getElementById("sidebaritem_item3");
+
+                        sideexpandbutton3.addEventListener("click", function () {
+                            if (sidebaritem_item3.style.display == "none") {
+                                sidebaritem_item3.style.display = "block";
+                                sideexpandbutton3.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item3.style.display = "none";
+                                sideexpandbutton3.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                        const sideexpandbutton4 = document.getElementById("sideexpandbutton4");
+                        const sidebaritem_item4 = document.getElementById("sidebaritem_item4");
+
+                        sideexpandbutton4.addEventListener("click", function () {
+                            if (sidebaritem_item4.style.display == "none") {
+                                sidebaritem_item4.style.display = "block";
+                                sideexpandbutton4.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item4.style.display = "none";
+                                sideexpandbutton4.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                    </script>
+                    <li><a href="#Reference" class="sidebaritem">Reference</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Overview">Overview</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-1.jpg" style="width: 80%;">
+                </div>
+                <p class="des-figure">
+                    Figure 1. Overall concept of our project. “RCA” is the abbreviation of “Rolling Circle
+                    Amplification”. “AuNPs” is the abbreviation of “Gold Nanoparticles”. “RT-RPA” is the
+                    abbreviation of “Reverse Transcription-Recombinase Polymerase Amplification”. “PCRD” is a kind
+                    of lateral flow strip.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    The ultimate objective of our
+                    project is attempting to employ human serum as the sample for both
+                    gold nanoparticle (AuNPs)-based colorimetric assay <a href="#[1]">[1]</a> and lateral flow strip
+                    testing <a href="#[2]">[2]</a>.
+                    However, at the current stage, we are unable to obtain serum samples from individuals due to
+                    permissions from relevant government institutions (see <a
+                        href="{{ url_for('pages', page='proposed-implementation') }}" class="home">page
+                        implementation</a>
+                    for our planned use
+                    of human specimens)</a>. Consequently, to validate the two pathways outlined in Figure 1, we
+                    synthesized circular RNA with an identical sequence to that found in human serum. Initially, the
+                    circularized product was amplified using either rolling circle amplification (RCA) or reverse
+                    transcription-recombinase polymerase amplification (RT-RPA). Subsequently, the amplified
+                    products were tested using gold nanoparticle-based colorimetric assay or lateral flow test,
+                    respectively.
+                </p>
+
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Mechanism & Design">Mechanism & Design</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <!--ADD WORKFLOW-->
+                <link rel="stylesheet" href="{{ url_for('static', filename = 'workflow.css') }}">
+                <script src="{{ url_for('static', filename = 'workflow.js') }}"></script>
+
+                <div style="justify-content: center;">
+                    <div id="flowchart-container">
+                        <div class="line" id="line1" onmouseover="addBorder('line1')"
+                            onmouseout="removeBorder('line1')"></div>
+                        <div class="line" id="line2" onmouseover="addBorder('line2')"
+                            onmouseout="removeBorder('line2')"></div>
+                        <div class="line" id="line3" onmouseover="addBorder('line3')"
+                            onmouseout="removeBorder('line3')"></div>
+                        <div class="line" id="line4" onmouseover="addBorder('line4')"
+                            onmouseout="removeBorder('line4')"></div>
+                        <div class="line" id="line5" onmouseover="addBorder('line5')"
+                            onmouseout="removeBorder('line5')"></div>
+                        <div class="line" id="line6" onmouseover="addBorder('line6')"
+                            onmouseout="removeBorder('line6')"></div>
+                        <div class="line" id="line7" onmouseover="addBorder('line7')"
+                            onmouseout="removeBorder('line7')"></div>
+                        <div class="line" id="line8" onmouseover="addBorder('line8')"
+                            onmouseout="removeBorder('line8')"></div>
+                        <div class="line" id="line9" onmouseover="addBorder('line9')"
+                            onmouseout="removeBorder('line9')"></div>
+                        <div class="line" id="line10" onmouseover="addBorder('line10')"
+                            onmouseout="removeBorder('line10')"></div>
+                        <div class="line" id="line11" onmouseover="addBorder('line11')"
+                            onmouseout="removeBorder('line11')"></div>
+                        <div class="line" id="line12" onmouseover="addBorder('line12')"
+                            onmouseout="removeBorder('line12')"></div>
+                        <div class="line" id="line13" onmouseover="addBorder('line13')"
+                            onmouseout="removeBorder('line13')"></div>
+                        <div class="line" id="line14" onmouseover="addBorder('line14')"
+                            onmouseout="removeBorder('line14')"></div>
+                        <div class="line" id="line15" onmouseover="addBorder('line15')"
+                            onmouseout="removeBorder('line15')"></div>
+                        <div class="line" id="line16" onmouseover="addBorder('line16')"
+                            onmouseout="removeBorder('line16')"></div>
+                        <div class="line" id="line17" onmouseover="addBorder('line17')"
+                            onmouseout="removeBorder('line17')"></div>
+                        <div class="line" id="line18" onmouseover="addBorder('line18')"
+                            onmouseout="removeBorder('line18')"></div>
+                        <div class="line" id="line19" onmouseover="addBorder('line19')"
+                            onmouseout="removeBorder('line19')"></div>
+                        <div class="line" id="line20" onmouseover="addBorder('line20')"
+                            onmouseout="removeBorder('line20')"></div>
+                        <div class="line" id="line21" onmouseover="addBorder('line21')"
+                            onmouseout="removeBorder('line21')"></div>
+                        <div class="line" id="line22" onmouseover="addBorder('line22')"
+                            onmouseout="removeBorder('line22')"></div>
+                        <div class="line" id="line23" onmouseover="addBorder('line23')"
+                            onmouseout="removeBorder('line23')"></div>
+                        <div class="line" id="line24" onmouseover="addBorder('line24')"
+                            onmouseout="removeBorder('line24')"></div>
+                        <div class="line" id="line25" onmouseover="addBorder('line25')"
+                            onmouseout="removeBorder('line25')"></div>
+                        <div class="line" id="line26" onmouseover="addBorder('line26')"
+                            onmouseout="removeBorder('line26')"></div>
+                        <div class="line" id="line27" onmouseover="addBorder('line27')"
+                            onmouseout="removeBorder('line27')"></div>
+                        <div class="line" id="line28" onmouseover="addBorder('line28')"
+                            onmouseout="removeBorder('line28')"></div>
+                        <div class="line" id="line29" onmouseover="addBorder('line29')"
+                            onmouseout="removeBorder('line29')"></div>
+                        <div class="line" id="line30" onmouseover="addBorder('line30')"
+                            onmouseout="removeBorder('line30')"></div>
+
+                        <!-- arrow head -->
+                        <!--<svg width="0" height="0" style="display:none;">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                                    refX="0" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" />
+                                </marker>
+                            </defs>
+                        </svg> -->
+
+                        <div id="sequence_design" class="flowchart-element" onmouseover="addBorder('sequence_design')"
+                            onmouseout="removeBorder('sequence_design')" href="#cloning">
+                            <p>Sequenec Design</p>
+                        </div>
+                        <div id="AuNPs_synthesis" class="flowchart-element" onmouseover="addBorder('AuNPs_synthesis')"
+                            onmouseout="removeBorder('AuNPs_synthesis')" href="#cloning">
+                            <p>AuNPs Synthesis</p>
+                        </div>
+                        <div id="probe-conjugated_AuNPs" class="flowchart-element"
+                            onmouseover="addBorder('probe-conjugated_AuNPs')"
+                            onmouseout="removeBorder('probe-conjugated_AuNPs')" href="#cloning">
+                            <p>Probe-Conjugated AuNPs</p>
+                        </div>
+                        <div id="repeated_insert_sequence_synthesis" class="flowchart-element"
+                            onmouseover="addBorder('repeated_insert_sequence_synthesis')"
+                            onmouseout="removeBorder('repeated_insert_sequence_synthesis')" href="#cloning">
+                            <p>Repeated Insert Sequence Synthesis</p>
+                        </div>
+                        <div id="preparation_of_templet_for_AELA-PCR" class="flowchart-element"
+                            onmouseover="addBorder('preparation_of_templet_for_AELA-PCR')"
+                            onmouseout="removeBorder('preparation_of_templet_for_AELA-PCR')" href="#cloning">
+                            <p>Preparation of Template for AELA-PCR</p>
+                        </div>
+                        <div id="cloning" class="flowchart-element" onmouseover="addBorder('cloning')"
+                            onmouseout="removeBorder('cloning')" href="#cloning">
+                            <p>Cloning</p>
+                        </div>
+                        <div id="PCR" class="flowchart-element" onmouseover="addBorder('PCR')"
+                            onmouseout="removeBorder('PCR')" href="#cloning">
+                            <p>PCR</p>
+                        </div>
+                        <div id="IVT" class="flowchart-element" onmouseover="addBorder('IVT')"
+                            onmouseout="removeBorder('IVT')" href="#cloning">
+                            <p>IVT</p>
+                        </div>
+                        <div id="circularization" class="flowchart-element" onmouseover="addBorder('circularization')"
+                            onmouseout="removeBorder('circularization')" href="#cloning">
+                            <p>Circularization</p>
+                        </div>
+                        <div id="circRNA_enrichment" class="flowchart-element"
+                            onmouseover="addBorder('circRNA_enrichment')"
+                            onmouseout="removeBorder('circRNA_enrichment')" href="#cloning">
+                            <p>CircRNA enrichment</p>
+                        </div>
+                        <div id="AELA_PCR" class="flowchart-element" onmouseover="addBorder('AELA_PCR')"
+                            onmouseout="removeBorder('AELA_PCR')" href="#cloning">
+                            <p>AELA-PCR</p>
+                        </div>
+                        <div id="RCA" class="flowchart-element" onmouseover="addBorder('RCA')"
+                            onmouseout="removeBorder('RCA')" href="#cloning">
+                            <p>RCA</p>
+                        </div>
+                        <div id="probe-conjugated_AuNPs_detection" class="flowchart-element"
+                            onmouseover="addBorder('probe-conjugated_AuNPs_detection')"
+                            onmouseout="removeBorder('probe-conjugated_AuNPs_detection')" href="#cloning">
+                            <p>Probe-Conjugated AuNPs Detection</p>
+                        </div>
+                        <div id="RT-RPA" class="flowchart-element" onmouseover="addBorder('RT-RPA')"
+                            onmouseout="removeBorder('RT-RPA')" href="#cloning">
+                            <p>RT-RPA</p>
+                        </div>
+                        <div id="PCRD" class="flowchart-element" onmouseover="addBorder('PCRD')"
+                            onmouseout="removeBorder('PCRD')" href="#cloning">
+                            <p>PCRD</p>
+                        </div>
+                        <div id="RPA" class="flowchart-element" onmouseover="addBorder('RPA')"
+                            onmouseout="removeBorder('RPA')" href="#cloning">
+                            <p>RPA</p>
+                        </div>
+                    </div>
+                    <div id="button-container" style="justify-content: space-around">
+                        <a href="#Path A"><button class="flowchart-button" id="A" onmouseover="addBorder('A')" ,
+                            onmouseout="removeBorder('A')">A</button></a>
+                        <a href="#Path B"><button class="flowchart-button" id="B" onmouseover="addBorder('B')" ,
+                            onmouseout="removeBorder('B')">B</button></a>
+                        <a href="#Path C"><button class="flowchart-button" id="C" onmouseover="addBorder('C')" ,
+                            onmouseout="removeBorder('C')">C</button></a>
+                        <a href="#Path D"><button class="flowchart-button" id="D" onmouseover="addBorder('D')" ,
+                            onmouseout="removeBorder('D')">D</button></a>
+                        <a href="#Path E"><button class="flowchart-button" id="E" onmouseover="addBorder('E')" ,
+                            onmouseout="removeBorder('E')">E</button></a>
+                        <a href="#Path F"><button class="flowchart-button" id="F" onmouseover="addBorder('F')" ,
+                            onmouseout="removeBorder('F')" href="#Path F">F</button></a>
+                        <a href="#Path G"><button class="flowchart-button" id="G" onmouseover="addBorder('G')" ,
+                            onmouseout="removeBorder('G')">G</button></a>
+                    </div>
+
+                    <!-- <script>
+                        const views = { 'A': '#Path A', 'B': '#Path B', 'C': '#Path C', 'D': '#Path D', 'E': '#Path E', 'F': '#Path F', 'G': '#Path G' }
+
+                        for (const [key, value] of Object.entries(views)) {
+                            document.getElementById(key).addEventListener('click', function () {
+                                document.getElementById(value).scrollIntoView({ behavior: 'smooth' });
+                            });
+                        }
+                    </script> -->
+                </div>
+                <p class="des-figure">
+                    Figure 2. The seven experimental pathway, labeled as A-G. </p>
+                <p class="des-note" style="text-align: center;">***Click any interested part of design or line to see different experimental pathway*** </p>
+                <p class="des-paragraph fade_from_right">
+                    We designed seven different experimental pathways (Figure 2) to validate whether the colorimetric
+                    assay and lateral flow
+                    strip would function as expected. All the A-G pathways are categorized into three sections:
+                    “CircRNA synthesis”, “Gold nanoparticle-based colorimetric assay” and “Lateral flow test.” The
+                    following description outlines the objective and design of each pathway.
+                </p>
+                <h1 class="des-heading2" id="CircRNA synthesis"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>CircRNA synthesis</h1>
+                <h1 class="des-heading3 fade_from_left" id="Path A">Path A: CircRNA Synthesis</h1>
+                <p class="des-paragraph fade_from_right">
+                    <b>Goal:</b> Synthesis of our target circRNA, hsa_circ_0004771 and
+                    hsa_circ_0101802, from its complementary DNA (cDNA) sequence, Insert_0004771 (BBa_K4636041) and
+                    Insert_0101802 (BBa_K4636040), which we ordered from synthetic customized DNA oligonucleotide
+                    manufacturer service vendor (Integrated DNA Technologies).
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <b>Path:</b> Sequence design → Cloning → PCR → IVT → Circularization → CircRNA
+                    enrichment
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Design:</b>
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-3.jpg">
+                </div>
+                <p class="des-figure">
+                    Figure 3. The experimental design, from IVT (In vitro transcription) to circRNA enrichment, of
+                    circRNA synthesis.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Sequence design:</u> All the required
+                    DNA for each step should be designed before conducting the experiment. Below is a brief
+                    explanation of different sequences required in path A; please refer to the <a
+                        href="{{ url_for('pages', page='parts') }}" class="home">Parts page</a> for more
+                    details.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Cloning:</b> Inserts (Insert_0004771 (BBa_K4636041) and Insert_0101802 (BBa_K4636040)) are
+                    designed to ligate with vector.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCR:</b> Forward (BBa_K4636003 and BBa_K4636005) and reverse (BBa_K4636004 and BBa_K4636006)
+                    primers
+                    are designed to specifically amplify the inserts we ligated with vectors during cloning.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>IVT:</b> The modified T7 promotor binding sites are incorporated into Insert_0004771
+                    (BBa_K4636041)
+                    and Insert_0101802 (BBa_K4636040) to facilitate T7 polymerase functionality.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Circularization:</b> DNA oligo, known as splint (BBa_K4636013-BBa_K4636018), are designed
+                    to
+                    elevate the efficiency of RNA back splicing by forming a double-stranded RNA (dsRNA).
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Cloning:</u> We ligate cDNA sequences (insert) with the pUC19 vector, followed by
+                    the
+                    transfer of the vector into E. coli DH5-alpha. This cloning process ensures a continuous and
+                    abundant supply of the inserted sequences.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>PCR:</u> The abbreviation of “Polymerase Chain Reaction”. We extract and amplify
+                    cDNA sequences from plasmid utilizing colony PCR for use in the subsequent experiment.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>IVT:</u> The abbreviation of “In Vitro Transcription”. The cDNA sequences are
+                    transcribed into linear RNA sequences with the assistance of T7 polymerase. Followed by treating
+                    with DNase to degrade remaining cDNA template.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Circularization:</u> Circularization of linear RNA includes three main steps as
+                    below.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>1. Monophosphorylation:</b> Monophosphorylation is crucial process prior to the back splicing
+                    step.
+                    It can be achieved by treating the RNA with pyrophosphatase (RppH), which removes the
+                    pyrophosphate group from the 5'-end of triphosphorylated RNA, ultimately yielding a
+                    5'-monophosphate RNA. Followed by back splicing, the monophosphorylated RNA can form a covalent
+                    bond between the 5'- and 3'-ends <a href="#[3]">[3]</a>.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>2. Formation of dsRNA:</b> Prior to the back-splicing step, we introduce a type of ssDNA
+                    oligo, known as splint. The splint has a complementary sequence to the linear form RNA. With
+                    this characteristic, it enhances the circularization ability of our RNA, by forming a
+                    double-stranded RNA <a href="#[4]">[4]</a>.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>3. Back-splicing:</b> The monophosphrylated linear RNA with splint attached can finally
+                    form the circRNA we desired in the assistance of T4 RNA ligase 2. After the ligation process,
+                    the splint will be degraded by treating with DNase I <a href="#[5]">[5]</a>.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-4.png"  style="width: 60%;">
+                </div>
+                <p class="des-figure">Figure 4. A diagram shows how splint and T4 RNA ligase 2 help the
+                    formation of circRNA. </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <u>CircRNA enrichment:</u> Given the circRNA's resistance to RNA exonuclease
+                    activity, we are able to remove any remaining linear RNA by treating the back-splicing products
+                    with RNase R <a href="#[6]">[6]</a>. Subsequently, we extract circRNA using an RNA clean-up system.
+                    This is
+                    followed by isothermal amplification (either RCA or RT-RPA) for colorectal cancer detection (via
+                    either Gold nanoparticle-based colorimetric assay or Lateral flow test).
+                </p>
+
+                <a class="nav_button" href="{{ url_for('pages', page='results') }}#Path A">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Results A!
+                </a>
+
+                <h1 class="des-heading2" id="Gold nanoparticle-based colorimetric assay">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Gold nanoparticle-based colorimetric assay
+                </h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-5.jpg" style="width: 60%;">
+                </div>
+                <p class="des-figure">Figure 5. A diagram shows the mechanism of gold nanoparticle-based
+                    colorimetric assay.</p>
+                <p class="des-paragraph fade_from_right">
+                    If the RCA products (long-repeated single-stranded DNA) are
+                    present in the probe-conjugated gold nanoparticle solution, the solution will appear a red
+                    color; conversely, if the RCA products are absent in the probe-conjugated gold nanoparticles
+                    solution, the color of solution will turn purple <a href="#[1]">[1]</a>. (see <a
+                        href="{{ url_for('pages', page='description') }}" class="home">page description</a> for a
+                    detailed
+                    explanation of the principle)
+                </p>
+                <h1 class="des-heading3 fade_from_left" id="Path B">Path B: Probe-Conjugated Gold Nanoparticle Synthesis
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    <b>Goal:</b> Preparation of probe-conjugated gold nanoparticles (AuNPs) for the colorimetric assay.
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <b>Path:</b> Sequence design → AuNPs synthesis → Probe-conjugated AuNPs → Probe-conjugated AuNPs
+                    detection
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Design:</b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Sequence design:</u> All the required DNA for each step should be designed before conducting
+                    the experiment. Below is a brief explanation of sequences required in path B; please refer to
+                    the <a href="{{ url_for('pages', page='parts') }}" class="home">Parts page</a> for more details.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Probe conjugated AuNPs:</b> A kind of DNA oligo, known as probe (BBa_K4636007-BBa_K4636012),
+                    were designed
+                    to act as the bridge between gold nanoparticles and RCA product (long-repeated single-stranded DNA
+                    sequence).
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <u>AuNPs synthesis:</u> According to our principle investigator, we could synthesize
+                    gold nanoparticles with diameter of approximately 13 nm for the colorimetric assay.
+                    Theoretically, 13 nm gold nanoparticles exhibit a peak in their spectrum at around 520 nm <a
+                        href="#[7]">[7]</a>.
+                    Therefore, our aim is to synthesize gold nanoparticles with a peak at approximately 520 nm and
+                    employ scanning electron microscopy (SEM) to double-check if the product aligns with our
+                    expectations.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Probe-conjugated AuNPs:</u> Thiol-modified DNA probes <a href="#[8]">[8]</a> with
+                    sequence
+                    complementary to the RCA product are conjugated onto the surface of 13 nm gold nanoparticles.
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <u>Probe-conjugated AuNPs detection:</u> The probe-conjugated gold nanoparticles are then
+                    utilized for detecting the long-repeated single-stranded DNA sequence (produced either by
+                    AELA-PCR or RCA).
+                </p>
+
+                <a class="nav_button" href="{{ url_for('pages', page='results') }}#Path B">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Results B!
+                </a>
+
+                <h1 class="des-heading3 fade_from_left" id="Path C">Path C: Assess the Functionality of Colorimetric
+                    Assay with AELA-PCR</h1>
+                <p class="des-paragraph fade_from_right">
+                    <b>Goal:</b> Considering that the circularization of RNA might be a challenging task and due to
+                    time limitation, we aim to synthesize a long-repeated single-stranded DNA (ssDNA) sequence to
+                    mimic the RCA product.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Path:</b> Sequence design → Cloning → PCR → Long-repeated dsDNA synthesis → AELA-PCR → Probe
+                    conjugated AuNPs detection
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Design:</b>
+                </p>
+
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-6.jpg"
+                        >
+
+                </div>
+                <p class="des-figure">
+                    Figure 6. The experimental design of Path C.</p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Sequence design:</u> All the required DNA for each step should be designed before conducting
+                    the experiment. Below is a brief explanation of different sequences required in path C; please
+                    refer to the <a href="{{ url_for('pages', page='parts') }}" class="home">Parts page</a> for more
+                    details.
+                </p>
+
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Cloning:</b> Inserts (Insert_0004771 (BBa_K4636041) and Insert_0101802 (BBa_K4636040)) are
+                    designed to ligate with vector.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCR:</b> Forward (BBa_K4636003 and BBa_K4636005) and reverse (BBa_K4636004 and BBa_K4636006)
+                    primers are designed to specifically amplify the inserts we ligate with vectors during cloning.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Preparation of template for AELA-PCR:</b> Forward (BBa_K4636036) and reverse (BBa_K4636037)
+                    primers are designed to specifically amplify the long-repeated inserts we ligate with vectors
+                    during preparation of template for AELA-PCR.
+                </p>
+
+                <p class="des-paragraph-item fade_from_left">
+                    <b>AELA-PCR:</b> Forward (BBa_K4636038) and reverse (BBa_K4636039) primers are designed to
+                    specifically and asymmetrically amplify the long-repeated insert we produce during long-repeated
+                    dsDNA synthesis.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Cloning:</u> We ligate cDNA sequences with the pUC19 vector, followed by the
+                    transfer of the vector into E. coli DH5-alpha. This cloning process ensures a continuous and
+                    abundant supply of the inserted sequences.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>PCR:</u> The abbreviation of “Polymerase Chain Reaction”. We extract and amplify
+                    cDNA sequences from plasmid utilizing colony PCR for use in the subsequent experiment.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Repeated insert sequence synthesis:</u> We introduce two restriction enzymes to
+                    digest the PCR products. The resulting 3'- and 5' sticky ends on the inserts are then ligated,
+                    forming long-repeated insert sequences with the assistance of T4 DNA ligase.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Preparation of template for AELA-PCR:</u> There are two main purposes we attempt
+                    to achieve. Firstly, incorporating additional sequences at the 3'- and 5'- ends of the
+                    long-repeated insert sequences, respectively, where the primers (BBa_K4636038 and
+                    BBa_K4636039) designed for AELA-PCR can bind. Secondly, amplifying the long-repeated insert
+                    sequences to act as the template for AELA-PCR. We introduce cloning again to achieve these two
+                    purposes.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>AELA-PCR:</u> The abbreviation of “Asymmetric Exponential and Linear
+                    Amplification-Polymerase Chain Reaction”. AELA-PCR is a form of asymmetric PCR, a technique that
+                    transform dsDNA into ssDNA. This is achieved by adding forward and reverse primer in a ratio of
+                    20:1 and processing a specialized thermal profile during the process <a href="#[9]">[9]</a>.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Probe-conjugated AuNPs detection:</u> The long-repeated ssDNA sequences can be use as sample,
+                    mixed with probe-conjugated gold nanoparticle solution produced in Path B to test if the
+                    colorimetric assay functions as expected (Figure 5).
+                </p>
+                <a class="nav_button" href="{{ url_for('pages', page='results') }}#Path C">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Results C!
+                </a>
+
+                <h1 class="des-heading3 fade_from_left" id="Path D">Path D: Amplify CircRNA by RCA for Colorimetric Assay
+                    Detection</h1>
+                <p class="des-paragraph fade_from_right">
+                    <b>Goal:</b> Amplify the synthesized circRNA by rolling circle amplification (RCA) and utilize
+                    the resulting product to evaluate the functionality of gold nanoparticle-based colorimetric
+                    assay.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Path:</b> Sequence design → Cloning → PCR → IVT → Circularization → CircRNA enrichment → RCA →
+                    Probe-conjugated AuNPs detection
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Design:</b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Sequence design:</u> All the required DNA for each step should be designed before conducting
+                    the experiment. Below is a brief explanation of different sequences required in path D; please
+                    refer to the <a href="{{ url_for('pages', page='parts') }}" class="home">Parts page</a> for more
+                    details
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Cloning:</b> Inserts (Insert_0004771 (BBa_K4636041) and Insert_0101802 (BBa_K4636040)) that we
+                    planned ligating with vector.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCR:</b> Forward (BBa_K4636003 and BBa_K4636005) and reverse (BBa_K4636004 and BBa_K4636006)
+                    primers are designed to specifically amplify the inserts we ligate with vectors during cloning.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>IVT:</b> The modified T7 promotor binding sites are incorporated into Insert_0004771
+                    (BBa_K4636041) and Insert_0101802 (BBa_K4636040) to facilitate T7 polymerase functionality.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Circularization:</b> DNA oligo, known as splint (BBa_K4636013-BBa_K4636018), are designed to
+                    elevate the efficiency of RNA back splicing by forming a double-stranded RNA (dsRNA).
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>RCA:</b> Single-stranded DNA primers (BBa_K4636028-BBa_K4636035) are designed to facilitate the
+                    initiation of the isothermal amplification process.
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <u>Cloning:</u> We ligate cDNA sequences with the pUC19 vector, followed by the transfer of the
+                    vector into E. coli DH5-alpha. This cloning process ensures a continuous and abundant supply of
+                    the inserted sequences.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>PCR:</u> The abbreviation of “Polymerase Chain Reaction”. We extract and amplify cDNA
+                    sequences from plasmid utilizing colony PCR for use in the subsequent experiment.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-7.jpg"
+                        >
+                </div>
+                <p class="des-figure">
+                    Figure 7. A diagram shows the experimental design, from IVT (In vitro transcription) to circRNA
+                    enrichment, of circRNA synthesis.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>IVT:</u> The abbreviation of “In Vitro Transcription”. The cDNA sequences are
+                    transcribed into linear RNA sequences with the assistance of T7 polymerase. Followed by treating
+                    with DNase to degrade remaining cDNA template.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Circularization:</u> Circularization of linear RNA includes three main steps as
+                    below.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Monophosphorylation:</b> Monophosphorylation is crucial process prior to the back splicing
+                    step. It can be achieved by treating the RNA with pyrophosphatase (RppH), which removes the
+                    pyrophosphate group from the 5'-end of triphosphorylated RNA, ultimately yielding a
+                    5'-monophosphate RNA. Followed by back splicing, the monophosphorylated RNA can form a covalent
+                    bond between the 5'- and 3'-ends <a href="#[3]">[3]</a>.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Formation of dsRNA:</b> Prior to the back splicing step, we introduce a type of DNA oligo,
+                    known as splint. The splint has a complementary sequence to the linear form RNA. With this
+                    characteristic, it enhances the circularization ability of our RNA, by forming a double-stranded
+                    RNA <a href="#[4]">[4]</a>.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Back-splicing: </b> The monophosphrylated linear RNA with splint attached can finally form
+                    the circRNA we desired in the assistance of T4 RNA ligase 2. After the ligation process is done,
+                    the splint will be degraded by treating with DNase I <a href="#[5]">[5]</a>.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-8.png" style="width: 60%;">
+                </div>
+                <p class="des-figure">
+                    Figure 8. A diagram shows how splint and T4 RNA ligase 2 help the formation of circRNA.</p>
+
+                <p class="des-paragraph fade_from_right">
+                    <u>CircRNA enrichment:</u> Given the circRNA's resistance to RNA exonuclease
+                    activity, we are able to remove any remaining linear RNA by treating the back splicing products
+                    with RNase R <a href="#[6]">[6]</a>. Subsequently, we extract circRNA using an RNA clean-up system.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>RCA:</u> The abbreviation of “Rolling Circle Amplification”. RCA is an isothermal
+                    amplification method that the reaction temperature of approximately 60-65°C. At first, the
+                    circRNA serves as template short DNA primers will annealed onto the complementary site.
+                    Subsequently, reverse transcriptase can amplify through continuous and repetitive reverse
+                    transcription along the circRNA, resulting in the formation of a long-repeated single-stranded
+                    complementary DNA <a href="#[10]">[10]</a>.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-9.jpg">
+                </div>
+                <p class="des-figure">
+                    Figure 9. A diagram shows how RCA amplify circular RNA by producing long repeated
+                    single-stranded complementary DNA.</p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Probe-conjugated AuNPs detection:</u> The long-repeated single-stranded complementary DNA can
+                    be use as sample, mixed with probe-conjugated gold nanoparticle solution produced in Path B to
+                    test if the colorimetric assay functions as expected (Figure 5).
+                </p>
+
+                <a class="nav_button" href="{{ url_for('pages', page='results') }}#Path D">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Results D!
+                </a>
+
+                <h1 class="des-heading2" id="Lateral flow test">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Lateral flow test
+                </h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-10.jpg" style="width: 60%;">
+                </div>
+                <p class="des-figure">
+                    Figure 10. A diagram shows the mechanism of lateral flow strip (PCRD).</p>
+                <p class="des-paragraph fade_from_right">
+                    If our target biomarkers, hsa_circ_0004771 and
+                    hsa_circ_0101802, present in the RT-RPA reaction, the resulting products (double-stranded DNA
+                    with modified primers) can bind to the anti-DIG and anti-FAM capture antibodies on the test
+                    lines. Consequently, three lines (two test lines and one control line) will be observed on the
+                    lateral flow strip (PCRD). Conversely, if there are no biomarkers amplified by RT-RPA, only the
+                    control line will be visible on the PCRD <a href="#[2]">[2]</a>. (see <a
+                        href="{{ url_for('pages', page='description') }}" class="home">page description</a> for a
+                    detailed
+                    explanation
+                    of the principle)
+                </p>
+                <h1 class="des-heading3 fade_from_left" id="Path E">Path E: Assess the Functionality of Lateral Flow
+                    Test by RPA Products</h1>
+                <p class="des-paragraph fade_from_right">
+                    <b>Goal:</b> Considering that the circularization of RNA might be a challenging work and also
+                    due to the time limitation. We have come up with an experimental pathway that skips the part of
+                    in vitro transcription (IVT) and circRNA synthesis and directly tests the functionality of the
+                    lateral flow strip (PCRD) right after polymerase chain reaction (PCR) and recombinase polymerase
+                    amplification (RPA).
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <b>Path:</b> Sequence design → Cloning → PCR → RPA → PCRD
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Design:</b>
+                </p>
+
+
+                <p class="des-paragraph fade_from_right">
+                    <u>Sequence design:</u> All the required DNA for each step should be designed before conducting
+                    the experiment. Below is a brief explanation of different sequences required in path E; please
+                    refer to the <a href="{{ url_for('pages', page='parts') }}" class="home">Parts page</a> for more
+                    details.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Cloning:</b> Inserts (Insert_0004771 (BBa_K4636041) and Insert_0101802
+                    (BBa_K4636040)) that we planned ligating with vector.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCR:</b> Forward (BBa_K4636003 and BBa_K4636005) and reverse (BBa_K4636004 and
+                    BBa_K4636006) primers are designed to specifically amplify the inserts we ligate with vectors
+                    during cloning.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>RPA:</b> Forward (BBa_K4636019, BBa_K4636021, BBa_K4636023, BBa_K4636025 and
+                    BBa_K4636027) and reverse (BBa_K4636020, BBa_K4636022, BBa_K4636024 and BBa_K4636026)
+                    primers are designed to facilitate the initiation of isothermal amplification process.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCRD:</b> Some modifications should be incorporated to the RPA forward (BBa_K4636019,
+                    BBa_K4636021, BBa_K4636023, BBa_K4636025 and BBa_K4636027) and reverse (BBa_K4636020,
+                    BBa_K4636022, BBa_K4636024 and BBa_K4636026) primers for the function of lateral flow strip.
+                </p>
+
+
+                <p class="des-paragraph fade_from_right">
+                    <u>Cloning:</u> We ligate cDNA sequences with the pUC19 vector, followed by the
+                    transfer of the vector into E. coli DH5-alpha. This cloning process ensures a continuous and
+                    abundant supply of the inserted sequences.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>PCR:</u> The abbreviation of “Polymerase Chain Reaction.” We extract and amplify
+                    cDNA sequences from plasmid utilizing colony PCR for use in the subsequent experiment.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>RPA:</u> The abbreviation of “Recombinase Polymerase Amplification”. RPA is an
+                    isothermal amplification method that the reaction temperature of approximately 37-42°C. In the
+                    beginning, modified primers recognize its complementary sequence and insert into the
+                    double-stranded DNA template by the strand-displacement activity of the recombinase (Figure
+                    11.①) Subsequently, the single-stranded binding protein (SSB) will stabilize the displaced DNA
+                    strain (Figure 11.②). The recombinase then disassemble (Figure 11.③) to allow polymerase binding
+                    and elongation of the modified primer (Figure 11.④ and Figure 11.⑤) <a href="#[11]">[11]</a>.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-11.jpg"
+                        >
+
+                </div>
+                <p class="des-figure">
+                    Figure 11. The mechanism of recombinase polymerase amplification (RPA).</p>
+                <p class="des-paragraph fade_from_right">
+                    <u>PCRD:</u> The RPA products serve as sample to test the
+                    functionality of PCRD.
+                </p>
+
+                <a class="nav_button" href="{{ url_for('pages', page='results') }}#Path E">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Results E!
+                </a>
+
+                <h1 class="des-heading3 fade_from_left" id="Path F">Path F: Conducting RT-RPA Using Linear RNA as
+                    Template for Lateral Flow Test</h1>
+                <p class="des-paragraph fade_from_right">
+                    <b>Goal:</b> Resulting from our inability to find relevant literature on reverse
+                    transcription-recombinase polymerase amplification (RT-RPA) using circRNA as a template and also
+                    due to the time limitation. We come up with an experimental pathway to omit the circRNA
+                    synthesis step. Instead, we will proceed RT-RPA using linear RNA as a template to access the
+                    functionality of PCRD.
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <b>Path:</b> Sequence design → Cloning → PCR → IVT → RT-RPA → PCRD
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Design:</b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Sequence design:</u> All the required DNA for each step should be designed before conducting
+                    the experiment. Below is a brief explanation of different sequences required in path F; please
+                    refer to the <a href="{{ url_for('pages', page='parts') }}" class="home">Parts page</a> for more
+                    details.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Cloning:</b> Inserts (Insert_0004771 (BBa_K4636041) and Insert_0101802 (BBa_K4636040)) that
+                    we planned ligating with vector.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCR: </b> Forward (BBa_K4636003 and BBa_K4636005) and reverse (BBa_K4636004 and BBa_K4636006)
+                    primers are designed to specifically amplify the inserts we ligate with vectors during cloning.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>IVT:</b> The modified T7 promotor binding sites are
+                    incorporated into Insert_0004771 (BBa_K4636041) and Insert_0101802 (BBa_K4636040) to
+                    facilitate T7 polymerase functionality.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>RT-RPA:</b> Forward (BBa_K4636019, BBa_K4636021, BBa_K4636023, BBa_K4636025 and
+                    BBa_K4636027) and reverse (BBa_K4636020, BBa_K4636022, BBa_K4636024 and BBa_K4636026)
+                    primers are designed to facilitate the initiation of isothermal amplification process.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCRD:</b> Some modifications should be incorporated to the RPA forward (BBa_K4636019,
+                    BBa_K4636021, BBa_K4636023, BBa_K4636025 and BBa_K4636027) and reverse (BBa_K4636020,
+                    BBa_K4636022, BBa_K4636024 and BBa_K4636026) primers for the function of lateral flow strip.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Cloning:</u> We ligate cDNA sequences with the pUC19 vector, followed by the
+                    transfer of the vector into E. coli DH5-alpha.This cloning process ensures a continuous and
+                    abundant supply of the inserted sequences.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>PCR:</u> The abbreviation of “Polymerase Chain Reaction”. We extract and amplify
+                    cDNA sequences from plasmid utilizing colony PCR for use in the subsequent experiment.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>IVT:</u> The abbreviation of “In Vitro
+                    Transcription”. The cDNA sequences are transcribed into linear RNA sequences with the assistance
+                    of T7 polymerase. Followed by treating with DNase to degrade any remaining cDNA.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>RT-RPA:</u> The abbreviation of “Reverse Transcription-Recombinase Polymerase
+                    Amplification”. RT-RPA is an isothermal amplification method with a reaction temperature of
+                    approximately 37-42°C. The process can be divided into two parts: reverse transcription (RT) and
+                    recombinase polymerase amplification (RPA). Initially, the linear RNA synthesized during IVT is
+                    reverse transcribed into complementary DNA which serve as template in the following RPA process
+                    (Figure 12). Subsequently, modified primers recognize its complementary sequence and insert into
+                    the double-stranded DNA template through the strand-displacement activity of the recombinase
+                    (Figure 12.①) . The single-stranded binding protein (SSB) then stabilizes the displaced DNA
+                    strand (Figure 12.②). Finally, the recombinase dissociates (Figure 12.③) to allow polymerase
+                    binding and elongation of the modified primer (Figure 12.④ and Figure 12.⑤) <a href="#[12]">[12]</a>
+                    .
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-12.jpg"
+                        >
+
+                </div>
+                <p class="des-figure">
+                    Figure 12. The mechanism of recombinase polymerase amplification (RPA).</p>
+
+                <p class="des-paragraph fade_from_right">
+                    <u>PCRD:</u> The RT-RPA products (double-stranded DNA with modified primers) serve as
+                    sample to test the functionality of PCRD.
+                </p>
+                <a class="nav_button" href="{{ url_for('pages', page='results') }}#Path F">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Results F!
+                </a>
+
+                <h1 class="des-heading3 fade_from_left" id="Path G">Path G: Amplify CircRNA Utilizing RT-RPA for Lateral
+                    Flow Test</h1>
+                <p class="des-paragraph fade_from_right">
+                    <b>Goal:</b> Successfully processing reverse transcription-recombinase polymerase amplification
+                    (RT-RPA) using circRNA as template. Subsequently, use the resulting product to access the
+                    functionality of lateral flow strip (PCRD).
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <b>Path:</b> Sequence design → Cloning → PCR → IVT → Circularization → CircRNA enrichment → RT-RPA →
+                    PCRD
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <b>Design:</b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Sequence design:</u> All the required DNA for each step should be designed before conducting
+                    the experiment. Below is a brief explanation of different sequences required in path G; please
+                    refer to the <a href="{{ url_for('pages', page='parts') }}" class="home">Parts page</a> for more
+                    details.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Cloning:</b> Inserts (Insert_0004771 (BBa_K4636041) and Insert_0101802 (BBa_K4636040)) that
+                    we planned ligating with vector.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCR: </b> Forward (BBa_K4636003 and BBa_K4636005) and reverse (BBa_K4636004 and BBa_K4636006)
+                    primers are designed to specifically amplify the inserts we ligate with vectors during cloning.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>IVT: </b> The modified T7 promotor binding sites are incorporated into Insert_0004771
+                    (BBa_K4636041) and Insert_0101802 (BBa_K4636040) to facilitate T7 polymerase functionality.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Circularization: </b> DNA oligo, known as splint (BBa_K4636013-BBa_K4636018), are designed
+                    to elevate the efficiency of RNA back splicing by forming a double-stranded RNA (dsRNA).
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>RT-RPA:</b> Forward (BBa_K4636019, BBa_K4636021, BBa_K4636023, BBa_K4636025 and
+                    BBa_K4636027) and reverse (BBa_K4636020, BBa_K4636022, BBa_K4636024 and BBa_K4636026)
+                    primers are designed to facilitate the initiation of isothermal amplification process.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>PCRD: </b> Some modifications should be incorporated to the RPA forward (BBa_K4636019,
+                    BBa_K4636021, BBa_K4636023, BBa_K4636025 and BBa_K4636027) and reverse (BBa_K4636020,
+                    BBa_K4636022, BBa_K4636024 and BBa_K4636026) primers for the function of lateral flow strip.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Cloning:</u> We ligate cDNA sequences with the pUC19 vector, followed by
+                    the transfer of the vector into E. coli DH5-alpha. This cloning process ensures a continuous and
+                    abundant supply of the inserted sequences.
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    <u>PCR:</u> The abbreviation of “Polymerase Chain Reaction”. We extract and amplify
+                    cDNA sequences from plasmid utilizing colony PCR for use in the subsequent experiment.
+                </p>
+
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-13.jpg" style="width: 80%;">
+                </div>
+                <p class="des-figure">
+                    Figure 13. A diagram shows the experimental design, from IVT (In vitro transcription) to circRNA
+                    enrichment, of circRNA synthesis.</p>
+
+                <p class="des-paragraph fade_from_right">
+                    <u>IVT:</u> The abbreviation of “In Vitro Transcription”. The cDNA sequences are
+                    transcribed into linear RNA sequences with the assistance of T7 polymerase. Followed by treating
+                    with DNase to degrade any remaining cDNA.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>Circularization:</u> Circularization of linear RNA includes three main steps as
+                    below.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Monophosphorylation:</b> Monophosphorylation is crucial process prior to the back splicing
+                    step. It can be achieved by treating the RNA with pyrophosphatase (RppH), which removes the
+                    pyrophosphate group from the 5'-end of triphosphorylated RNA, ultimately yielding a
+                    5'-monophosphate RNA. Followed by back splicing, the monophosphorylated RNA can form a covalent
+                    bond between the 5'- and 3'-ends <a href="#[3]">[3]</a>.
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Formation of dsRNA: </b> Prior to the back splicing step, we introduce a type of DNA oligo,
+                    known as splint. The splint has a complementary sequence to the linear form RNA. With this
+                    characteristic, it enhances the circularization ability of our RNA, by forming a double-stranded
+                    RNA <a href="#[4]">[4]</a>.
+                </p>
+                <p class="des-paragraph-item fade_from_left">
+                    <b>Back-splicing:</b> The monophosphrylated linear RNA with splint attached can finally form the
+                    circRNA we desired in the assistance of T4 RNA ligase 2. After the ligation process is done, the
+                    splint will be degraded by treating with DNase I <a href="#[5]">[5]</a>.
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-14.png" style="width: 60%;">
+                </div>
+                <p class="des-figure">
+                    Figure 14. A diagram shows how splint and T4 RNA ligase 2 help the formation of circular RNA.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>CircRNA enrichment:</u> Given the circRNA's resistance to RNA exonuclease activity, we
+                    are able to remove any remaining linear RNA by treating the back splicing products with RNase R [6].
+                    Subsequently, we extract circRNA using an RNA clean-up system.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    <u>RT-RPA: </u> The abbreviation of “Reverse Transcription-Recombinase Polymerase
+                    Amplification”. RT-RPA is an isothermal amplification method with a reaction temperature of
+                    approximately 37-42°C. The process can be divided into two parts: reverse transcription (RT) and
+                    recombinase polymerase amplification (RPA). Initially, the linear RNA synthesized during IVT is
+                    reverse transcribed into complementary DNA which serve as template in the following RPA process
+                    (Figure 15). Subsequently, modified primers recognize its complementary sequence and insert into the
+                    double-stranded DNA template through the strand-displacement activity of the recombinase (Figure
+                    15.①) . The single-stranded binding protein (SSB) then stabilizes the displaced DNA strand (Figure
+                    15.②). Finally, the recombinase dissociates (Figure 15.③) to allow polymerase binding and elongation
+                    of the modified primer (Figure 15.④ and Figure 15.⑤) <a href="#[12]">[12]</a>.
+                </p>
+
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/design/figure-15.jpg"
+                        >
+                </div>
+                <p class="des-figure">
+                    Figure 15. The mechanism of recombinase polymerase amplification (RPA).</p>
+                <p class="des-paragraph fade_from_right">
+                    <u>PCRD:</u> The RT-RPA products (double-stranded DNA with modified primers) serve as
+                    sample to test the functionality of PCRD.
+                </p>
+
+                <a class="nav_button" href="{{ url_for('pages', page='results') }}#Path G">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Results G!
+                </a>
+            </div>
+
+            <div id="Reference">
+                <h1 class="des-ref-heading">Reference</h1>
+                <p class="des-ref-paragraph">[1] Ali, M. M., Kanda, P., Aguirre, S. D., & Li, Y. (2011).
+                    Modulation of DNA-modified gold-nanoparticle stability in salt with concatemeric single-stranded
+                    DNAs for colorimetric bioassay development. Chemistry (Weinheim an der Bergstrasse, Germany), 17(7),
+                    2052-2056.
+                    <a id="[1]" href="https://doi.org/10.1002/chem.201002677">https://doi.org/10.1002/chem.201002677</a>
+                </p>
+                <p class="des-ref-paragraph">[2] El-Tholoth, M., Branavan, M., Naveenathayalan, A., &
+                    Balachandran, W. (2019). Recombinase polymerase amplification-nucleic acid lateral flow immunoassays
+                    for Newcastle disease virus and infectious bronchitis virus detection. Molecular biology reports,
+                    46(6), 6391-6397.
+                    <a id="[2]"
+                        href="https://doi.org/10.1007/s11033-019-05085-y">https://doi.org/10.1007/s11033-019-05085-y</a>
+                </p>
+                <p class="des-ref-paragraph">[3] Obi, P., & Chen, Y. G. (2021). The design and synthesis
+                    of circular RNAs. Methods (San Diego, Calif.), 196, 85-103.
+                    <a id="[3]"
+                        href="https://doi.org/10.1016/j.ymeth.2021.02.020">https://doi.org/10.1016/j.ymeth.2021.02.020</a>
+                </p>
+                <p class="des-ref-paragraph">[4] Lee, K. H., Kim, S., & Lee, S. W. (2022). Pros and Cons
+                    of In Vitro Methods for Circular RNA Preparation. International journal of molecular sciences,
+                    23(21), 13247.
+                    <a id="[4]" href="https://doi.org/10.3390/ijms232113247">https://doi.org/10.3390/ijms232113247</a>
+                </p>
+                <p class="des-ref-paragraph">[5] Lu, D., Chatterjee, S., Xiao, K., Riedel, I., Huang, C.
+                    K., Costa, A., Cushman, S., Neufeldt, D., Rode, L., Schmidt, A., Juchem, M., Leonardy, J., Büchler,
+                    G., Blume, J., Gern, O. L., Kalinke, U., Wen Tan, W. L., Foo, R., Vink, A., van Laake, L. W., …
+                    Thum, T. (2022). A circular RNA derived from the insulin receptor locus protects against
+                    doxorubicin-induced cardiotoxicity. European heart journal, 43(42), 4496-4511.
+                    <a id="[5]"
+                        href="https://doi.org/10.1093/eurheartj/ehac337">https://doi.org/10.1093/eurheartj/ehac337</a>
+                </p>
+                <p class="des-ref-paragraph">[6] Boss, M., & Arenz, C. (2020). A Fast and Easy Method
+                    for Specific Detection of Circular RNA by Rolling-Circle Amplification. Chembiochem: a European
+                    journal of chemical biology, 21(6), 793-796.
+                    <a id="[6]" href="https://doi.org/10.1002/cbic.201900514">https://doi.org/10.1002/cbic.201900514</a>
+                </p>
+                <p class="des-ref-paragraph">[7] Liang, Z., Zhang, J., Wang, L., Song, S., Fan, C., &
+                    Li, G. (2007). A Centrifugation-based Method for Preparation of Gold Nanoparticles and its
+                    Application in Biodetection. International Journal of Molecular Sciences, 8(6), 526-532.
+                    <a id="[7]" href="https://www.mdpi.com/1422-0067/8/6/526">https://www.mdpi.com/1422-0067/8/6/526</a>
+                </p>
+                <p class="des-ref-paragraph">[8] Hwu, S., Garzuel, M., Forró, C., Ihle, S. J.,
+                    Reichmuth, A. M., Kurdzesau, F., & Vörös, J. (2020). An analytical method to control the surface
+                    density and stability of DNA-gold nanoparticles for an optimized biosensor. Colloids and surfaces.
+                    B, Biointerfaces, 187, 110650.
+                    <a id="[8]"
+                        href="https://doi.org/10.1016/j.colsurfb.2019.110650">https://doi.org/10.1016/j.colsurfb.2019.110650</a>
+                </p>
+                <p class="des-ref-paragraph">[9] Reddy Banda, S., Klapproth, H., Smit, N., Bednar, S.,
+                    Brandstetter, T., & Rühe, J. (2022). An advanced and efficient asymmetric PCR method for microarray
+                    applications. Frontiers in bioengineering and biotechnology, 10, 1045154.
+                    <a id="[9]"
+                        href="https://doi.org/10.3389/fbioe.2022.1045154">https://doi.org/10.3389/fbioe.2022.1045154</a>
+                </p>
+                <p class="des-ref-paragraph">[10] Boss, M., & Arenz, C. (2020). A Fast and Easy Method
+                    for Specific Detection of Circular RNA by Rolling-Circle Amplification. Chembiochem: a European
+                    journal of chemical biology, 21(6), 793-796.
+                    <a id="[10]"
+                        href="https://doi.org/10.1002/cbic.201900514">https://doi.org/10.1002/cbic.201900514</a>
+                </p>
+                <p class="des-ref-paragraph">[11] BLobato, I. M., & O'Sullivan, C. K. (2018).
+                    Recombinase polymerase amplification: Basics, applications and recent advances. Trends in analytical
+                    chemistry : TRAC, 98, 19-35.
+                    <a id="[11]"
+                        href="https://doi.org/10.1016/j.trac.2017.10.015">https://doi.org/10.1016/j.trac.2017.10.015</a>
+                </p>
+                <p class="des-ref-paragraph">[12] Zhang, W. S., Pan, J., Li, F., Zhu, M., Xu, M., Zhu,
+                    H., Yu, Y., & Su, G. (2021). Reverse Transcription Recombinase Polymerase Amplification Coupled with
+                    CRISPR-Cas12a for Facile and Highly Sensitive Colorimetric SARS-CoV-2 Detection. Analytical
+                    chemistry, 93(8), 4126-4133.
+                    <a id="[12]"
+                        href="https://doi.org/10.1021/acs.analchem.1c00013">https://doi.org/10.1021/acs.analchem.1c00013</a>
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

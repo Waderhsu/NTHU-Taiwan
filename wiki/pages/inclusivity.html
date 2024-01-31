@@ -1,0 +1,368 @@
+{% extends "layout.html" %}
+  
+{% block title %}Diversity & Inclusivity{% endblock %}
+
+{% block page_content %}
+
+<style>
+  .slide--1__darkbg {
+    left: 0%;
+    background: url("https://static.igem.wiki/teams/4636/wiki/header002.jpg") center center no-repeat;
+    background-size: cover;
+    background-position: 0px center, 0px center;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  .slide--1__letter {
+    background: url("https://static.igem.wiki/teams/4636/wiki/header002.jpg") center center no-repeat;
+    background-position: 0px center, 0px center;
+    background-size: cover;
+  }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+  $(document).ready(function () {
+    const $cont = $('.cont');
+    const $slider = $('.slider');
+    const $nav = $('.nav');
+    const winW = $(window).width();
+    const animSpd = 750; // Change also in CSS
+    const distOfLetGo = winW * 0.2;
+    let curSlide = 1;
+    let animation = false;
+    let autoScrollVar = false;
+    let diff = 0;
+
+    // Generating slides
+    let arrCities = ['Inclusivity', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+    let numOfCities = arrCities.length;
+    let arrCitiesDivided = [];
+
+    arrCities.map((city) => {
+      let length = city.length;
+      let letters = Math.floor(length / 4);
+      let exp = new RegExp(".{1," + letters + "}", "g");
+
+      arrCitiesDivided.push(city.match(exp));
+    });
+
+    let generateSlide = function (city) {
+      let frag1 = $(document.createDocumentFragment());
+      let frag2 = $(document.createDocumentFragment());
+      const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+      const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+      const $slide =
+        $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+      const letter =
+        $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+      /*
+                      for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                          const text =
+                              $(`<div class="slide__text slide__text--${i + 1}">
+                                  ${arrCitiesDivided[city][i]}
+                              </div>`);
+                          frag1.append(text);
+                      }
+      */
+      const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+      frag2.append(navSlide);
+      $nav.append(frag2);
+
+      $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+      $slider.append($slide);
+
+      if (arrCities[city].length <= 4) {
+        $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+      }
+    };
+
+    for (let i = 0, length = numOfCities; i < length; i++) {
+      generateSlide(i);
+    }
+
+    $('.nav__slide--1').addClass('nav-active');
+
+    // Navigation
+    function bullets(dir) {
+      $('.nav__slide--' + curSlide).removeClass('nav-active');
+      $('.nav__slide--' + dir).addClass('nav-active');
+    }
+
+    function timeout() {
+      animation = true;
+    }
+
+    function pagination(direction) {
+      animation = true;
+      diff = 0;
+      $slider.addClass('animation');
+      $slider.css({
+        'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__darkbg').css({
+        'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__letter').css({
+        'transform': 'translate3d(0, 0, 0)',
+      });
+
+      $slider.find('.slide__text').css({
+        'transform': 'translate3d(0, 0, 0)'
+      });
+    }
+
+    function navigateRight() {
+      if (!autoScrollVar) return;
+      if (curSlide >= numOfCities) return;
+      pagination(0);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide + 1);
+      curSlide++;
+    }
+
+    function navigateLeft() {
+      if (curSlide <= 1) return;
+      pagination(2);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide - 1);
+      curSlide--;
+    }
+
+    function toDefault() {
+      pagination(1);
+      setTimeout(timeout, animSpd);
+    }
+
+
+
+    $(document).on('mouseup touchend', function (e) {
+      $(document).off('mousemove touchmove');
+
+      if (animation) return;
+
+      if (diff >= distOfLetGo) {
+        toDefault();
+      } else if (diff <= -distOfLetGo) {
+        toDefault();
+      } else {
+        toDefault();
+      }
+    });
+
+    $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+      let target = +$(this).attr('data-target');
+      bullets(target);
+      curSlide = target;
+      pagination(1);
+    });
+
+    $(document).on('click', '.side-nav', function () {
+      let target = $(this).attr('data-target');
+
+      if (target === 'right') navigateRight();
+      if (target === 'left') navigateLeft();
+    });
+
+    $(document).on('keydown', function (e) {
+      if (e.which === 39) navigateRight();
+      if (e.which === 37) navigateLeft();
+    });
+
+    $(document).on('mousewheel DOMMouseScroll', function (e) {
+      if (animation) return;
+      let delta = e.originalEvent.wheelDelta;
+
+      if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+      if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+    });
+  });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+  const carouselText = [
+    { text: "In diversity, there is beauty and there is strength.", color: "rgba(255, 255, 255, 0.679)" },
+
+  ]
+
+  $(document).ready(async function () {
+    carousel(carouselText, "#feature-text")
+  });
+
+  async function typeSentence(sentence, eleRef, delay = 100) {
+    const letters = sentence.split("");
+    let i = 0;
+    while (i < letters.length) {
+      await waitForMs(delay);
+      $(eleRef).append(letters[i]);
+      i++;
+    }
+  }
+
+
+  async function deleteSentence(eleRef) {
+    const sentence = $(eleRef).html();
+    const letters = sentence.split("");
+    let i = 0;
+    while (letters.length > 0) {
+      await waitForMs(1000000);
+      letters.pop();
+      $(eleRef).html(letters.join(""));
+    }
+  }
+
+  async function carousel(carouselList, eleRef) {
+    var i = 0;
+    while (true) {
+      updateFontColor(eleRef, carouselList[i].color)
+      await typeSentence(carouselList[i].text, eleRef);
+      await waitForMs(1500);
+      await deleteSentence(eleRef);
+      await waitForMs(500);
+      i++
+      if (i >= carouselList.length) { i = 0; }
+    }
+  }
+
+  function updateFontColor(eleRef, color) {
+    $(eleRef).css('color', color);
+  }
+
+  function waitForMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+</script>
+<script>
+  $(function () {
+    $('.scroll-down').click(function () {
+      $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+      return false;
+    });
+  });
+</script>
+
+
+<div id="content">
+  <section class="banner-container">
+    <div class="cont">
+      <div class="slider"></div>
+    </div>
+    <div class="typing-container" style="top: 50px;">
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+      <span class="input-cursor"></span>
+    </div>
+    <div class="typing-container" style="margin-top: -250px;
+          color: aliceblue;
+          /* font-style: unset; */
+          font-size: xx-large;
+          font-weight: 800;
+          letter-spacing: 8px;
+          font-size: 140px;
+          font-family: inherit;">
+      Inclusivity
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+    </div>
+    <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+  </section>
+  <section class="content">
+    <div class="main-left">
+      <div class="sidebar">
+        <ul>
+          <li><a href="#Problem" class="sidebaritem">Uniqueness of synthetic biological application</a></li>
+          <li><a href="#Inspiration" class="sidebaritem">Eliminate inequality</a></li>
+          <li><a href="#Our Goal" class="sidebaritem">All-aspect development</a></li>
+          <li><a href="#Solution" class="sidebaritem">Globalization</a></li>
+          <li><a href="#Advantages and innovations" class="sidebaritem">Down-to-earth promotion</a></li>
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="main-right" id="effort">
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Problem"">Uniqueness of synthetic biological application</h1>
+        <button class="expandbutton" id="expandbutton"></button>
+      </div>
+      <div id="article1">
+        <h1 class="des-heading2" id="heading2">
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>circularize linear RNA into circRNA
+        </h1>
+        <p class="des-paragraph fade_from_right">
+          Without access to get the real
+          diagnosed patient blood sample, our team had developed a remarkable way to circularize linear
+          form RNA into circular form RNA, in order to imitate the environment of circRNA in the sample
+          blood.
+        </p>
+
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Inspiration">Eliminate inequality</h1>
+        <button class="expandbutton" id="expandbutton2"></button>
+      </div>
+      <div id="article2">
+        <p class="des-paragraph fade_from_right">
+          Our product is suitable for every
+          age group, without limitation to age, career, area, race, developing level, or even educational
+          level. It only requires a tube of sample blood, and our product will automatically do the
+          analysis for you.
+        </p>
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Our Goal">All-aspect development
+        </h1><button class="expandbutton" id="expandbutton3"></button>
+      </div>
+      <div id="article3">
+        <p class="des-paragraph fade_from_right">
+          NanoCircDx not only considered
+          patient and respondents' feeling and thoughts, but it also required doctors, professionals, and
+          industrial workers' advice. Our product is all-aspect developed, we square up every detail and
+          try our best to meet the needs of the public. And the result data of questionnaire showed that
+          we did receive positive feedback from the general public and there is a need for the
+          development.
+        </p>
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Solution">Globalization</h1>
+        <button class="expandbutton" id="expandbutton4"></button>
+      </div>
+      <div id="article4">
+        <p class="des-paragraph fade_from_right">
+          We use different language to
+          promote synthetic biology and introduce our product to different iGEM teams from all over the
+          world. As for promotion video, we add different subtitle to the video in order to reach out to
+          more people. And for social media platforms (IG, FB), our posts provided both Chinese and
+          English version to be more international.
+        </p>
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Advantages and innovations">Down-to-earth promotion</h1>
+        <button class="expandbutton" id="expandbutton5"></button>
+      </div>
+      <div id="article5">
+        <p class="des-paragraph fade_from_right">
+          Our team use practical and sensible way to introduce the concept of synthetic biology and iGEM
+          competition, so as to let more people have an roughly understanding of what we are doing and
+          could relate to their life. For instance, we promoted synthetic biology to every age group by
+          hosting educational scientific camp and academic conference.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/diversity-and-inclusivity/inclusivity-graphic-1.jpg">
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% endblock %}

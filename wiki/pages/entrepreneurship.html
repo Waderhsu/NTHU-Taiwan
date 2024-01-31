@@ -1,0 +1,966 @@
+{% extends "layout.html" %}
+  
+{% block title %}Entrepreneurship{% endblock %}
+
+{% block page_content %}
+  <style>
+    .slide--1__darkbg {
+      left: 0%;
+      background: url("https://static.igem.wiki/teams/4636/wiki/header005.jpg") center center no-repeat;
+      background-size: cover;
+      background-position: 0px center, 0px center;
+      transform: translate3d(0, 0, 0);
+      will-change: transform;
+    }
+
+    .slide--1__letter {
+      background: url("https://static.igem.wiki/teams/4636/wiki/header005.jpg") center center no-repeat;
+      background-position: 0px center, 0px center;
+      background-size: cover;
+    }
+  </style>
+  <script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+  <script>
+    $(document).ready(function () {
+      const $cont = $('.cont');
+      const $slider = $('.slider');
+      const $nav = $('.nav');
+      const winW = $(window).width();
+      const animSpd = 750; // Change also in CSS
+      const distOfLetGo = winW * 0.2;
+      let curSlide = 1;
+      let animation = false;
+      let autoScrollVar = false;
+      let diff = 0;
+
+      // Generating slides
+      let arrCities = ['Entrepreneurship', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+      let numOfCities = arrCities.length;
+      let arrCitiesDivided = [];
+
+      arrCities.map((city) => {
+        let length = city.length;
+        let letters = Math.floor(length / 4);
+        let exp = new RegExp(".{1," + letters + "}", "g");
+
+        arrCitiesDivided.push(city.match(exp));
+      });
+
+      let generateSlide = function (city) {
+        let frag1 = $(document.createDocumentFragment());
+        let frag2 = $(document.createDocumentFragment());
+        const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+        const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+        const $slide =
+          $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                        <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                        <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                    </div>`);
+
+        const letter =
+          $(`<div class="slide__letter slide--${numSlide}__letter">
+                        ${firstLetter}
+                    </div>`);
+        /*
+                        for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                            const text =
+                                $(`<div class="slide__text slide__text--${i + 1}">
+                                    ${arrCitiesDivided[city][i]}
+                                </div>`);
+                            frag1.append(text);
+                        }
+        */
+        const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+        frag2.append(navSlide);
+        $nav.append(frag2);
+
+        $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+        $slider.append($slide);
+
+        if (arrCities[city].length <= 4) {
+          $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+        }
+      };
+
+      for (let i = 0, length = numOfCities; i < length; i++) {
+        generateSlide(i);
+      }
+
+      $('.nav__slide--1').addClass('nav-active');
+
+      // Navigation
+      function bullets(dir) {
+        $('.nav__slide--' + curSlide).removeClass('nav-active');
+        $('.nav__slide--' + dir).addClass('nav-active');
+      }
+
+      function timeout() {
+        animation = true;
+      }
+
+      function pagination(direction) {
+        animation = true;
+        diff = 0;
+        $slider.addClass('animation');
+        $slider.css({
+          'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+        });
+
+        $slider.find('.slide__darkbg').css({
+          'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+        });
+
+        $slider.find('.slide__letter').css({
+          'transform': 'translate3d(0, 0, 0)',
+        });
+
+        $slider.find('.slide__text').css({
+          'transform': 'translate3d(0, 0, 0)'
+        });
+      }
+
+      function navigateRight() {
+        if (!autoScrollVar) return;
+        if (curSlide >= numOfCities) return;
+        pagination(0);
+        setTimeout(timeout, animSpd);
+        bullets(curSlide + 1);
+        curSlide++;
+      }
+
+      function navigateLeft() {
+        if (curSlide <= 1) return;
+        pagination(2);
+        setTimeout(timeout, animSpd);
+        bullets(curSlide - 1);
+        curSlide--;
+      }
+
+      function toDefault() {
+        pagination(1);
+        setTimeout(timeout, animSpd);
+      }
+
+
+
+      $(document).on('mouseup touchend', function (e) {
+        $(document).off('mousemove touchmove');
+
+        if (animation) return;
+
+        if (diff >= distOfLetGo) {
+          toDefault();
+        } else if (diff <= -distOfLetGo) {
+          toDefault();
+        } else {
+          toDefault();
+        }
+      });
+
+      $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+        let target = +$(this).attr('data-target');
+        bullets(target);
+        curSlide = target;
+        pagination(1);
+      });
+
+      $(document).on('click', '.side-nav', function () {
+        let target = $(this).attr('data-target');
+
+        if (target === 'right') navigateRight();
+        if (target === 'left') navigateLeft();
+      });
+
+      $(document).on('keydown', function (e) {
+        if (e.which === 39) navigateRight();
+        if (e.which === 37) navigateLeft();
+      });
+
+      $(document).on('mousewheel DOMMouseScroll', function (e) {
+        if (animation) return;
+        let delta = e.originalEvent.wheelDelta;
+
+        if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+        if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+      });
+    });
+  </script>
+  <script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+  <script>
+    const carouselText = [
+      { text: "Don't be afraid to give up the good to go for the great.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+      carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+      const letters = sentence.split("");
+      let i = 0;
+      while (i < letters.length) {
+        await waitForMs(delay);
+        $(eleRef).append(letters[i]);
+        i++;
+      }
+    }
+
+
+    async function deleteSentence(eleRef) {
+      const sentence = $(eleRef).html();
+      const letters = sentence.split("");
+      let i = 0;
+      while (letters.length > 0) {
+        await waitForMs(1000000);
+        letters.pop();
+        $(eleRef).html(letters.join(""));
+      }
+    }
+
+    async function carousel(carouselList, eleRef) {
+      var i = 0;
+      while (true) {
+        updateFontColor(eleRef, carouselList[i].color)
+        await typeSentence(carouselList[i].text, eleRef);
+        await waitForMs(1500);
+        await deleteSentence(eleRef);
+        await waitForMs(500);
+        i++
+        if (i >= carouselList.length) { i = 0; }
+      }
+    }
+
+    function updateFontColor(eleRef, color) {
+      $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+  </script>
+  <script>
+    $(function () {
+      $('.scroll-down').click(function () {
+        $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+        return false;
+      });
+    });
+  </script>
+
+
+  <div id="content">
+    <section class="banner-container">
+      <div class="cont">
+        <div class="slider"></div>
+      </div>
+      <div class="typing-container" style="top: 50px;">
+        <span id="sentence" class="sentence"></span>
+        <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+        <span class="input-cursor"></span>
+      </div>
+      <div class="typing-container" style="margin-top: -250px;
+            color: aliceblue;
+            /* font-style: unset; */
+            font-size: xx-large;
+            font-weight: 800;
+            letter-spacing: 8px;
+            font-size: 140px;
+            font-family: inherit;">
+        Entrepreneurship
+        <span id="sentence" class="sentence"></span>
+        <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+      </div>
+      <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+      <div class="main-left">
+        <div class="sidebar">
+          <ul>
+            <li><a href="#Problem" class="sidebaritem">Overview</a></li>
+            <li><a href="#Inspiration" class="sidebaritem">Problem and Demand</a></li>
+            <li><a href="#Our Goal" class="sidebaritem">About Our Team</a></li>
+            <li><a href="#Solution" class="sidebaritem">Innovation Design</a></li>
+            <li><a href="#Advantages and innovations" class="sidebaritem">Product Packaging</a></li>
+            <li><a href="#Market Survey" class="sidebaritem">Market Survey</a></li>
+            <li><a href="#Questionnaire Survey" class="sidebaritem">Questionnaire Survey</a></li>
+            <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+            <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+              <ul>
+                <li class="sidebaritem_item"><a href="#Purpose">Purpose</a>
+                </li>
+                <li class="sidebaritem_item"><a href="#Analysis">Analysis</a></li>
+              </ul>
+            </div>
+            <li><a href="#Business analysis model" class="sidebaritem">Business Snalysis Model</a></li>
+            <button class="sideexpandbutton" id="sideexpandbutton2"></button>
+            <div id="sidebaritem_item2" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+              <ul>
+                <li class="sidebaritem_item"><a href="#realistic milestone">Realistic Milestone</a></li>
+                <li class="sidebaritem_item"><a href="#product development plans (4P)">Product Development Pplans</a></li>
+                <li class="sidebaritem_item"><a href="#future work">Future Work</a></li>
+              </ul>
+            </div>
+            <li><a href="#Positive and Negative Long-term Impact" class="sidebaritem">Positive and Negative<br>Long-term Impact</a></li>
+            <button class="sideexpandbutton" id="sideexpandbutton3"></button>
+
+            <div id="sidebaritem_item3" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+              <ul>
+                <li class="sidebaritem_item"><a href="#POSITIVE">POSITIVE</a></li>
+                <li class="sidebaritem_item"><a href="#NEGATIVE">NEGATIVE</a></li>
+              </ul>
+            </div>
+            <li><a href="#Enterprise Visited" class="sidebaritem">Enterprise Visited</a></li>
+            <li><a href="#Acknowledgments" class="sidebaritem">Acknowledgments</a></li>
+            <li><a href="#Reference" class="sidebaritem">Reference</a></li>
+          </ul>
+          <script>
+            const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+            const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+            sideexpandbutton1.addEventListener("click", function () {
+                if (sidebaritem_item1.style.display == "none") {
+                    sidebaritem_item1.style.display = "block";
+                    sideexpandbutton1.style.transform = "rotate(-180deg)";
+                } else {
+                    sidebaritem_item1.style.display = "none";
+                    sideexpandbutton1.style.transform = "rotate(-360deg)";
+                }
+            });
+            const sideexpandbutton2 = document.getElementById("sideexpandbutton2");
+            const sidebaritem_item2 = document.getElementById("sidebaritem_item2");
+
+            sideexpandbutton2.addEventListener("click", function () {
+                if (sidebaritem_item2.style.display == "none") {
+                    sidebaritem_item2.style.display = "block";
+                    sideexpandbutton2.style.transform = "rotate(-180deg)";
+                } else {
+                    sidebaritem_item2.style.display = "none";
+                    sideexpandbutton2.style.transform = "rotate(-360deg)";
+                }
+            });
+            const sideexpandbutton3 = document.getElementById("sideexpandbutton3");
+            const sidebaritem_item3 = document.getElementById("sidebaritem_item3");
+
+            sideexpandbutton3.addEventListener("click", function () {
+                if (sidebaritem_item3.style.display == "none") {
+                    sidebaritem_item3.style.display = "block";
+                    sideexpandbutton3.style.transform = "rotate(-180deg)";
+                } else {
+                    sidebaritem_item3.style.display = "none";
+                    sideexpandbutton3.style.transform = "rotate(-360deg)";
+                }
+            });
+          </script>
+        </div>
+      </div>
+
+      <div class="main-right" id="effort">
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Problem">Overview</h1>
+          <button class="expandbutton" id="expandbutton"></button>
+        </div>
+        <div id="article1">
+          <p class="des-paragraph fade_from_right">
+            Globally, colorectal cancer ranks
+            third in terms of cancer incidence. The cancer diagnostics market, valued at $17.2 billion in
+            2021, is projected to reach $29.6 billion by 2026 with an 11.5% annual growth rate.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            To benefit more colorectal cancer
+            patients worldwide, we're actively pursuing commercialization and entrepreneurship. Our efforts
+            cover product development, packaging, and cost estimation. We utilize business models, market
+            research, and consumer surveys for data-driven adjustments.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            We're committed to aligning our
+            synthetic biology project with Sustainable Development Goals (SDGs) to reduce resource
+            inequality, making colorectal cancer screening accessible to diverse communities. Beyond iGEM,
+            we aim to publish our findings and seek patents under our thesis advisor guidance, bringing our
+            product closer to reality.
+          </p>
+        </div>
+        <script>
+          const expandbutton = document.getElementById("expandbutton");
+          const article1 = document.getElementById("article1");
+
+          expandbutton.addEventListener("click", function () {
+            if (article1.style.display == "block") {
+              article1.style.display = "none";
+              expandbutton.style.transform = "rotate(-180deg)";
+            } else {
+              article1.style.display = "block";
+              expandbutton.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Inspiration">Problem and Demand</h1>
+          <button class="expandbutton" id="expandbutton2"></button>
+        </div>
+        <div id="article2">
+          <p class="des-paragraph fade_from_right">
+            Colorectal cancer ranks as the
+            third most prevalent form of cancer on a global scale, constituting approximately 10% of all
+            cancer diagnoses, and stands as the second principal cause of cancer-related mortality
+            worldwide. In the year 2020, it was estimated that there were over 1.9 million newly diagnosed
+            cases of colorectal cancer and more than 930,000 individuals succumbed to this disease globally.
+            Projections indicate that by the year 2040, the burden of colorectal cancer will escalate to a
+            staggering 3.2 million new cases annually, marking a 63% increase, along with an anticipated 1.6
+            million deaths each year, reflecting a 73% rise in mortality rates.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            According to a report by
+            MARKETSANDMARKETS, the global cancer diagnostics market was valued at $17.2 billion in 2021 and
+            is projected to reach $29.6 billion by 2026, at a compound annual growth rate (CAGR) of 11.5%.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Combining the stated facts that
+            colorectal cancer cases and the cancer detection market both have been growing in recent years,
+            we think that the research on liquid biopsy has great potential in the medical market.
+            Furthermore, we believe that our minimally invasive screening method and fully automated device
+            could possibly revolutionize the current colorectal cancer screening market, providing a more
+            acceptable, affordable, and convenient screening option.
+          </p>
+        </div>
+        <script>
+          const expandbutton2 = document.getElementById("expandbutton2");
+          const article2 = document.getElementById("article2");
+
+          expandbutton2.addEventListener("click", function () {
+            if (article2.style.display == "block") {
+              article2.style.display = "none";
+              expandbutton2.style.transform = "rotate(-180deg)";
+            } else {
+              article2.style.display = "block";
+              expandbutton2.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Our Goal">About Our Team</h1>
+          <button class="expandbutton" id="expandbutton3"></button>
+        </div>
+        <div id="article3">
+          <p class="des-paragraph fade_from_right">
+            NTHU_Taiwan is a cross-disciplinary
+            team, our members come from six different departments, including the Department of Life
+            Sciences, Department of Physics, Department of Electrical Engineering, and Department of
+            Materials. We hope to achieve our goals through the cooperation of talents in various fields.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Our work is divided into 3 parts:
+            Wet Lab, Dry Lab, and Human Practice. Wet Lab's main work is gene editing design and biological
+            experiment analysis, Dry Lab is responsible for model design, software, hardware production, and
+            team website establishment, and Human Practice is responsible for artistic design, public
+            relations, fundraising, and promotion, etc. In terms of team operation, we invited three experts
+            with testing-related expertise, including Professor Lin, Xing-Ying from Tsinghua University, to
+            serve as the team's instructors and discuss the progress and direction of the experiment through
+            regular weekly meetings.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            This year, we took colorectal
+            cancer detection as the competition topic, hoping to solve the shortcomings of current detection
+            methods such as low accuracy and high invasiveness.
+          </p>
+        </div>
+        <script>
+          const expandbutton3 = document.getElementById("expandbutton3");
+          const article3 = document.getElementById("article3");
+
+          expandbutton3.addEventListener("click", function () {
+            if (article3.style.display == "block") {
+              article3.style.display = "none";
+              expandbutton3.style.transform = "rotate(-180deg)";
+            } else {
+              article3.style.display = "block";
+              expandbutton3.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Solution">Innovation Design</h1>
+          <button class="expandbutton" id="expandbutton4"></button>
+        </div>
+        <div id="article4">
+          <h1 class="des-heading3 fade_from_left">Our products are innovative:</h1>
+          <p class="des-paragraph fade_from_right">
+            1. Revolutionizing traditional screening methods(such as FIT) of Colorectal Cancer detection.<br>
+            2. More convenient, accurate, low invasive, and affordable price.<br>
+            3. Fully automated operations to reduce human error.<br>
+            4. Paired with an app to provide instant results.
+          </p>
+          
+        <script>
+          const expandbutton4 = document.getElementById("expandbutton4");
+          const article4 = document.getElementById("article4");
+
+          expandbutton4.addEventListener("click", function () {
+            if (article4.style.display == "block") {
+              article4.style.display = "none";
+              expandbutton4.style.transform = "rotate(-180deg)";
+            } else {
+              article4.style.display = "block";
+              expandbutton4.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+      
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Advantages and innovations">Product Packaging</h1><button class="expandbutton" id="expandbutton5"></button>
+        </div>
+        <div id="article5">
+          <p class="des-paragraph fade_from_right">
+            We hope to collaborate with local clinics or healthcare institutions in the future and establish testing stations in these locations. Through blood sampling and the use of fully automated equipment, we will measure the concentration of Circular RNA in the blood (interpreted in nanogold assay), with the entire process yielding test results in approximately two hours. 
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Regarding the PCRD screening aspect, we aspire to follow a similar approach to COVID-19 rapid testing by making rapid test kits and testing reagents available for purchase at pharmacies or clinics for individuals who require testing. If individuals receive a positive rapid screening result with three lines during testing, they should seek further medical diagnosis and help at the hospital. 
+          </p>
+          <a class="nav_button" href="{{ url_for('pages', page='hardware') }}">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            Click to go Hardware!
+          </a>
+        </div>
+        <script>
+          const expandbutton5 = document.getElementById("expandbutton5");
+          const article5 = document.getElementById("article5");
+
+          expandbutton5.addEventListener("click", function () {
+            if (article5.style.display == "block") {
+              article5.style.display = "none";
+              expandbutton5.style.transform = "rotate(-180deg)";
+            } else {
+              article5.style.display = "block";
+              expandbutton5.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Market Survey">Market Survey</h1>
+          <button class="expandbutton" id="expandbutton6"></button>
+        </div>
+        <div id="article6">
+          <p class="des-paragraph fade_from_right">
+            According to the statistics on
+            medical and healthcare expenses for cancer patients in Taiwan in the year 2022, as shown in
+            Figure 1, there were 110,579 patients who sought medical treatment for colorectal cancer
+            (including colon, rectal, and anal cancer). The pharmaceutical expenses covered by National
+            Health Insurance (NHI) amounted to approximately NT$5.67 billion New Taiwan Dollars, while the
+            total medical expenses incurred reached NT$16.07 billion New Taiwan Dollars. On average, each
+            patient incurred about NT$51,287 New Taiwan Dollars in pharmaceutical expenses and NT$145,284
+            New Taiwan Dollars in total medical expenses.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            According to a report from
+            MARKETSANDMARKETS, the global cancer diagnosis market size in 2021 was $17.2 billion USD. It is
+            projected to reach $29.6 billion USD by 2026, growing at a Compound Annual Growth Rate (CAGR) of
+            11.5%. The majority of the market, accounting for 67%, is comprised of equipment, including
+            Pathology-based Instruments, Imaging Instruments, and Biopsy Instruments, as illustrated in
+            Figure 2.
+          </p>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/entrepreneurship-fig2.png"style="width: 50%">
+          </div>
+          <p class="des-figure">
+            Figure 1. Cancer Epidemiology in Taiwan (Ministry of Health and Welfare - Statistics of
+            Pharmaceutical Expenses and Medical Costs for Cancer Patients in 2022)
+          </p>
+          <div class="containerfig">
+            <img style="max-height: 200px; width: auto;" src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/entrepreneurship-fig3.png">
+            <img style="max-height: 200px; width: auto;" src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/entrepreneurship-fig4.png">
+            <img style="max-height: 200px; width: auto;" src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/entrepreneurship-fig5.png">
+          </div>
+          <p class="des-figure">
+            Figure 2. The Market Size of Cancer Screening (MARKETSANDMARKETS(2021/04) Cancer Diagnostics
+            Market worth $26.6 billion by 2026)。
+          </p>
+        </div>
+        <script>
+          const expandbutton6 = document.getElementById("expandbutton6");
+          const article6 = document.getElementById("article6");
+
+          expandbutton6.addEventListener("click", function () {
+            if (article6.style.display == "block") {
+              article6.style.display = "none";
+              expandbutton6.style.transform = "rotate(-180deg)";
+            } else {
+              article6.style.display = "block";
+              expandbutton6.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Questionnaire Survey">Questionnaire Survey</h1>
+          <button class="expandbutton" id="expandbutton7"></button>
+        </div>
+        <div id="article7">
+          <h1 class="des-heading2" id="Purpose"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Purpose</h1>
+          <p class="des-paragraph fade_from_right">
+            With the purpose of meeting the needs of the public and ameliorating the current condition of detecting early-stage Colorectal Cancer, our team designed a survey to investigate the severity of colorectal cancer worldwide and the acceptable price range for cancer screening among the general public. The questionnaire reflected the public's thoughts on our product and how they felt about current methods of detecting early-stage Colorectal Cancer.
+          </p>
+          <h1 class="des-heading2" id="Analysis"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Analysis</h1>
+          <p class="des-paragraph fade_from_right">
+            The result data showed that there were over four hundred people joined this investigation, and the composition of the respondents ranged from college students to workers, medical-related industry, professors, and others. The age of the respondents ranges from less than 18 years old to over 60 years old. From the data, we can summarize a few important points as follows:
+          </p>
+          <p class="des-paragraph fade_from_right">1. Colorectal Cancer is common and serious:</p>
+          <p class="des-paragraph-item fade_from_right">>
+            According to the database, there are 84.8% of the respondents considered Colorectal Cancer to be common and serious while 8.6% of them considered Colorectal Cancer to be common but not serious. And only 1% of the respondents think Colorectal Cancer is not common or serious.
+          </p>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/analysis-data-graph-1.png">
+          </div>
+          <p class="des-paragraph fade_from_right">2. Colorectal Cancer could cause inconvenience to life:</p>
+          <p class="des-paragraph-item fade_from_right">>
+            According to the database, there are 98% of the respondents think having Colorectal Cancer is a tragedy to life and only 1% consider the disease to have no impact on life. 
+          </p>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/analysis-data-graph-2.png">
+          </div>
+          <p class="des-paragraph fade_from_right">3. Current fee for detecting Colorectal Cancer is too expensive:</p>
+          <p class="des-paragraph-item fade_from_right">>
+            Even though Taiwan has health insurance, there are still over half (52.1%) of the respondents consider the cost of detecting Colorectal Cancer to be too high for the general public, not to mention countries that do not have health insurance!
+          </p>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/analysis-data-graph-3.png">
+          </div>
+          <p class="des-paragraph fade_from_right">4. Current detecting method(such as FIT) is inconvenience:</p>
+          <p class="des-paragraph-item fade_from_right">>
+            According to the database, there are 76% of the respondents think the current method of detecting early-stage Colorectal Cancer is way too inconvenient.
+          </p>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/analysis-data-graph-4.png">
+          </div>
+          <p class="des-paragraph fade_from_right">5. NanoCircDx is acceptable to the public:</p>
+          <p class="des-paragraph-item fade_from_right">>
+            According to the database, 96.3% of the respondents are willing to use our product for early detection of Colorectal Cancer due to its convenience, accuracy, minimal invasiveness, and efficiency. And only 2.7% of the respondents don’t have to will to use our product.
+          </p>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/analysis-data-graph-5.png">
+          </div>
+        </div>
+        <script>
+          const expandbutton7 = document.getElementById("expandbutton7");
+          const article7 = document.getElementById("article7");
+
+          expandbutton7.addEventListener("click", function () {
+            if (article7.style.display == "block") {
+              article7.style.display = "none";
+              expandbutton7.style.transform = "rotate(-180deg)";
+            } else {
+              article7.style.display = "block";
+              expandbutton7.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Business analysis model">Business analysis model</h1>
+          <button class="expandbutton" id="expandbutton8"></button>
+        </div>
+        <div id="article8">
+          <h1 class="des-heading2" id="realistic milestone"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Realistic Milestone</h1>
+          <p class="des-paragraph fade_from_right">
+            1. Find the problem of early-stage detection of Colorectal Cancer.<br>
+            2. Brainstorm the solution to the problem—NanoCircDx.<br>
+            3. Inquire for professional and industrial advice.<br>
+            4. Take the public's thoughts into consideration.<br>
+            5. Improve our product.<br>
+            6. Meet the needs of the public.
+          <h1 class="des-heading2" id="product development plans (4P)"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Product Development Plans</h1>
+          <h1 class="des-heading3 fade_from_left">4P Model</h1>
+          <p class="des-paragraph fade_from_right">
+            Based on the MARKETSANDMARKETS
+            report, the global cancer diagnosis market is projected to reach a substantial value of $29.6
+            billion by 2026. Our product leverages cutting-edge liquid biopsy technology, offering a
+            solution that addresses the limitations commonly associated with existing methods, such as
+            invasiveness and inconvenience, as supported by public survey feedback.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            In the realm of marketing, our
+            pricing strategy stands out as a key component. Our product boasts affordability when compared
+            to traditional colonoscopy procedures. Patients are only responsible for covering the
+            registration fee and associated blood testing costs. Moreover, our fully automated equipment
+            substantially reduces hospital labor costs, thereby lightening the load on the healthcare
+            system.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            In terms of promotion and
+            placement, our ongoing product development efforts align with collaborative ventures with local
+            clinics and healthcare institutions. We aspire to have a significant impact on the field,
+            ultimately contributing to the preservation of lives. This integrated approach, encompassing the
+            4Ps of marketing (Product, Price, Promotion, and Place), positions us to make a meaningful
+            difference in the cancer diagnostics market.
+          </p>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/4p-analysis-of-nanocircdx.png">
+          </div>
+          <p class="des-figure">Figure 3. 4P Analysis of NanoCircDx</p>
+          <h1 class="des-heading2" id="SWOT Analysis"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>SWOT Analysis</h1>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/entrepreneurship/entrepreneurship-fig6.png">
+          </div>
+          <p class="des-figure">Figure 4. 4P Business Analysis - SWOT Analysis</p>
+          <h1 class="des-heading3 fade_from_left">SWOT Analysis</h1>
+          <p class="des-paragraph fade_from_right">
+            From a strengths perspective, the
+            research product emphasizes a novel exosome-based colorectal cancer detection system (prognosis)
+            with high sensitivity, specificity, precision, and cost-effectiveness. This positions it in the
+            market as a differentiated product in terms of technology and product attributes compared to
+            existing methods, which is a competitive advantage for the research team. Furthermore, the
+            research team possesses core technology expertise and has established relevant patents, along
+            with control over key raw materials and suppliers, which provides a significant advantage in
+            terms of product ownership and know-how.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            However, internal weaknesses
+            include the fact that the current methods are well-known in the clinical field, making it costly
+            to “teach users" about the research product when entering the market. Additionally, this
+            technology product requires integration with its own sensing devices, which involves a bundled
+            sales approach of instruments with testing reagents. This aspect needs to be carefully
+            considered in the subsequent marketing strategy. Simultaneously, the research team is a startup
+            and lacks brand recognition and corporate visibility, which will require substantial resources
+            in the marketing efforts when entering the market through distribution channels.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            External opportunities in the
+            market, based on data analysis in this study, indicate that there is still a need for more
+            effective ways of applying liquid biopsy in cancer detection within the clinical setting, and
+            there is a high level of expectation for liquid biopsy in the market. Analysis of competitors
+            also reveals that international companies are still in the development stage for exosome
+            diagnostics, and non-invasive testing is currently the primary trend in the market. All of these
+            factors present opportunities.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Furthermore, by the research, it
+            can be observed that major corporations or self-developers are currently at the nascent stage of
+            exosome diagnostics. Only one American company is active in clinical applications. However, when
+            considering the broader context of liquid biopsy, there are already products and services on the
+            market in areas such as CTC and ctDNA.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            External threats in the market
+            consider that exosome technology is still in its infancy, and thus, if the team possesses
+            critical core technology, it needs to seize the initiative in development. Additionally,
+            healthcare distribution channels are closed, and the barrier to entry for new products into
+            these channels is high.
+          </p>
+
+          <h1 class="des-heading2" id="future work"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Future Work</h1>
+          <p class="des-paragraph fade_from_right">
+            The ultimate goal of our project is
+            to raise awareness of early colorectal cancer screening among the public. The fastest way is to
+            popularize and commercialize our project as soon as possible. The following will be some brief
+            introductions to the different works and goals we planned to meet during the process of
+            implementing our project.
+          </p>
+          <h1 class="des-heading3 fade_from_left">1. Issue a paper</h1>
+          <p class="des-paragraph fade_from_right">
+            When we came up with the project
+            and prepared experiments, we referred to many papers and suggestions from professionals in
+            different fields. Therefore, after completing the competition, we will publish our project as a
+            paper to help future iGEMers and other scientists who want to use circRNA to screen cancer.
+          </p>
+          <h1 class="des-heading3 fade_from_left">2. Apply for product patent</h1>
+          <p class="des-paragraph fade_from_right">
+            Nowadays, the world pays more and
+            more attention to intellectual property rights. Applying for patents for our products is a good
+            way to protect the intellectual property rights of creators and at the same time protect the
+            rights and interests of consumers. It ensures the quality and source of products. Enable
+            consumers to trust the goods or services they purchase.
+          </p>
+        </div>
+        <script>
+          const expandbutton8 = document.getElementById("expandbutton8");
+          const article8 = document.getElementById("article8");
+
+          expandbutton8.addEventListener("click", function () {
+            if (article8.style.display == "block") {
+              article8.style.display = "none";
+              expandbutton8.style.transform = "rotate(-180deg)";
+            } else {
+              article8.style.display = "block";
+              expandbutton8.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Positive and Negative Long-term Impact">Positive and Negative Long-term Impact</h1>
+          <button class="expandbutton" id="expandbutton9"></button>
+        </div>
+        <div id="article9">
+          <h1 class="des-heading2" id="POSITIVE">
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>POSITIVE:
+          </h1>
+          <h1 class="des-heading3 fade_from_left">1. Reduce the burden of the NHI
+          </h1>
+
+          <p class="des-paragraph fade_from_right">
+            If our project is successfully
+            developed into a commercial product, it will be very helpful to the National Health Insurance of
+            our country (Taiwan) and can greatly reduce the burden of the National Health Insurance.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Taiwan's healthcare system, called
+            National Health Insurance (NHI), makes sure everyone gets affordable, high-quality medical care.
+            It's like a big insurance plan run by the government.
+          </p>
+          <h1 class="des-heading3 fade_from_left">2. Increase willingness to get
+            cancer screening</h1>
+          <h1 class="des-heading3 fade_from_left">3. Potential market demand</h1>
+
+          <p class="des-paragraph fade_from_right">
+            Colorectal cancer is a common
+            cancer worldwide, so there is a huge potential market demand, especially for new technologies
+            for early screening.
+          </p>
+          <h1 class="des-heading3 fade_from_left">4. Impact on medical research
+          </h1>
+
+          <p class="des-paragraph fade_from_right">
+            The successful development of such
+            reagents will have a profound impact on medical research and clinical practice and is expected
+            to improve the early detection rate of colorectal cancer.
+          </p>
+          <h1 class="des-heading2" id="NEGATIVE"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>NEGATIVE:</h1>
+          <h1 class="des-heading3 fade_from_left">1. Requires more resources and takes a longer time</h1>
+
+          <p class="des-paragraph fade_from_right">
+            Developing new medical reagents
+            requires significant time and resources and requires rigorous regulatory and approval
+            procedures, which can be a long and expensive process. In addition, the development of rapid
+            screening reagents requires highly sensitive and specific technologies to ensure accuracy and
+            reliability, which may be part of the technical challenges.
+          </p>
+          <h1 class="des-heading3 fade_from_left">2. Cost and availability</h1>
+
+          <p class="des-paragraph fade_from_right">
+            Making new screening tests more
+            widely available requires large-scale production and distribution, which can involve high costs,
+            especially in the early stages.
+          </p>
+        </div>
+        <script>
+          const expandbutton9 = document.getElementById("expandbutton9");
+          const article9 = document.getElementById("article9");
+
+          expandbutton9.addEventListener("click", function () {
+            if (article9.style.display == "block") {
+              article9.style.display = "none";
+              expandbutton9.style.transform = "rotate(-180deg)";
+            } else {
+              article9.style.display = "block";
+              expandbutton9.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Enterprise Visited">Enterprise Visited</h1>
+            <button class="expandbutton" id="expandbutton10"></button>
+        </div>
+        <div id="article10">
+          <p class="des-paragraph fade_from_right">
+            Go to Integrated Human Practice page to see more!
+          </p>
+          <a class="nav_button" href="{{ url_for('pages', page='human-practices') }}">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            Click to go IHP!
+          </a>
+        </div>
+        <script>
+          const expandbutton10 = document.getElementById("expandbutton10");
+          const article10 = document.getElementById("article10");
+
+          expandbutton10.addEventListener("click", function () {
+            if (article10.style.display == "block") {
+              article10.style.display = "none";
+              expandbutton10.style.transform = "rotate(-180deg)";
+            } else {
+              article10.style.display = "block";
+              expandbutton10.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Acknowledgments">Acknowledgments</h1>
+          <button class="expandbutton" id="expandbutton11"></button>
+        </div>
+        <div id="article11">
+          <p class="des-paragraph fade_from_right">
+            In order to raise funds for our experimental research, community outreach initiatives, and various expenses associated with the 2023 iGEM competition, we have been actively seeking scholarships and reaching out to the public for donations, as well as proactively seeking sponsors. Thanks to the laboratory project and the sponsorship from various organizations, we believe that every contribution, regardless of its amount, plays a crucial role in supporting our journey.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            We heartfully thank Prestigious supports from MOST 109-2222-E-007-003-MY2; NSTC 112-2321-B-007-003; NSTC 112-2221-E-007-019-MY3; SPARK grants@NTHU; MGH FMD Fellowship; NIH T32; APAC Award; MOE STEM grant; NTHU-CGMH joint grants; CMRP grants; NTHU grants; NHRI grant; ITRI BMCC grant; National Tsing Hua University scholarship; Integrated DNA Technologies; Taiwan Ministry of Education scholarship; College of Life Science and Medicine, National Tsing Hua University; NTHU Alumni Association; Taiwan Association For Virtual And Augmented Reality scholarship; iGEM Impact Grant and ongoing applications.
+          </p>
+        </div>
+        <script>
+          const expandbutton11 = document.getElementById("expandbutton11");
+          const article11 = document.getElementById("article11");
+
+          expandbutton11.addEventListener("click", function () {
+            if (article11.style.display == "block") {
+              article11.style.display = "none";
+              expandbutton11.style.transform = "rotate(-180deg)";
+            } else {
+              article11.style.display = "block";
+              expandbutton11.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+
+        <div id="Reference">
+          <h1 class="des-ref-heading">Reference</h1>
+          <p id="[1]" class="des-ref-paragraph">[1] Cancer Precision Medicine Blueprint: Focusing on Screening Technology Trends and Challenges <a href="https://reurl.cc/qk2W6R">https://reurl.cc/qk2W6R</a></p>
+          <p id="[2]" class="des-ref-paragraph">[2] Cancer Detection Opportunities: The New "Holy Grail" <a href="https://reurl.cc/d7gZW2">https://reurl.cc/d7gZW2</a></p>
+          <p id="[3]" class="des-ref-paragraph">[3] The New Era of Biotherapy: Current Developments in Exosome Applications <a href="https://www2.itis.org.tw/NetReport/NetReport_Detail.aspx?rpno=564035281&industry=2">https://www2.itis.org.tw/NetReport/NetReport_Detail.aspx?rpno=564035281&industry=2</a></p>
+          <p id="[4]" class="des-ref-paragraph">[4] The Medical Era of Exosomes (Part 1) - Trends in Industry Applications and Market Potential <a href="https://reurl.cc/Y8o2ND">https://reurl.cc/Y8o2ND</a></p>
+          <p id="[5]" class="des-ref-paragraph">[5] Dai J, Su Y, Zhong S, et al. Exosomes: Key Players in Cancer and Potential Therapeutic Strategy. Signal Transduct Target Ther. 2020;5(1):145. Published 2020 Aug 5. doi:10.1038/s41392-020-00261-0</p>
+          <p id="[6]" class="des-ref-paragraph">[6] Understanding Colorectal Cancer, China Medical University Hospital <a href="https://reurl.cc/AdlQVK">https://reurl.cc/AdlQVK</a></p>
+          <p id="[7]" class="des-ref-paragraph">[7] What Is Colorectal Cancer, Tri-Service General Hospital <a href="https://reurl.cc/7RqggD">https://reurl.cc/7RqggD</a></p>
+          <p id="[8]" class="des-ref-paragraph">[8] Colorectal Cancer: Taiwan's Highest Cancer Incidence - Expert Insights on Staging and Treatment Options <a href="https://reurl.cc/eXg0Ax">https://reurl.cc/eXg0Ax</a></p>
+          <p id="[9]" class="des-ref-paragraph">[9] National Yang-Ming University Hospital Colorectal Cancer Treatment Guidelines <a href="http://web.csh.org.tw/web/cancer/wp-content/uploads/2017/03/C18-2017-2.pdf">http://web.csh.org.tw/web/cancer/wp-content/uploads/2017/03/C18-2017-2.pdf</a></p>
+          <p id="[10]" class="des-ref-paragraph">[10] Will My Colorectal Cancer Recur? <a href="https://www.healthnews.com.tw/article/48383">https://www.healthnews.com.tw/article/48383</a></p>
+          <p id="[11]" class="des-ref-paragraph">[11] WHO Cancer Today <a href="https://reurl.cc/024LAl">https://reurl.cc/024LAl</a></p>
+          <p id="[12]" class="des-ref-paragraph">[12] Global Cancer Data Report 2020 <a href="https://reurl.cc/Mb6rnL">https://reurl.cc/Mb6rnL</a> <a href="https://reurl.cc/Vj0KyZ">https://reurl.cc/Vj0KyZ</a></p>
+          <p id="[13]" class="des-ref-paragraph">[13] Top 10 Cancer Incidence in Taiwan, Ministry of Health and Welfare - National Health Insurance Administration <a href="https://reurl.cc/MRgeRL">https://reurl.cc/MRgeRL</a></p>
+          <p id="[14]" class="des-ref-paragraph">[14] Taiwan's Cancer Registration Results for the Year 109: Colorectal Cancer Remains at the Top Spot <a href="https://heho.com.tw/archives/257122">https://heho.com.tw/archives/257122</a></p>
+          <p id="[15]" class="des-ref-paragraph">[15] Ministry of Health and Welfare - Healthcare Expenditure Statistics for Various Types of Cancer in 111 (112.04.06 Update) <a href="https://reurl.cc/b7o03X">https://reurl.cc/b7o03X</a></p>
+          <p id="[16]" class="des-ref-paragraph">[16] Cancer Diagnostics Market worth $26.6 billion by 2026 <a href="https://reurl.cc/qOnMgp">https://reurl.cc/qOnMgp</a></p>
+          <p id="[17]" class="des-ref-paragraph">[17] Exosome Research Market Growth Drivers & Opportunities <a href="https://reurl.cc/n72QGn">https://reurl.cc/n72QGn</a></p>
+          <p id="[18]" class="des-ref-paragraph">[18] TAF Foundation - National Certification Fund <a href="https://www.taftw.org.tw/directory/scheme/medLab/list/">https://www.taftw.org.tw/directory/scheme/medLab/list/</a></p>
+          <p id="[19]" class="des-ref-paragraph">[19] Colorectal Cancer Diagnosis Methods - Handy Guide <a href="https://www.cmuh.cmu.edu.tw/NewsInfo/NewsArticle?no=5745">https://www.cmuh.cmu.edu.tw/NewsInfo/NewsArticle?no=5745</a></p>
+          <p id="[20]" class="des-ref-paragraph">[20] Colorectal Cancer Prevention and Screening <a href="https://reurl.cc/RvoxEG">https://reurl.cc/RvoxEG</a></p>
+          <p id="[21]" class="des-ref-paragraph">[21] How to Properly Screen for Colorectal Cancer <a href="https://www.tyh.com.tw/health/f11.html">https://www.tyh.com.tw/health/f11.html</a></p>
+          <p id="[22]" class="des-ref-paragraph">[22] Introduction to Colorectal Cancer Screening <a href="https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=621&pid=1136">https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=621&pid=1136</a></p>
+          <p id="[23]" class="des-ref-paragraph">[23] Circulating Tumor Cell Detection Introduction - Harvard Health Check <a href="https://reurl.cc/X4Z79D">https://reurl.cc/X4Z79D</a></p>
+          <p id="[24]" class="des-ref-paragraph">[24] Chang Gung Medical Center Fee Standards <a href="https://reurl.cc/Zr4yDW">https://reurl.cc/Zr4yDW</a></p>
+          <p id="[25]" class="des-ref-paragraph">[25] National Taiwan University Hospital Medical Fee Standards <a href="https://reurl.cc/3jKeGl">https://reurl.cc/3jKeGl</a></p>
+          <p id="[26]" class="des-ref-paragraph">[26] Beitou Checkup Management Hospital Self-Pay <a href="https://reurl.cc/qOG0MN">https://reurl.cc/qOG0MN</a></p>
+          <p id="[27]" class="des-ref-paragraph">[27] Shin Kong Wu Ho-Su Interpretation of Examination Results <a href="https://reurl.cc/pWa5Q8">https://reurl.cc/pWa5Q8</a></p>
+          <p id="[28]" class="des-ref-paragraph">[28] Exosome Treatment and Diagnostic Companies Worldwide <a href="http://www.xpbiomed.com/newsitem/278546988">http://www.xpbiomed.com/newsitem/278546988</a></p>
+          <p id="[29]" class="des-ref-paragraph">[29] Roche and Takeda's Layout: Nearly 50 Companies Compete in the Exosome Industry <a href="https://reurl.cc/rLVddO">https://reurl.cc/rLVddO</a></p>
+          <p id="[30]" class="des-ref-paragraph">[30] Bio-Techne Brands <a href="https://www.bio-techne.com/cn/about/bio-techne-brands">https://www.bio-techne.com/cn/about/bio-techne-brands</a></p>
+          <p id="[31]" class="des-ref-paragraph">[31] Bio-Techne Investor Presentations <a href="https://investors.bio-techne.com/presentations">https://investors.bio-techne.com/presentations</a></p>
+          <p id="[32]" class="des-ref-paragraph">[32] How Exosome Diagnostics Became a Benchmark in the Exosome Diagnostic Industry <a href="https://www.vbdata.cn/38851">https://www.vbdata.cn/38851</a></p>
+          <p id="[33]" class="des-ref-paragraph">[33] Exosome Liquid Biopsy Achieves Breakthrough, ExoDx Prostate IntelliScore Granted Breakthrough Medical Device Designation by FDA <a href="https://xueqiu.com/1912517390/128531591">https://xueqiu.com/1912517390/128531591</a></p>
+          <p id="[34]" class="des-ref-paragraph">[34] ExosomePlus <a href="http://www.exosomeplus.com/">http://www.exosomeplus.com/</a></p>
+        </div>
+      </div>
+    </section>
+  </div>
+{% endblock %}

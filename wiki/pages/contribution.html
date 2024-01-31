@@ -1,0 +1,677 @@
+{% extends "layout.html" %}
+  
+{% block title %}Contribution{% endblock %}
+
+{% block page_content %}
+  <style>
+    .slide--1__darkbg {
+      left: 0%;
+      background: url("https://static.igem.wiki/teams/4636/wiki/contribution.jpg") center center no-repeat;
+      background-size: cover;
+      background-position: 0px center, 0px center;
+      transform: translate3d(0, 0, 0);
+      will-change: transform;
+    }
+
+    .slide--1__letter {
+      background: url("https://static.igem.wiki/teams/4636/wiki/contribution.jpg") center center no-repeat;
+      background-position: 0px center, 0px center;
+      background-size: cover;
+    }
+  </style>
+  <script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+  <script>
+    $(document).ready(function () {
+      const $cont = $('.cont');
+      const $slider = $('.slider');
+      const $nav = $('.nav');
+      const winW = $(window).width();
+      const animSpd = 750; // Change also in CSS
+      const distOfLetGo = winW * 0.2;
+      let curSlide = 1;
+      let animation = false;
+      let autoScrollVar = false;
+      let diff = 0;
+
+      // Generating slides
+      let arrCities = ['Contribution', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+      let numOfCities = arrCities.length;
+      let arrCitiesDivided = [];
+
+      arrCities.map((city) => {
+        let length = city.length;
+        let letters = Math.floor(length / 4);
+        let exp = new RegExp(".{1," + letters + "}", "g");
+
+        arrCitiesDivided.push(city.match(exp));
+      });
+
+      let generateSlide = function (city) {
+        let frag1 = $(document.createDocumentFragment());
+        let frag2 = $(document.createDocumentFragment());
+        const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+        const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+        const $slide =
+          $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                        <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                        <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                    </div>`);
+
+        const letter =
+          $(`<div class="slide__letter slide--${numSlide}__letter">
+                        ${firstLetter}
+                    </div>`);
+        /*
+                        for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                            const text =
+                                $(`<div class="slide__text slide__text--${i + 1}">
+                                    ${arrCitiesDivided[city][i]}
+                                </div>`);
+                            frag1.append(text);
+                        }
+        */
+        const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+        frag2.append(navSlide);
+        $nav.append(frag2);
+
+        $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+        $slider.append($slide);
+
+        if (arrCities[city].length <= 4) {
+          $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+        }
+      };
+
+      for (let i = 0, length = numOfCities; i < length; i++) {
+        generateSlide(i);
+      }
+
+      $('.nav__slide--1').addClass('nav-active');
+
+      // Navigation
+      function bullets(dir) {
+        $('.nav__slide--' + curSlide).removeClass('nav-active');
+        $('.nav__slide--' + dir).addClass('nav-active');
+      }
+
+      function timeout() {
+        animation = true;
+      }
+
+      function pagination(direction) {
+        animation = true;
+        diff = 0;
+        $slider.addClass('animation');
+        $slider.css({
+          'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+        });
+
+        $slider.find('.slide__darkbg').css({
+          'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+        });
+
+        $slider.find('.slide__letter').css({
+          'transform': 'translate3d(0, 0, 0)',
+        });
+
+        $slider.find('.slide__text').css({
+          'transform': 'translate3d(0, 0, 0)'
+        });
+      }
+
+      function navigateRight() {
+        if (!autoScrollVar) return;
+        if (curSlide >= numOfCities) return;
+        pagination(0);
+        setTimeout(timeout, animSpd);
+        bullets(curSlide + 1);
+        curSlide++;
+      }
+
+      function navigateLeft() {
+        if (curSlide <= 1) return;
+        pagination(2);
+        setTimeout(timeout, animSpd);
+        bullets(curSlide - 1);
+        curSlide--;
+      }
+
+      function toDefault() {
+        pagination(1);
+        setTimeout(timeout, animSpd);
+      }
+
+
+
+      $(document).on('mouseup touchend', function (e) {
+        $(document).off('mousemove touchmove');
+
+        if (animation) return;
+
+        if (diff >= distOfLetGo) {
+          toDefault();
+        } else if (diff <= -distOfLetGo) {
+          toDefault();
+        } else {
+          toDefault();
+        }
+      });
+
+      $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+        let target = +$(this).attr('data-target');
+        bullets(target);
+        curSlide = target;
+        pagination(1);
+      });
+
+      $(document).on('click', '.side-nav', function () {
+        let target = $(this).attr('data-target');
+
+        if (target === 'right') navigateRight();
+        if (target === 'left') navigateLeft();
+      });
+
+      $(document).on('keydown', function (e) {
+        if (e.which === 39) navigateRight();
+        if (e.which === 37) navigateLeft();
+      });
+
+      $(document).on('mousewheel DOMMouseScroll', function (e) {
+        if (animation) return;
+        let delta = e.originalEvent.wheelDelta;
+
+        if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+        if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+      });
+    });
+  </script>
+  <script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+  <script>
+    const carouselText = [
+      { text: "Contribute your curiosity, shape the possibilities.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+      carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+      const letters = sentence.split("");
+      let i = 0;
+      while (i < letters.length) {
+        await waitForMs(delay);
+        $(eleRef).append(letters[i]);
+        i++;
+      }
+    }
+
+
+    async function deleteSentence(eleRef) {
+      const sentence = $(eleRef).html();
+      const letters = sentence.split("");
+      let i = 0;
+      while (letters.length > 0) {
+        await waitForMs(1000000);
+        letters.pop();
+        $(eleRef).html(letters.join(""));
+      }
+    }
+
+    async function carousel(carouselList, eleRef) {
+      var i = 0;
+      while (true) {
+        updateFontColor(eleRef, carouselList[i].color)
+        await typeSentence(carouselList[i].text, eleRef);
+        await waitForMs(1500);
+        await deleteSentence(eleRef);
+        await waitForMs(500);
+        i++
+        if (i >= carouselList.length) { i = 0; }
+      }
+    }
+
+    function updateFontColor(eleRef, color) {
+      $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+  </script>
+  <script>
+    $(function () {
+      $('.scroll-down').click(function () {
+        $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+        return false;
+      });
+    });
+  </script>
+
+  <div id="content">
+    <section class="banner-container">
+      <div class="cont">
+        <div class="slider"></div>
+      </div>
+      <div class="typing-container" style="top: 50px;">
+        <span id="sentence" class="sentence"></span>
+        <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+        <span class="input-cursor"></span>
+      </div>
+      <div class="typing-container" style="margin-top: -250px;
+      color: aliceblue;
+      /* font-style: unset; */
+      font-size: xx-large;
+      font-weight: 800;
+      letter-spacing: 8px;
+      font-size: 110px;
+      font-family: inherit;
+      align-content: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 120px;"
+  >
+        Contribution
+        <span id="sentence" class="sentence"></span>
+        <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+      </div>
+      <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+      <div class="main-left">
+        <div class="sidebar">
+          <ul>
+            <li><a href="#Problem" class="sidebaritem">Novel Cancer Detection Method</a></li>
+            <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+            <div id="sidebaritem_item1" class="sidebaritem_item-container">
+              <ul>
+                <li class="sidebaritem_item"><a id="" href="#Limitation of colonoscopy">Limitation of colonoscopy</a></li>
+                <li class="sidebaritem_item"><a id="Limitation" href="#Limitation of Fecal Immunochemical Test">Limitation of Fecal Immunochemical Test</a></li>
+                <li class="sidebaritem_item"><a id="Our" href="#Our Novel Detection Method: NanocircDx">Our Novel Detection Method: NanocircDx</a></li>
+                <script>
+                  const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                  const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+  
+                  sideexpandbutton1.addEventListener("click", function () {
+                      if (sidebaritem_item1.style.display == "none") {
+                          sidebaritem_item1.style.display = "block";
+                          sideexpandbutton1.style.transform = "rotate(-180deg)";
+                      } else {
+                          sidebaritem_item1.style.display = "none";
+                          sideexpandbutton1.style.transform = "rotate(-360deg)";
+                      }
+                  });
+              </script>
+              </ul>
+            </div>
+            <li><a href="#Establish Standardization Process for CircRNA Synthesis" class="sidebaritem">Establish Standardization Process for CircRNA Synthesis</a></li>
+            <li><a href="#Our Goal" class="sidebaritem">Developing Automated Operation and Heating Device</a></li>
+            <li><a href="#Solution" class="sidebaritem">Establish Image Database for Detection Results of PCRD and AuNPs</a></li>
+            <li><a href="#Advantages and innovations" class="sidebaritem">Establish Machine Learning for Post-Detection Product Analysis</a></li>
+            <li><a href="#Create iGEM Map to Enhance the Cohesion of iGEM Community" class="sidebaritem">Create iGEM Map to Enhance the Cohesion of iGEM Community</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="main-right" id="effort">
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Problem">Novel Cancer Detection Method</h1>
+          <button class="expandbutton" id="expandbutton"></button>
+        </div>
+        <div id="article1">
+          <p class="des-paragraph fade_from_right">
+            Current detection method for
+            colorectal cancer includes colonoscopy and fecal immunochemical test (FIT), which both have some
+            limitations.
+          </p>
+          <h1 class="des-heading2" id="Limitation of colonoscopy"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Limitation of colonoscopy</h1>
+          <h1 class="des-heading3 fade_from_left">1. Invasive Examination</h1>
+          <p class="des-paragraph fade_from_right">
+            Colonoscopy is an invasive
+            procedure that involves inserting a flexible tube with a camera (colonoscope) into the rectum
+            and colon. This can cause discomfort, cramping, and even pain for some patients, especially
+            during the insertion and navigation of the scope. The invasive examination led to a low
+            willingness for public to participate, resulting in patients delaying seeking medical care.
+          </p>
+          <h1 class="des-heading3 fade_from_left">2. Potential Risk of Acute Physical Hazard</h1>
+          <p class="des-paragraph fade_from_right">
+            Nonetheless, colonoscopy carries
+            some risks, including bleeding, bowel perforation, or infection. Perforation can occur when the
+            colon's lining is punctured, potentially leading to infection and requiring surgical repair.
+            These complications can be severe and may require immediate medical attention.
+          </p>
+          <h1 class="des-heading3 fade_from_left">3. High Financial Burden</h1>
+          <p class="des-paragraph fade_from_right">
+            Financial burden is another issue;
+            colonoscopy can be relatively expensive, especially for patients without insurance coverage. The
+            cost includes not only the procedure itself but also the facility, anesthesia, and pathology
+            fees for analyzing the collected tissue samples. According to the Center for Health and Cancer
+            Prevention Institute, the total cost of a colonoscopy is $850 USD.
+          </p>
+          <h1 class="des-heading3 fade_from_left">4. Dietary Restriction</h1>
+          <p class="des-paragraph fade_from_right">
+            A low-fiber diet is required on the
+            day prior to the colonoscopy examination. Reducing the uptake of fiber can effectively reduce
+            bowel movements, which makes the enema process more comprehensive. A low-fiber diet should avoid
+            consuming soybeans, whole grain products, raw vegetables, red meat, etc., which causes
+            inconvenience and could lower examination willingness.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            
+          </p>
+
+          <h1 class="des-heading2" id="Limitation of Fecal Immunochemical Test"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Limitation of Fecal Immunochemical Test</h1>
+          <p class="des-paragraph fade_from_right">
+            The fetal immunochemical test
+            (FIT), while non-invasive, may produce false-negative results, especially in cases where
+            bleeding is intermittent or at a low level. This can lead to delayed diagnosis and missed
+            opportunities for early intervention. According to the reference paper
+            <a href="https://aacrjournals.org/clincancerres/article/23/8/2061/123555/Fecal-Bacteria-Act-as-Novel-Biomarkers-for">(https://aacrjournals.org/clincancerres/article/23/8/2061/123555/Fecal-Bacteria-Act-as-Novel-Biomarkers-for)</a>,
+            the FIT test has low sensitivity at the first stage of colorectal cancer, which may delay
+            examination. The FIT test can also be influenced by dietary choices and certain medications.
+            Some foods, such as red meat, raw vegetables, and vitamin C supplements, can lead to
+            false-positive or false-negative results due to their impact on gastrointestinal bleeding.
+          </p>
+          <h1 class="des-heading2" id="Our Novel Detection Method: NanocircDx"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Our Novel Detection Method: NanocircDx</h1>
+          <p class="des-paragraph fade_from_right">
+            Recognizing the limitations and
+            drawbacks associated with traditional cancer detection methods like colonoscopy and the Fecal
+            Immunochemical Test (FIT), we are excited to introduce a groundbreaking approach called
+            NanocircDX.
+          </p>
+          <h1 class="des-heading3 fade_from_left">1. Enhanced Speed Detection in Cancer Early Stage</h1>
+          <p class="des-paragraph fade_from_right">
+            Our primary aim with NanocircDX is
+            to revolutionize cancer detection by offering a faster and more accurate method, particularly
+            for detecting cancer at its earliest and most treatable stages.
+          </p>
+          <h1 class="des-heading3 fade_from_left">2. Minimal-Invasive Testing</h1>
+          <p class="des-paragraph fade_from_right">
+            Unlike invasive procedures such as
+            colonoscopy, NanocircDX offers a minimal-invasive testing process. Patients will no longer need
+            to endure uncomfortable or embarrassing procedures, increasing their willingness to participate
+            in regular screenings.
+          </p>
+          <h1 class="des-heading3 fade_from_left">3. Improved Patient Experience</h1>
+          <p class="des-paragraph fade_from_right">
+            The simplicity and
+            minimal-invasiveness of NanocircDX lead to a more positive and comfortable patient experience.
+            This encourages individuals to proactively engage in cancer screening, promoting early detection
+            and better outcomes.
+          </p>
+          <h1 class="des-heading3 fade_from_left">4. Quick Results</h1>
+          <p class="des-paragraph fade_from_right">
+            NanocircDX offers rapid results
+            within 2.5 hours, reducing the waiting time for patients. Early detection can lead to early
+            intervention, potentially saving lives and reducing the overall burden of cancer treatment.
+          </p>
+          <h1 class="des-heading3 fade_from_left">5. Enhance Public Willingness</h1>
+          <p class="des-paragraph fade_from_right">
+            NanocircDX is designed not only to
+            be a more effective detection method but also to encourage more individuals to prioritize their
+            health through regular screenings. By eliminating the discomfort and anxiety associated with
+            traditional screening methods, NanocircDX aims to make cancer screening a less intimidating
+            experience.
+          </p>
+        </div>
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Establish Standardization Process for CircRNA Synthesis" style="padding-top: 8px;
+          font-size: 27px;">Establish Standardization Process for CircRNA Synthesis</h1>
+          <button class="expandbutton" id="expandbutton2"></button>
+        </div>
+        <div id="article2">
+          <p class="des-paragraph fade_from_right">
+            Recognizing the scarcity of
+            comprehensive circRNA synthesis protocols in the current literature, we have successfully
+            developed a complete detection process. This valuable resource is intended to assist future iGEM
+            teams and researchers interested in circRNA detection. Our well-defined synthesis steps ensure
+            precise and efficient circRNA production, addressing the challenges associated with the circRNA
+            detection process.
+          </p>
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/contribution/contributionfig1.png" style="width: 80%;">
+          </div>
+          <h1 class="des-heading3 fade_from_left">In Vitro Transcription</h1>
+          <p class="des-paragraph fade_from_right">
+            Prior to the circularization
+            process, users should prepare the target sequence. The selected sequence types could either be
+            DNA or ssRNA. If the prepared sequence is in DNA form, then the sequence should require the T7
+            promoter and cDNA of circRNA, and then conduct IVT (in vitro transcription) to transcribe the
+            sequence into ssRNA. If the prepared sequence is in ssRNA form, then users should skip IVT and
+            DNase I and do the following process:
+            <!--ADD button1(Link to experiment> IVT >T7 ...) and button2(Part BBa_K4636000 is for the detailed design of the T7 promoter.)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">DNase I</h1>
+          <p class="des-paragraph fade_from_right">
+            In this step, DNase I is added to
+            degrade template DNA for the IVT process.
+            <!--ADD button3(Link to experiment> IVT >DNase I ...)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">RNA Clean-up</h1>
+          <p class="des-paragraph fade_from_right">
+            RNA clean-up is required to remove
+            enzymes, salts, and contaminants. This purification process enhances the quality and integrity
+            of RNA, ensuring accurate downstream applications.
+            <!--ADD button3(Link to experiment> RNA Clean-up ...)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">Monophosphorylation</h1>
+          <p class="des-paragraph fade_from_right">
+            Monophosphorylation is aimed to
+            substitute triphosphate with single phosphate group on a sequence. Pyrophosphatase is the common
+            used enzyme in monophosphorylation process. In RNA circularization, pyrophosphatase is typically
+            applied to 5’ end of the RNA molecule, enabling the formation of a circular structure by
+            covalently linking the monophosphorylated end to the other end.
+            <!--ADD button4(Link to experiment>Mono ...)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">RNA Clean-up</h1>
+          <p class="des-paragraph fade_from_right">
+            RNA clean-up is required to remove
+            enzymes, salts, and contaminants. This purification process enhances the quality and integrity
+            of RNA, ensuring accurate downstream applications.
+            <!--ADD button5(Link to experiment> RNA clean-up ...)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">Form Nicked dsRNA</h1>
+          <p class="des-paragraph fade_from_right">
+            In this step, splint and ssRNA are
+            introduced, and after a high-temperature reaction, a slow cooling process promotes annealing,
+            resulting in the formation of dsRNA. The formed dsRNA assists in the subsequent circularization
+            step.
+            <!--ADD button6(Link to experiment> circularization ...) and button7(Part number link to splint design)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">Circularization</h1>
+          <p class="des-paragraph fade_from_right">
+            T4 RNA ligase 2 is an enzyme
+            commonly used in molecular biology for various RNA manipulation techniques, including
+            circularization. When applied to circularization, T4 RNA ligase 2 catalyzes the formation of a
+            covalent bond between the 3' and 5' ends of an RNA molecule, resulting in a circular RNA
+            structure.
+            <!--ADD button8(Link to experiment> circularization...)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">DNase I</h1>
+          <p class="des-paragraph fade_from_right">
+            In this step, DNase I is added to
+            degrade template DNA for the IVT process.
+            <!--ADD button3(Link to experiment> IVT >DNase I ...)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">RNA Clean-up</h1>
+          <p class="des-paragraph fade_from_right">
+            RNA clean-up is required to remove
+            enzymes, salts, and contaminants. This purification process enhances the quality and integrity
+            of RNA, ensuring accurate downstream applications.
+            <!--ADD button3(Link to experiment> RNA Clean-up ...)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">RNase R</h1>
+          <p class="des-paragraph fade_from_right">
+            RNase R is a kind of
+            exoribonuclease enzyme used to degrade the exposed end of RNA. It has specificity for
+            linear-form RNA and has circRNA resistance. By adding RNase R to the
+            circularization product, unsuccessful circularization RNA could be degraded, leaving a pure
+            circRNA product.
+            <!--ADD button3(Link to experiment> RNase R...)-->
+          </p>
+          <h1 class="des-heading3 fade_from_left">RNA Clean-up</h1>
+          <p class="des-paragraph fade_from_right">
+            RNA clean-up is required to remove
+            enzymes, salts, and contaminants. This purification process enhances the quality and integrity
+            of RNA, ensuring accurate downstream applications.
+            <!--ADD button3(Link to experiment> RNA Clean-up ...)-->
+          </p>
+        </div>
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Our Goal" style="padding-top: 8px;
+          font-size: 27px;">Developing Automated Operation and Heating Device
+          </h1><button class="expandbutton" id="expandbutton3"></button>
+        </div>
+        <div id="article3">
+          <div class="containerfig">
+            <img
+              src="https://static.igem.wiki/teams/4636/wiki/contribution/contribution/contribution/contribution/contribution/contribution/contribution/99e6514e-ce59-464a-b682-216ff022b4a4.png" style="margin-top: 30px; width: 80%">
+          </div>
+          <p class="des-paragraph fade_from_right">
+            The shortcomings of many current
+            detection methods, which rely on complicated manual operation and interpretation, have led to
+            concerns about increased human errors and uncertainties in sample analysis. These limitations
+            can potentially impact the accuracy of the interpretation and the overall reliability of the
+            results. To address these challenges, we have developed an innovative detection device that
+            streamlines the entire process, reducing the need for manual intervention and offering a
+            user-friendly experience.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Unlike manual methods that require
+            constant human intervention at various stages, our device is designed to automate the entire
+            detection process. Once a sample is placed into the device, it automatically initiates
+            pre-programmed protocols for different types of sample analyses. Users do not need to provide
+            instructions for each step; the device follows a predetermined sequence based on the type of
+            analysis required. This simplifies the operation and ensures that the process is carried out
+            correctly every time.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            To enhance user monitoring and
+            interaction, our device features a user-friendly LED display panel. This panel provides
+            real-time information about the current steps in the analysis process. Users can easily track
+            the progress, ensuring that they are informed and in control throughout the procedure.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            We aim to enhance the accuracy,
+            reliability, and user experience of sample detection across various applications, from medical
+            diagnostics to research endeavors. This device marks a crucial step toward more streamlined and
+            error-resistant sample analysis methods. It is intuitive and easy to use, making it accessible
+            to a wide range of users, including healthcare professionals and researchers.
+          </p>
+        </div>
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Solution" style="padding-top: 10px;
+          font-size: 23px;">Establish Image Database for Detection Results of PCRD and AuNPs</h1>
+          <button class="expandbutton" id="expandbutton4"></button>
+        </div>
+        <div id="article4">
+          <p class="des-paragraph fade_from_right">
+            Creating a database for PCRD and
+            gold nanoparticle detection results is a valuable initiative for streamlining the analysis and
+            interpretation of data from different samples. This database allows for faster and more accurate
+            automated analysis of newly imported data, contributing to improved precision in result
+            interpretation.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            The database serves as a
+            centralized repository for storing PCRD and gold nanoparticle detection results from various
+            samples. This centralization facilitates efficient data management and retrieval. Users can
+            rapidly access historical data and compare it with newly imported information. This quick search
+            capability streamlines the analysis process, saving time and effort.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Establishing a database for PCRD
+            and gold nanoparticle detection results is a strategic investment in data management and
+            analysis. It enhances the efficiency and accuracy of result interpretation, aids in quality
+            control, and supports research efforts. By leveraging historical data and integrating machine
+            learning, organizations can achieve faster and more reliable insights from their PCRD and gold
+            nanoparticle detection experiments, ultimately advancing their scientific and analytical
+            capabilities.
+          </p>
+        </div>
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Advantages and innovations" style="padding-top: 9px;
+          font-size: 25px;">Establish Machine Learning for Post-Detection Product Analysis</h1>
+          <button class="expandbutton" id="expandbutton5"></button>
+        </div>
+        <div id="article5">
+          <p class="des-paragraph fade_from_right">
+            We designed an APP for accurate
+            identification of post-testing products. Its core functionality
+            is based on a database of testing products, utilizing machine learning technology for
+            identification and analysis.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Firstly, users can capture or
+            upload images of PCRD or gold nanoparticle test results through
+            the application. Subsequently, the application undergoes image processing to extract crucial
+            features and data. These features and data are then transmitted to the testing product database
+            for comparison and identification. The testing product database comprises an extensive
+            collection of reference data from PCR tests and gold nanoparticle tests, including known
+            positive and negative results as well as variations in various contexts. Machine learning models
+            use this reference data for training to accurately identify new results.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Ultimately, users will see the
+            outcome of the application displaying the results of the testing
+            products. Users can trust the results provided by this tool without requiring in-depth
+            expertise.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Furthermore, in the future, this
+            application may include additional features such as saving
+            historical results, providing recommendations or suggesting next steps, and the option to share
+            results with healthcare professionals. This will assist users in better managing their test
+            outcomes and taking the necessary actions promptly. This application is poised to have a
+            significant impact on scientific research, clinical testing, and personal health management.
+          </p>
+        </div>
+        <div class="headingbox">
+          <h1 class="des-heading1" id="Create iGEM Map to Enhance the Cohesion of iGEM Community" style="padding-top: 9px;
+          font-size: 25px;">Create iGEM Map to Enhance the Cohesion of iGEM Community</h1>
+            <button class="expandbutton" id="expandbutton6"></button>
+        </div>
+        <div id="article6">
+          <div class="containerfig">
+            <img src="https://static.igem.wiki/teams/4636/wiki/contribution/contributionfig2.png" style="margin-top: 30px;">
+          </div>
+          <p class="des-paragraph fade_from_right">
+            To help foster cohesion within the
+            iGEM community, NTHU_Taiwan has created a 3D interactive iGEM
+            map. This map allows users to easily click on icons representing iGEM teams and access
+            information about them, contributing to the following:
+          </p>
+          <h1 class="des-heading3 fade_from_left">1. Quick Access to Information</h1>
+          <p class="des-paragraph fade_from_right">
+            By clicking on icons, users can
+            swiftly access information about other iGEM teams, including
+            their projects, achievements, contact details, and more. This reduces the time spent searching
+            for information, making it easier for members to get to know each other.
+          </p>
+          <h1 class="des-heading3 fade_from_left">2. Establishing Connections</h1>
+          <p class="des-paragraph fade_from_right">
+            The map can include contact
+            information for teams, facilitating the establishment of connections
+            and communication among members. Such communication aids in building long-term relationships,
+            promoting collaboration, and sharing knowledge.
+          </p>
+          <h1 class="des-heading3 fade_from_left">3. Promoting Community Engagement</h1>
+          <p class="des-paragraph fade_from_right">
+            Such a map can also highlight
+            events, conferences, and gatherings within the iGEM community,
+            encouraging members to participate in these activities and strengthening community cohesion.
+          </p>
+          <p class="des-paragraph fade_from_right">
+            Building cohesion within the iGEM
+            community is a crucial aspect of driving research and
+            development in synthetic biology. By providing easy access to information and promoting
+            collaboration among members, we can create a more robust and collaborative iGEM community,
+            thereby advancing innovation and development in the field of synthetic biology
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+{% endblock %}

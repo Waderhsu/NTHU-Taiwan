@@ -1,0 +1,544 @@
+{% extends "layout.html" %}
+
+{% block title %}Diversity & Inclusivity{% endblock %}
+
+{% block page_content %}
+
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/proposed-implementation.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/proposed-implementation.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Propose', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "Propose with purpose, implement with passion.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container" style="top: 50px;">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -270px;
+            color: aliceblue;
+            /* font-style: unset; */
+            font-size: xx-large;
+            font-weight: 800;
+            letter-spacing: 8px;
+            font-size: 110px;
+            font-family: inherit;
+            align-content: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 120px;"
+        >
+            Proposed<br>Implementation
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a id="sidebaritem1" href="#Problem" class="">Overview </a></li>
+                    <li><a id="sidebaritem2" href="#Inspiration" class="">Proposed end users</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+                    <div id="sidebaritem_item1" class="sidebaritem_item-container">
+                        <ul>
+                            <li class="sidebaritem_item"><a id="" href="#End">End Users of NanoCircDx Colorectal Cancer Screening Platform</a></li>
+                            <li class="sidebaritem_item"><a id="Establishment" href="#NanoCircDx">NanoCircDx for Advancing CircRNA Research and Applications</a></li>
+                        </ul>
+                    </div>
+                    <li><a id="sidebaritem3" href="#Our Goal" class="">Validation Through Patient Specimens</a></li>
+                    <li><a id="sidebaritem5" href="#Solution" class="">Safety</a></li>
+                    <li><a id="sidebaritem5" href="#Reference" class="">Reference</a></li>
+                </ul>
+            </div>
+            <script>
+                const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+                sideexpandbutton1.addEventListener("click", function () {
+                    if (sidebaritem_item1.style.display == "none") {
+                        sidebaritem_item1.style.display = "block";
+                        sideexpandbutton1.style.transform = "rotate(-180deg)";
+                    } else {
+                        sidebaritem_item1.style.display = "none";
+                        sideexpandbutton1.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+        </div>
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Problem">Overview</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1" style="display:block;">
+                <p class="des-paragraph fade_from_right">
+                    While we possess some design
+                    prototypes and experimental data for NanoCircDX, there is still a considerable distance to
+                    bridge our concepts into real world applications. To bring our innovation into practical use, we
+                    must consider various aspects including the proposed end users, envisioning the practical usage
+                    of our products, commercialization, entrepreneurship, and safety concerns. This page focuses on
+                    the proposed implementation for NanoCircDX, which will target the later stages of our project.
+                    We aspire for our product to make a meaningful contribution to society, benefiting the global
+                    population.
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Inspiration">Proposed end users</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2" style="display:block;">
+                <h1 class="des-heading2" id="End">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>End Users of NanoCircDx Colorectal Cancer Screening Platform
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    NanoCircDx is a novel colorectal
+                    cancer screening platform. The developed technology of NanoCircDx not only enables the detection
+                    of colorectal cancer but also extends a broader spectrum for the detection of circular RNA
+                    (circRNA) through liquid biopsy. Regarding colorectal cancer screening, the most direct end
+                    users of our product include individuals who have concerns about or are at the risk of
+                    developing the disease. Hospitals and clinics will be the primary institutions offering the
+                    cancer screening test developed by NanoCircDx.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Given the prevalence of colorectal
+                    cancer in Taiwan, particularly among individuals aged 50 and older, the Health Promotion
+                    Administration in Taiwan offers subsidies for biennial colorectal cancer screenings to citizens
+                    between the ages of 50 and 74 <a href="#[1]">[1]</a>. However, there has been a notable trend of colorectal cancer
+                    occurring at younger ages, with an increase in patients aged between 40 and 50 and even
+                    individuals in their 30s in recent years <a href="#[2]">[2]</a>. In response to this evolving phenomenon, our team
+                    has proposed to integrate NanoCircDx with physical examination. NanoCircDx will be incorporated
+                    as an extra choice or listed as an additional option within the blood tests to the general
+                    public.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Furthermore, with the NanoCircDx
+                    colorectal cancer screening platform and our fully automated hardware and software device, we
+                    provide a fast and simple detection method without the need of complex and expensive laboratory
+                    equipment. This enables the usage of our product in rural and remote health facilities, which
+                    can strengthen healthcare for rural communities and enhance medical care networks.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    To summarize, NanoCircDx's novel
+                    colorectal cancer screening platform is positioned for the following target user groups:
+                </p>
+                <p class="des-paragraph-item fade_from_right">
+                    1. Integration of NanoCircDx into hospital and clinic physical examinations.<br>
+                    2. Application of the NanoCircDx product in rural and remote healthcare facilities.
+                </p>
+                <h1 class="des-heading2" id="NanoCircDx">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>NanoCircDx for Advancing CircRNA Research and Applications
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    As we develop the detection method
+                    of circRNA through liquid biopsy, this idea breaks through current limitations, forging new
+                    pathways for the utilization of circRNA. CircRNA, compared to other types of linear RNA,
+                    exhibits greater stability, making it not only easier to manipulate but also more suitable for
+                    diagnostic purposes. Given that circRNA has not previously served as a direct diagnostic
+                    biomarker, our team has pioneered an innovative direct detection protocol for circRNA while
+                    establishing a standardized process for circRNA synthesis (<a href="{{ url_for('pages', page='contribution')}}" class="home">linked to contribution</a>). This
+                    valuable resource is intended to assist future researchers or iGEM teams in circRNA detection orpage
+                    applications.
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Our Goal">Validation Through Patient Specimens</h1>
+                <button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3" style="display:block;">
+                <p class="des-paragraph fade_from_right">
+                     In vitro diagnostics (IVD) are
+                    tests used on biological samples such as blood or tissue that have been taken from the human
+                    body to determine the status of a person's health <a href="#[3]">[3]</a>. They may also be used in precision
+                    medicine to identify patients who are likely to benefit from specific treatments or therapies.
+                    Our product, NanoCircDX, falls under the classification of an in vitro diagnostic product.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Since the U.S. Food and Drug
+                    Administration (FDA) requires Institutional Review Board (IRB) review for all clinical
+                    investigations involving human subjects and requests clinical samples with sufficient laboratory
+                    or clinical characterization to assess the clinical validity of a new device <a href="#[4]">[4]</a>, including IVDs,
+                    this process is an integral part of our product development. Therefore, in September 2023, our
+                    team submitted a proposal for the clinical trial application to the Chang Gung Medical
+                    Foundation IRB. The proposal, titled “Using highly sensitive gold nanoparticle colorimetric
+                    methods and lateral flow reagents to detect highly specific biomarkers of circular ribonucleic
+                    acid in the blood of early-stage colorectal cancer patients to assist in colorectal cancer
+                    screening”, is currently under review with project number 2309150001.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    This process aims to access banked
+                    specimens from colorectal cancer patients stored in Linkou Chang Gung Memorial Hospital's human
+                    biobank for the purpose of conduction of retrospective study. The objective is to validate the
+                    laboratory-developed colorectal cancer detection platform, ensuring accurate sensitivity and
+                    specificity in detecting colorectal cancer circRNA biomarkers. The proposal requests an
+                    assessment of 1,500 frozen specimens for use in the subsequent validation process. These
+                    specimens will include 500 cases of individuals with early-stage colorectal cancer (stages I and
+                    II), 500 cases of individuals with advanced-stage colorectal cancer (stages III and IV), and 500
+                    cases of healthy individuals. All assessed specimens will be randomly assigned to our colorectal
+                    cancer detection platform, and a randomized trial will be conducted to prove the clinical
+                    effectiveness <a href="#[5]">[5]</a>.
+                </p>
+                <div class="headingbox">
+                <h1 class="des-heading1" id="Our Goal">From Lab to Market </h1>
+                <button class="expandbutton" id="expandbutton4"></button>
+            </div>
+            <div id="article3" style="display:block;">
+                <p class="des-paragraph fade_from_right">
+                     NanoCircDx is currently in the process of applying for intellectual property and patents as part of our efforts to advance it into a commercially viable medical product. Our primary objective is to bridge the gap between laboratory research and market availability while extending the reach of our product to benefit more patients. This endeavor places a significant emphasis on commercialization and entrepreneurship (<a href="{{ url_for('pages', page='entrepreneurship')}}" class="home">linked to entrepreneurship</a>). 
+                </p>
+                <p class="des-paragraph fade_from_right">
+                     Recognizing the interest of our customers in using our product, we plan to commercialize NanoCircDx by developing it into an easy to use kit. The first step involves skilled nurses and phlebotomists performing blood draws from patients. Subsequently, we will provide a standardized operating procedure for the isolation of circular RNA from blood samples. This critical step must be completed before utilizing our NanoCircDx detection platform. Lastly, our product NanoCircDx will include a user-friendly guide, designed for easy comprehension by the customer. This guide will cover topics such as an introduction to the product, storage and stability information, components of the kit, and a step-by-step user manual. 
+                </p>
+
+                <h1 class="des-heading2" id="heading2">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Isolation of Circular RNA from Blood Samples
+                </h1>
+                <p class="des-paragraph fade_from_right">1. Serum Preparation</p>
+                <p class="des-paragraph-item fade_from_right">
+                    Each participant is required to provide 8 mL of a blood specimen. After collection of the
+                    whole blood, allow the blood to clot by leaving it undisturbed at room temperature for 30 minutes,
+                    then remove the clot with a refrigerated centrifuge. The resulting supernatant is designated
+                    serum. Following centrifugation, serum will be transferred into a clean polypropylene tube,
+                    ensuring that sample handling is maintained at 2-8°C. <a href="#[6]">[6]</a><br>
+                </p>
+                <p class="des-paragraph fade_from_right">2. Exosome Isolation</p>
+                <p class="des-paragraph-item fade_from_right">
+                    Serum will be combined with ExoQuick exosome precipitation solution (System Bio-Sciences)
+                    according to the manufacturer's instructions. The resulting pellet is designated as an exosome. <a href="#[7]">[7]</a><br>
+                </p>
+                <p class="des-paragraph fade_from_right">3. Exosomal RNA Extraction</p>
+                <p class="des-paragraph-item fade_from_right">
+                    Total exosomal RNA was extracted from the exosome pellets using the miRNeasy Serum/Serum Kit
+                    (Qiagen) according to the supplied protocol. <a href="#[7]">[7]</a><br>
+                </p>
+                <p class="des-paragraph fade_from_right">4. Ribonuclease R Treatment</p>
+                <p class="des-paragraph-item fade_from_right">
+                    Ribonuclease R (Thermo Fisher) will be added to the solution
+                    after exosomal RNA extraction. Ribonuclease R digests all linear RNAs but does not affect circular
+                    RNA structures, thereby increasing the proportion of circular RNA within the specimen.
+                </p>
+                <h1 class="des-heading2" id="heading2"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>NanoCircDx User Guide</h1>
+                <div style="display: flex;">
+                    <iframe
+                        src="https://static.igem.wiki/teams/4636/wiki/proposed-implementation/proposed-implementation/proposed-implementation/manual-aunps.pdf"
+                        width="50%" height="500px"></iframe>
+                    <iframe
+                        src="https://static.igem.wiki/teams/4636/wiki/proposed-implementation/proposed-implementation/proposed-implementation/manual-pcrd.pdf"
+                        width="50%" height="500px"></iframe>
+                </div>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Solution">Safety</h1>
+                <button class="expandbutton" id="expandbutton5"></button>
+            </div>
+            <div id="article4" style="display:block;">
+                <p class="des-paragraph fade_from_right">
+                    NanoCircDx is designed as a
+                    detection kit with a primary focus on minimizing potential risks associated with its use while
+                    maintaining accurate sensitivity and specificity in detecting cancer. To prevent any
+                    contamination or mishandling of circRNA samples, it is crucial to ensure proper handling
+                    throughout the testing process. To achieve this, we will provide comprehensive and easily
+                    understandable instructions and guidelines, emphasizing correct sample handling procedures.
+                    Furthermore, all materials utilized in the NanoCircDx kit will be meticulously selected and
+                    manufactured to meet stringent quality control standards, aligning with the highest safety
+                    requirements. Safety is a fundamental consideration in the development of NanoCircDx, we are
+                    dedicated to maintaining the highest safety standards and further ensure the accuracy of our
+                    results.
+                </p>
+                <a class="nav_button" href="{{ url_for('pages', page='safety') }}">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Safety!
+                </a>
+            </div>
+            <div id="Reference" style="display:block;">
+                <h1 class="des-ref-heading">Reference</h1>
+                <p class="des-ref-paragraph">
+                    [1] Wang, Y. W., Chen, H. H., Wu, M. S.,
+                    Chiu, H. M., & Taiwanese Nationwide Colorectal Cancer Screening Program (2018). Current status
+                    and future challenge of population-based organized colorectal cancer screening: Lesson from the
+                    first decade of Taiwanese program. <i>Journal of the Formosan Medical Association = Taiwan yi zhi</i>, <b>117</b>(5), 358-364.
+                    <a id="[1]" href="https://doi.org/10.1016/j.jfma.2017.09.010">https://doi.org/10.1016/j.jfma.2017.09.010</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [2] <a id="[2]" href="https://www.hpa.gov.tw/EngPages/Detail.aspx?nodeid=1051&pid=5957">https://www.hpa.gov.tw/EngPages/Detail.aspx?nodeid=1051&pid=5957</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [3] <a id="[3]" href="https://www.europarl.europa.eu/RegData/etudes/BRIE/2014/542151/EPRS_BRI(2014)542151_REV1_EN.pdf">https://www.europarl.europa.eu/RegData/etudes/BRIE/2014/542151/EPRS_BRI(2014)542151_REV1_EN.pdf</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [4] <a id="[4]" href="https://www.fda.gov/medical-devices/industry-medical-devices/studies-using-leftover-deidentified-human-specimens-require-irb-review-letter-industry">https://www.fda.gov/medical-devices/industry-medical-devices/studies-using-leftover-deidentified-human-specimens-require-irb-review-letter-industry</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [5] Minasian, L. M., Pinsky, P., Katki, H.
+                    A., Dickherber, T., Han, P. K. J., Harris, L., Patriotis, C., Srivastava, S., Weil, C. J.,
+                    Prorok, P. C., & Castle, P. E. (2023). Study design considerations for trials to evaluate
+                    multicancer early detection assays for clinical utility. <i>Journal of the National Cancer
+                        Institute</i>, <b>115</b>(3), 250-257.<a id="[5]" href=""></a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [6] <a id="[6]" href="https://www.thermofisher.com/tw/zt/home/references/protocols/cell-and-tissue-analysis/elisa-protocol/elisa-sample-preparation-protocols/plasma-and-serum-preparation.html#prot3">https://www.thermofisher.com/tw/zt/home/references/protocols/cell-and-tissue-analysis/elisa-protocol/elisa-sample-preparation-protocols/plasma-and-serum-preparation.html#prot3</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [7] Xie, Y., Li, J., Li, P., Li, N., Zhang,
+                    Y., Binang, H., Zhao, Y., Duan, W., Chen, Y., Wang, Y., Du, L., & Wang, C. (2020). RNA-Seq
+                    Profiling of Serum Exosomal Circular RNAs Reveals Circ-PNN as a Potential Biomarker for Human
+                    Colorectal Cancer. <i>Frontiers in oncology</i>, <b>10</b>, 982.
+                    <a id="[7]" href="https://doi.org/10.3389/fonc.2020.00982">https://doi.org/10.3389/fonc.2020.00982</a>
+                </p>
+            </div>  
+        </div>
+        <script src="{{ url_for('static', filename = 'expand-button.js') }}"></script>
+    </section>
+</div>
+
+{% endblock %}

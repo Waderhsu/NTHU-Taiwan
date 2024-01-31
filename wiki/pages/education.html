@@ -1,0 +1,566 @@
+{% extends "layout.html" %}
+
+{% block title %}Education & Communication{% endblock %}
+
+{% block page_content %}
+<style>
+  .slide--1__darkbg {
+    left: 0%;
+    background: url("https://static.igem.wiki/teams/4636/wiki/education.jpg") center center no-repeat;
+    background-size: cover;
+    background-position: 0px center, 0px center;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  .slide--1__letter {
+    background: url("https://static.igem.wiki/teams/4636/wiki/education.jpg") center center no-repeat;
+    background-position: 0px center, 0px center;
+    background-size: cover;
+  }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+  $(document).ready(function () {
+    const $cont = $('.cont');
+    const $slider = $('.slider');
+    const $nav = $('.nav');
+    const winW = $(window).width();
+    const animSpd = 750; // Change also in CSS
+    const distOfLetGo = winW * 0.2;
+    let curSlide = 1;
+    let animation = false;
+    let autoScrollVar = false;
+    let diff = 0;
+
+    // Generating slides
+    let arrCities = ['Education', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+    let numOfCities = arrCities.length;
+    let arrCitiesDivided = [];
+
+    arrCities.map((city) => {
+      let length = city.length;
+      let letters = Math.floor(length / 4);
+      let exp = new RegExp(".{1," + letters + "}", "g");
+
+      arrCitiesDivided.push(city.match(exp));
+    });
+
+    let generateSlide = function (city) {
+      let frag1 = $(document.createDocumentFragment());
+      let frag2 = $(document.createDocumentFragment());
+      const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+      const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+      const $slide =
+        $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+      const letter =
+        $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+      /*
+                      for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                          const text =
+                              $(`<div class="slide__text slide__text--${i + 1}">
+                                  ${arrCitiesDivided[city][i]}
+                              </div>`);
+                          frag1.append(text);
+                      }
+      */
+      const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+      frag2.append(navSlide);
+      $nav.append(frag2);
+
+      $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+      $slider.append($slide);
+
+      if (arrCities[city].length <= 4) {
+        $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+      }
+    };
+
+    for (let i = 0, length = numOfCities; i < length; i++) {
+      generateSlide(i);
+    }
+
+    $('.nav__slide--1').addClass('nav-active');
+
+    // Navigation
+    function bullets(dir) {
+      $('.nav__slide--' + curSlide).removeClass('nav-active');
+      $('.nav__slide--' + dir).addClass('nav-active');
+    }
+
+    function timeout() {
+      animation = true;
+    }
+
+    function pagination(direction) {
+      animation = true;
+      diff = 0;
+      $slider.addClass('animation');
+      $slider.css({
+        'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__darkbg').css({
+        'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__letter').css({
+        'transform': 'translate3d(0, 0, 0)',
+      });
+
+      $slider.find('.slide__text').css({
+        'transform': 'translate3d(0, 0, 0)'
+      });
+    }
+
+    function navigateRight() {
+      if (!autoScrollVar) return;
+      if (curSlide >= numOfCities) return;
+      pagination(0);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide + 1);
+      curSlide++;
+    }
+
+    function navigateLeft() {
+      if (curSlide <= 1) return;
+      pagination(2);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide - 1);
+      curSlide--;
+    }
+
+    function toDefault() {
+      pagination(1);
+      setTimeout(timeout, animSpd);
+    }
+
+
+
+    $(document).on('mouseup touchend', function (e) {
+      $(document).off('mousemove touchmove');
+
+      if (animation) return;
+
+      if (diff >= distOfLetGo) {
+        toDefault();
+      } else if (diff <= -distOfLetGo) {
+        toDefault();
+      } else {
+        toDefault();
+      }
+    });
+
+    $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+      let target = +$(this).attr('data-target');
+      bullets(target);
+      curSlide = target;
+      pagination(1);
+    });
+
+    $(document).on('click', '.side-nav', function () {
+      let target = $(this).attr('data-target');
+
+      if (target === 'right') navigateRight();
+      if (target === 'left') navigateLeft();
+    });
+
+    $(document).on('keydown', function (e) {
+      if (e.which === 39) navigateRight();
+      if (e.which === 37) navigateLeft();
+    });
+
+    $(document).on('mousewheel DOMMouseScroll', function (e) {
+      if (animation) return;
+      let delta = e.originalEvent.wheelDelta;
+
+      if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+      if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+    });
+  });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+  const carouselText = [
+    { text: "Education is the key to unlock the golden door of freedom.", color: "rgba(255, 255, 255, 0.679)" },
+
+  ]
+
+  $(document).ready(async function () {
+    carousel(carouselText, "#feature-text")
+  });
+
+  async function typeSentence(sentence, eleRef, delay = 100) {
+    const letters = sentence.split("");
+    let i = 0;
+    while (i < letters.length) {
+      await waitForMs(delay);
+      $(eleRef).append(letters[i]);
+      i++;
+    }
+  }
+
+
+  async function deleteSentence(eleRef) {
+    const sentence = $(eleRef).html();
+    const letters = sentence.split("");
+    let i = 0;
+    while (letters.length > 0) {
+      await waitForMs(1000000);
+      letters.pop();
+      $(eleRef).html(letters.join(""));
+    }
+  }
+
+  async function carousel(carouselList, eleRef) {
+    var i = 0;
+    while (true) {
+      updateFontColor(eleRef, carouselList[i].color)
+      await typeSentence(carouselList[i].text, eleRef);
+      await waitForMs(1500);
+      await deleteSentence(eleRef);
+      await waitForMs(500);
+      i++
+      if (i >= carouselList.length) { i = 0; }
+    }
+  }
+
+  function updateFontColor(eleRef, color) {
+    $(eleRef).css('color', color);
+  }
+
+  function waitForMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+</script>
+<script>
+  $(function () {
+    $('.scroll-down').click(function () {
+      $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+      return false;
+    });
+  });
+</script>
+
+
+<div id="content">
+  <section class="banner-container">
+    <div class="cont">
+      <div class="slider"></div>
+    </div>
+
+    <div class="typing-container" style="top: 50px;">
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+      <span class="input-cursor"></span>
+    </div>
+
+    <div class="typing-container" style="margin-top: -270px;
+    color: aliceblue;
+    /* font-style: unset; */
+    font-size: xx-large;
+    font-weight: 800;
+    letter-spacing: 8px;
+    font-size: 110px;
+    font-family: inherit;
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 120px;">
+      Education & Communication
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+    </div>
+    <a href="#" class="scroll-down" address="true"></a>
+  </section>
+  <section class="content">
+    <div class="main-left">
+      <div class="sidebar">
+        <ul>
+          <li><a href="#Problem" class="sidebaritem">Social Media Education</a></li>
+          <li><a href="#Inspiration" class="sidebaritem">Summer Camp</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+          <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#Science Education camps">Science Education camps</a></li>
+              <li class="sidebaritem_item"><a href="#NTHU Biological Science Camp">NTHU Biological Science Camp</a></li>
+            </ul>
+          </div>
+          <li><a href="#Our Goal" class="sidebaritem">Wiki Game</a></li>
+          <li><a href="#Solution" class="sidebaritem">College of Life Science and Medicine Alumni Conference</a></li>
+          <li><a href="#Advantages and innovations" class="sidebaritem">Questionnaire</a>
+          </li>
+        </ul>
+        <script>
+          const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+          const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+          sideexpandbutton1.addEventListener("click", function () {
+              if (sidebaritem_item1.style.display == "none") {
+                  sidebaritem_item1.style.display = "block";
+                  sideexpandbutton1.style.transform = "rotate(-180deg)";
+              } else {
+                  sidebaritem_item1.style.display = "none";
+                  sideexpandbutton1.style.transform = "rotate(-360deg)";
+              }
+          });
+        </script>
+      </div>
+    </div>
+
+    <div class="main-right" id="effort">
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Problem">Social Media Education</h1>
+        <button class="expandbutton" id="expandbutton"></button>
+      </div>
+      <div id="article1">
+        <h1 class="des-heading3 fade_from_left">How do we introduce our project to the non-scientific
+          community and educate them about synthetic biology?
+        </h1>
+        <p class="des-paragraph fade_from_right">
+          Since synthetic biology is an
+          emerging concept, and for the general public, it's an entirely new term. Therefore, it's crucial
+          to enhance societal awareness of this new technology, alleviate public concerns, and increase
+          acceptance of biotechnological products. We utilize the internet as a tool for spreading ideas
+          because it can convey information about synthetic biology to people of all ages, regardless of
+          their location. We chose to employ visual and captivating content, including graphics and
+          entertaining videos, on social media platforms such as Instagram, Facebook, YouTube, and Twitter
+          to more effectively promote the concept of synthetic biology and other biological insights.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/social-media.jpg" alt="Fig2"
+            >
+        </div>
+        <p class="des-figure">Figure social-media</p>
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Inspiration">Summer Camp</h1>
+        <button class="expandbutton" id="expandbutton2"></button>
+      </div>
+      <div id="article2">
+        <h1 class="des-heading2" id="Science Education camps">
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Science Education camps
+        </h1>
+        <h1 class="des-heading3 fade_from_left" id="heading3">1. Introduction </h1>
+        <p class="des-paragraph fade_from_right">
+          With an aim to promote synthetic
+          biology to every age group, our team collaborated with a local cram school in Kaohsiung, and
+          hosted a half-day science camp on August 13th, 14th, and 24th. We taught junior high school
+          students from grade one to grade three and elementary school students about the concept of
+          synthetic biology, iGEM competition, our project, biological information, current disease and
+          experimental skills.
+        </p>
+        <h1 class="des-heading3 fade_from_left" id="heading3">2. Preparation before the camp </h1>
+        <p class="des-paragraph fade_from_right">
+          Before the camp, we had to prepare
+          the sheet for students to study and read during the class, so our team members had studied few
+          scientific papers and integrated the knowledge into an easy version for junior high school
+          students to study. We printed the documents and made a power point to let the students have a
+          clear thought on the whole lesson.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Furthermore, our team members had
+          to do the biological experiments and prepared the samples and equipment before the class to
+          ensure there would not be any problems during the process. It was a challenge to prepare for the
+          science camp because there was a distance between Kaohsiung and Hsinchu and our team members
+          were not fully familiar with the environment. After all, we prepared well before the science
+          camp.
+        </p>
+        <h1 class="des-heading3 fade_from_left" id="heading3">3. The process during the camp</h1>
+        <p class="des-paragraph fade_from_right">
+          During the science camp, our team
+          members first taught the students about the concept of synthetic biology and the purpose of iGEM
+          competition. Then we explained about the project we were doing so far and mentioned the
+          biological and medical knowledge related to Colorectal Cancer, such as the constructure of bowel
+          and intestine and how did the mutation of cancer cell work. After that, we combined the concept
+          of current COVID disease to our biological experiments, showed the students how to compare the
+          CT value and how to conduct the biological experiments.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          The experiments included extraction
+          of chicken blood and pork mince, solid and liquid form of bacteria culture, anatomy of Phoenix
+          snail and basic tutorial of equipment operation. It was so much fun explaining the concept of
+          synthetic biology while teaching the students how to conduct the experiments. To see if the
+          students have understood the lesson, our team also prepared gifts for them to answer easy quiz
+          from the lesson, and we could tell that those kids did understand the concepts and enjoyed the
+          whole process.
+        </p>
+        <h1 class="des-heading3 fade_from_left" id="heading3">4. Reflection and feedback of the camp</h1>
+        <p class="des-paragraph fade_from_right">
+          In this science education camp, we
+          taught approximately 60 high school students and nearly 20 elementary school students, for a
+          total of around 80 students. What we learned from those kids was the spirit of “never give up”.
+          Although it seemed like it was a cliché to say, they showed their consistency and passion for
+          biology. Some of the students could not successfully completed the experiment, however, they did
+          not complain about anything but just kept trying until the lesson was over. Even though they did
+          not get a good result at the end, some of them came to ask our team member about why and how did
+          the experiment went wrong. This was the spirit of doing research and trouble shooting. We had
+          difficulties and met struggles during the process of our project, but our team learned the
+          spirit of never give up and tried our best to progress and improve day by day, it was an amazing
+          lesson to learn from those young kids as well as promoting the concept of synthetic biology.
+        </p>
+        <h1 class="des-heading3 fade_from_left" id="heading3">5. Science camp educational program</h1>
+        <div class="containerfig">
+          <iframe src="https://static.igem.wiki/teams/4636/wiki/education/educationpdf1.pdf" style="width: 48%; height: 350px; padding-left: 10px; padding-right: 10px"></iframe>
+          <iframe src="https://static.igem.wiki/teams/4636/wiki/education/educationpdf2.pdf" style="width: 48%; height: 350px; padding-left: 10px; padding-right: 10px"></iframe>
+        </div>
+        <p class="des-figure">
+          Figure 1. Science camp educational program. (Left: Junior high school; Right: Elementary school)
+        </p>
+        <div class="containerfig">
+          <iframe src="https://static.igem.wiki/teams/4636/wiki/education/education003.pdf" style="width: 80%;height:800px "></iframe>
+        </div>
+        <p class="des-figure">Figure 2. Course material</p>
+        <h1 class="des-heading2" id="NTHU Biological Science Camp"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>NTHU Biological Science Camp</h1>
+        <p class="des-paragraph fade_from_right">
+          NTHU Biological Science Camp is an
+          annual flagship event of the College of Life Science and Medicine at National Tsing Hua
+          University. It invites approximately 80 high school students around Taiwan to participate in a
+          6-day, 5-night camp. During the camp, participants engage in various activities and hands-on
+          laboratory experiments.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          In order to promote the primary
+          objective of the iGEM competition, which is to deliver knowledge and practical applications of
+          synthetic biology, we organized a brief presentation for both senior and junior high school
+          students. Simultaneously, we introduced our project to the audience, effectively sharing our
+          concept with the broader public.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/educationfig2.jpeg" style="height: 200px; width: auto;">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/educationfig3.png" style="height: 200px; width: auto;">
+        </div>
+        <p class="des-figure">Figure 3.</p>
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Our Goal">Wiki Game</h1>
+        <button class="expandbutton" id="expandbutton3"></button>
+      </div>
+      <div id="article3">
+        <p class="des-paragraph fade_from_right">
+          In order to introduce our project to the general
+          public, we used Phaser 3 to design an interactive browser game that will provide visitors to our websites with
+          a lively experience. Through the game, the player will go through the whole process of our project.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          We created a story about NTHU Panda, who
+          unfortunately lost his father due to colorectal cancer. Later on, he set on his journey to explore the
+          innovative substance, circular RNA, with the aim of rescuing others from colorectal cancer.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-1.png" style="width: 60%;">
+        </div>
+        <p class="des-figure">Figure 4.</p>
+        <p class="des-paragraph fade_from_right">
+          In the game, the player can move the character by
+          clicking the left/right/up/down arrow button. They can also click on the shift button to move faster. In each
+          level, there are various obstacles that require the player to avoid or jump off.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-2.png" style="width: 40%; padding-left: 10px; padding-right: 10px">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-3.png" style="width: 40%; padding-left: 10px; padding-right: 10px">
+        </div>
+        <p class="des-figure">Figure 5.</p>
+        <p class="des-paragraph fade_from_right">
+          They will be asked to collect several items that compose the main idea of our project.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-4.png" style="width: 40%; padding-left: 10px; padding-right: 10px">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-5.png" style="width: 40%; padding-left: 10px; padding-right: 10px">
+        </div>
+        <p class="des-figure">Figure 6.</p>
+        <p class="des-paragraph fade_from_right">
+          At the end of each level, they will be given some questions to double-check whether they understand our
+          process.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-6.png"
+             style="width: 40%; padding-left: 10px; padding-right: 10px">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-7.png"
+             style="width: 40%; padding-left: 10px; padding-right: 10px">
+        </div>
+        <p class="des-figure">Figure 7.</p>
+        <p class="des-paragraph fade_from_right">
+          After the player finishes all levels, there will be a close-up story of NTHU Panda. If they are interested in
+          our project, they can visit our homepage by clicking the bottom-right button.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-8.png"
+             style="width: 40%; padding-left: 10px; padding-right: 10px">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/game-9.png"
+             style="width: 40%; padding-left: 10px; padding-right: 10px">
+        </div>
+        <p class="des-figure">Figure 8.</p>
+        <a class="nav_button" href="{{ url_for('pages', page='home') }}">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          Click to go Wiki game!
+        </a>
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Solution">College of Life Science and Medicine Alumni Conference</h1>
+        <button class="expandbutton" id="expandbutton4"></button>
+      </div>
+      <div id="article4">
+        <p class="des-paragraph fade_from_right">
+          We propose our subject at the
+          College of Life Science and Medicine Alumni Association and reap significant improvements.
+          Firstly, alumni associations are typically comprised of alumni with extensive experience in
+          biomedical industries and fields. We can establish valuable connections with these
+          professionals, gaining access to crucial resources and support, including funding, mentorship,
+          and guidance. For example, some alumni introduced our team to authoritative physicians in the
+          Gastroenterology Department. Additionally, we have the opportunity to showcase our proposal to
+          professionals, receiving feedback and advice to refine our business model, strategies, and
+          plans, ultimately creating a product that genuinely meets the market needs. Last but not least,
+          the presentation at the conference helped us to attract the interest of potential clients,
+          investors, and partners. Offering opportunities to secure the necessary funding to drive our
+          research forward.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/educationfig4.png"
+             style="width: 30%; padding-left: 10px; padding-right: 10px">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/educationfig5.png"
+             style="width: 30%; padding-left: 10px; padding-right: 10px">
+          <img src="https://static.igem.wiki/teams/4636/wiki/education/educationfig6.png"
+             style="width: 30%; padding-left: 10px; padding-right: 10px">
+        </div>
+        <p class="des-figure">Figure 9.</p>
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Advantages and innovations">Questionnaire</h1>
+        <button class="expandbutton" id="expandbutton5"></button>
+      </div>
+      <div id="article5">
+        <p class="des-paragraph fade_from_right">
+          We have designed a questionnaire to
+          investigate the current severity of colorectal cancer
+          worldwide and the acceptable price range for cancer screening among the general public. While
+          designing the questionnaire, we also aim for individuals to acquire colorectal cancer-related
+          knowledge during the process. This includes the importance of early colorectal cancer detection,
+          early symptoms of colorectal cancer, the principles behind current methods of colorectal cancer
+          screening, and etc. The questionnaire helps raise public awareness of health issues and
+          motivates people to become more actively involved in prevention and early detection.
+        </p>
+        <a class="nav_button" href="{{ url_for('pages', page='entrepreneurship') }}#Questionnaire Survey">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          Click to go Entrepreneurship!
+        </a>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename = 'expand-button.js') }}"></script>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,350 @@
+#flowchart-container {
+  position: relative;
+  display: flex;
+  justify-content: space-between; /* Adjust as needed */
+  margin: 0 auto;
+  padding: 10px;
+  height: 600px;
+}
+
+#button-container {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.flowchart-button {
+  width: 11%;
+  height: 40px;
+  background-color: white;
+  border: 1px solid var(--dark-purple);
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: white;
+  background-color: var(--light-purple);
+  cursor: pointer;
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  outline: none;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  touch-action: manipulation;
+  transition: box-shadow 0.2s ease 0s, -ms-transform 0.1s ease 0s, -webkit-transform 0.1s ease 0s, transform 0.1s ease 0s;
+  user-select: none;
+  margin-left: 10px;
+}
+
+.flowchart-button:hover { 
+  box-shadow: var(--dark-purple) 0px 0px 0px 2px, rgba(255, 255, 255, 0.8) 0px 0px 0px 4px;
+  transition: box-shadow 0.2s ease 0s;
+  background-color: var(--dark-purple);
+  color: white; 
+}
+
+.flowchart-button:focus { 
+  color: var(--dark-purple); 
+}
+
+.flowchart-button:active {
+  background-color: rgb(247, 247, 247);
+  border-color: var(--dark-purple);
+  transform: scale(0.96);
+  color: var(--dark-purple);
+}
+
+.flowchart-element {
+  position: absolute;
+  background-color: white;
+  color: black;
+  text-align: center;
+  font-size: 12px;
+  height: 32px;
+  /* line-height: 10px; */
+  border-radius: 10px;
+  cursor: pointer;
+  border-width: thick;
+  border-style: solid;
+  border-color: var(--dark-purple);
+  line-height: 150%;
+}
+.line {
+  position: absolute;
+  border: 1px solid #000000; /* Line color */
+}
+
+#line1 {
+  margin-top: 135px;
+  margin-left: 145px;
+  width: 22px;
+  height: 0px;
+}
+
+#line2 {
+  margin-top: 45px;
+  margin-left: 165px;
+  width: 0px;
+  height: 90px;
+}
+
+#line3 {
+  margin-top: 45px;
+  margin-left: 165px;
+  width: 50px;
+  height: 0px;
+}
+
+#line4 {
+  margin-top: 45px;
+  margin-left: 230px;
+  width: 350px;
+  height: 0px;
+}
+
+#line5 {
+  margin-top: 45px;
+  margin-left: 480px;
+  width: 500px;
+  height: 0px;
+}
+
+#line6 {
+  margin-top: 45px;
+  margin-left: 980px;
+  width: 0px;
+  height: 325px;
+}
+
+#line7 {
+  margin-top: 235px;
+  margin-left: 165px;
+  width: 50px;
+  height: 0px;
+}
+
+#line8 {
+  margin-top: 235px;
+  margin-left: 230px;
+  width: 80px;
+  height: 0px;
+}
+
+#line9 {
+  margin-top: 235px;
+  margin-left: 300px;
+  width: 100px;
+  height: 0px;
+}
+
+#line10 {
+  margin-top: 235px;
+  margin-left: 400px;
+  width: 100px;
+  height: 0px;
+}
+
+#line11 {
+  margin-top: 235px;
+  margin-left: 600px;
+  width: 100px;
+  height: 0px;
+}
+
+#line12 {
+  margin-top: 135px;
+  margin-left: 325px;
+  width: 0px;
+  height: 100px;
+}
+
+#line13 {
+  margin-top: 135px;
+  margin-left: 325px;
+  width: 150px;
+  height: 0px;
+}
+
+#line14 {
+  margin-top: 135px;
+  margin-left: 630px;
+  width: 300px;
+  height: 0px;
+}
+
+#line15 {
+  margin-top: 145px;
+  margin-left: 880px;
+  width: 0px;
+  height: 120px;
+}
+
+#line16 {
+  margin-top: 250px;
+  margin-left: 880px;
+  width: 0px;
+  height: 100px;
+}
+
+#line17 {
+  margin-top: 235px;
+  margin-left: 650px;
+  width: 0px;
+  height: 122px;
+}
+
+#line18 {
+  margin-top: 355px;
+  margin-left: 652px;
+  width: 70px;
+  height: 0px;
+}
+
+#line19 {
+  margin-top: 357px;
+  margin-left: 650px;
+  width: 0px;
+  height: 93px;
+}
+
+#line20 {
+margin-top: 450px;
+margin-left: 650px;
+width: 100px;
+height: 0px;
+}
+
+#line21 {
+  margin-top: 355px;
+  margin-left: 700px;
+  width: 100px;
+  height: 0px;
+}
+
+#line22 {
+  margin-top: 455px;
+  margin-left: 750px;
+  width: 100px;
+  height: 0px;
+}
+
+#line23 {
+  margin-top: 250px;
+  margin-left: 440px;
+  width: 0px;
+  height: 210px;
+}
+
+#line24 {
+  margin-top: 460px;
+  margin-left: 440px;
+  width: 300px;
+  height: 0px;
+}
+
+#line25 {
+  margin-top: 250px;
+  margin-left: 345px;
+  width: 0px;
+  height: 300px;
+}
+
+#line26 {
+  margin-top: 535px;
+  margin-left: 380px;
+  width: 462px;
+  height: 0px;
+}
+
+#line27 {
+  margin-top: 455px;
+  margin-left: 840px;
+  width: 0px;
+  height: 80px;
+}
+
+#line28 {
+  margin-top: 137px;
+  margin-left: 165px;
+  width: 0px;
+  height: 98px;
+}
+
+#line29 {
+  margin-top: 135px;
+  margin-left: 780px;
+  width: 100px;
+  height: 0px;
+}
+
+#line30 {
+  margin-top: 355px;
+  margin-left: 880px;
+  width: 100px;
+  height: 0px;
+}
+
+#sequence_design {
+  margin-top: 120px;
+  margin-left: 10px;
+}
+#AuNPs_synthesis {
+  margin-top: 30px;
+  margin-left: 180px;
+}
+#probe-conjugated_AuNPs {
+  margin-top: 30px;
+  margin-left: 360px;
+}
+#cloning {
+  margin-top: 220px;
+  margin-left: 180px;
+}
+#PCR {
+  margin-top: 220px;
+  margin-left: 300px;
+}
+#IVT {
+  margin-top: 220px;
+  margin-left: 400px;
+}
+#circularization {
+  margin-top: 220px;
+  margin-left: 490px;
+}
+#circRNA_enrichment {
+  margin-top: 220px;
+  margin-left: 630px;
+}
+#AELA_PCR {
+  margin-top: 260px;
+  margin-left: 830px;
+}
+#RCA {
+  margin-top: 340px;
+  margin-left: 670px;
+}
+#probe-conjugated_AuNPs_detection {
+  margin-top: 340px;
+  margin-left: 760px;
+}
+#RT-RPA {
+  margin-top: 440px;
+  margin-left: 670px;
+}
+#PCRD {
+  margin-top: 440px;
+  margin-left: 800px;
+}
+#RPA {
+  margin-top: 520px;
+  margin-left: 330px;
+}
+#repeated_insert_sequence_synthesis {
+  margin-top: 120px;
+  margin-left: 400px;
+}
+#preparation_of_templet_for_AELA-PCR {
+  margin-top: 120px;
+  margin-left: 720px;
+}

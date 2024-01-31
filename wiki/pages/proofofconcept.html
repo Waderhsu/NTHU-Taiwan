@@ -1,0 +1,651 @@
+{% extends "layout.html" %}
+
+{% block title %}Proof of concept{% endblock %}
+
+{% block page_content %}
+
+<style>
+  .slide--1__darkbg {
+    left: 0%;
+    background: url("https://static.igem.wiki/teams/4636/wiki/proof-of-concept.jpg") center center no-repeat;
+    background-size: cover;
+    background-position: 0px center, 0px center;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  .slide--1__letter {
+    background: url("https://static.igem.wiki/teams/4636/wiki/proof-of-concept.jpg") center center no-repeat;
+    background-position: 0px center, 0px center;
+    background-size: cover;
+  }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+  $(document).ready(function () {
+    const $cont = $('.cont');
+    const $slider = $('.slider');
+    const $nav = $('.nav');
+    const winW = $(window).width();
+    const animSpd = 750; // Change also in CSS
+    const distOfLetGo = winW * 0.2;
+    let curSlide = 1;
+    let animation = false;
+    let autoScrollVar = false;
+    let diff = 0;
+
+    // Generating slides
+    let arrCities = ['Proof', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+    let numOfCities = arrCities.length;
+    let arrCitiesDivided = [];
+
+    arrCities.map((city) => {
+      let length = city.length;
+      let letters = Math.floor(length / 4);
+      let exp = new RegExp(".{1," + letters + "}", "g");
+
+      arrCitiesDivided.push(city.match(exp));
+    });
+
+    let generateSlide = function (city) {
+      let frag1 = $(document.createDocumentFragment());
+      let frag2 = $(document.createDocumentFragment());
+      const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+      const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+      const $slide =
+        $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+      const letter =
+        $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+      /*
+                      for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                          const text =
+                              $(`<div class="slide__text slide__text--${i + 1}">
+                                  ${arrCitiesDivided[city][i]}
+                              </div>`);
+                          frag1.append(text);
+                      }
+      */
+      const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+      frag2.append(navSlide);
+      $nav.append(frag2);
+
+      $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+      $slider.append($slide);
+
+      if (arrCities[city].length <= 4) {
+        $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+      }
+    };
+
+    for (let i = 0, length = numOfCities; i < length; i++) {
+      generateSlide(i);
+    }
+
+    $('.nav__slide--1').addClass('nav-active');
+
+    // Navigation
+    function bullets(dir) {
+      $('.nav__slide--' + curSlide).removeClass('nav-active');
+      $('.nav__slide--' + dir).addClass('nav-active');
+    }
+
+    function timeout() {
+      animation = true;
+    }
+
+    function pagination(direction) {
+      animation = true;
+      diff = 0;
+      $slider.addClass('animation');
+      $slider.css({
+        'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__darkbg').css({
+        'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__letter').css({
+        'transform': 'translate3d(0, 0, 0)',
+      });
+
+      $slider.find('.slide__text').css({
+        'transform': 'translate3d(0, 0, 0)'
+      });
+    }
+
+    function navigateRight() {
+      if (!autoScrollVar) return;
+      if (curSlide >= numOfCities) return;
+      pagination(0);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide + 1);
+      curSlide++;
+    }
+
+    function navigateLeft() {
+      if (curSlide <= 1) return;
+      pagination(2);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide - 1);
+      curSlide--;
+    }
+
+    function toDefault() {
+      pagination(1);
+      setTimeout(timeout, animSpd);
+    }
+
+
+
+    $(document).on('mouseup touchend', function (e) {
+      $(document).off('mousemove touchmove');
+
+      if (animation) return;
+
+      if (diff >= distOfLetGo) {
+        toDefault();
+      } else if (diff <= -distOfLetGo) {
+        toDefault();
+      } else {
+        toDefault();
+      }
+    });
+
+    $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+      let target = +$(this).attr('data-target');
+      bullets(target);
+      curSlide = target;
+      pagination(1);
+    });
+
+    $(document).on('click', '.side-nav', function () {
+      let target = $(this).attr('data-target');
+
+      if (target === 'right') navigateRight();
+      if (target === 'left') navigateLeft();
+    });
+
+    $(document).on('keydown', function (e) {
+      if (e.which === 39) navigateRight();
+      if (e.which === 37) navigateLeft();
+    });
+
+    $(document).on('mousewheel DOMMouseScroll', function (e) {
+      if (animation) return;
+      let delta = e.originalEvent.wheelDelta;
+
+      if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+      if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+    });
+  });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+  const carouselText = [{ text: "Seeing is believing.", color: "rgba(255, 255, 255, 0.679)" },
+
+  ]
+
+  $(document).ready(async function () {
+    carousel(carouselText, "#feature-text")
+  });
+
+  async function typeSentence(sentence, eleRef, delay = 100) {
+    const letters = sentence.split("");
+    let i = 0;
+    while (i < letters.length) {
+      await waitForMs(delay);
+      $(eleRef).append(letters[i]);
+      i++;
+    }
+  }
+
+
+  async function deleteSentence(eleRef) {
+    const sentence = $(eleRef).html();
+    const letters = sentence.split("");
+    let i = 0;
+    while (letters.length > 0) {
+      await waitForMs(1000000);
+      letters.pop();
+      $(eleRef).html(letters.join(""));
+    }
+  }
+
+  async function carousel(carouselList, eleRef) {
+    var i = 0;
+    while (true) {
+      updateFontColor(eleRef, carouselList[i].color)
+      await typeSentence(carouselList[i].text, eleRef);
+      await waitForMs(1500);
+      await deleteSentence(eleRef);
+      await waitForMs(500);
+      i++
+      if (i >= carouselList.length) { i = 0; }
+    }
+  }
+
+  function updateFontColor(eleRef, color) {
+    $(eleRef).css('color', color);
+  }
+
+  function waitForMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+</script>
+<script>
+  $(function () {
+    $('.scroll-down').click(function () {
+      $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+      return false;
+    });
+  });
+</script>
+
+
+<div id="content">
+  <section class="banner-container">
+    <div class="cont">
+      <div class="slider"></div>
+    </div>
+    <div class="typing-container">
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+      <span class="input-cursor"></span>
+    </div>
+    <div class="typing-container" style="margin-top: -250px;
+          color: aliceblue;
+          /* font-style: unset; */
+          font-size: xx-large;
+          font-weight: 800;
+          letter-spacing: 8px;
+          font-size: 140px;
+          font-family: inherit;">
+      Proof of concept
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+    </div>
+    <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+  </section>
+  <section class="content">
+    <div class="main-left">
+      <div class="sidebar">
+        <ul>
+          <li><a id="sidebaritem1" href="#Problem" class="">Our goal</a></li>
+          <li><a id="sidebaritem2" href="#Inspiration" class="">How to Prove our Concept?</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+          <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a id="" href="#Separating">Separating Serum from Patients' Whole Blood and
+                  Purifying RNA</a></li>
+              <li class="sidebaritem_item"><a id="Establishment" href="#Validation of Circularization">Validation of
+                  Circularization</a></li>
+              <li class="sidebaritem_item"><a id="" href="#Validation of Detection Method 1">Validation of Detection
+                  Method 1</a></li>
+              <li class="sidebaritem_item"><a id="" href="#Validation of Detection Method 2">Validation of Detection
+                  Method 2</a></li>
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+            const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+            sideexpandbutton1.addEventListener("click", function () {
+              if (sidebaritem_item1.style.display == "none") {
+                sidebaritem_item1.style.display = "block";
+                sideexpandbutton1.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item1.style.display = "none";
+                sideexpandbutton1.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+          <li><a id="sidebaritem3" href="#Reference" class="">Reference</a></li>
+
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="main-right" id="effort">
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Problem">Our goal</h1>
+        <button class="expandbutton" id="expandbutton"></button>
+      </div>
+      <div id="article1">
+
+        <p class="des-paragraph fade_from_right">
+          With the assistance of medical
+          professionals, a blood sample is drawn and separated into serum, followed by RNA purification.
+          Subsequently, the target circular RNA (circRNA) is amplified isothermally, and detection is
+          performed using either a gold nanoparticle-based colorimetric assay or a lateral flow test, as
+          illustrated in Figure 1. Both of the detection methods will be verified through experiments.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          In the first method (Figure 1A),
+          we employ rolling circle amplification (RCA) to amplify our target circRNA. RCA generates
+          single-stranded complementary DNA (cDNA) with multiple copies of the circRNA sequence. Following
+          this amplification step, testing is performed using 13 nm gold nanoparticles conjugated with
+          probes.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          In the second method (Figure 1B),
+          we conduct reverse transcription-recombinase polymerase amplification (RT-RPA) to amplify our
+          target circRNA. During RT-RPA, modified primers are included in the amplification process of
+          circRNA, enabling the resulting cDNA products to be detected by lateral flow cassette, PCRD.
+        </p>
+
+        <div class="containerfig">
+          <img
+            src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/figure-1-overview.jpg" style="width: 80%">
+
+        </div>
+        <p class="des-figure">
+          Figure 1: Colorectal Cancer Screening Workflow. After purifying circRNA, two detection methods are employed:
+          A.
+          Amplification through RCA, followed by gold nanoparticles colorimetric assay. B. Amplification
+          through RT-RPA, followed by PCRD detection.
+        </p>
+      </div>
+      <script>
+        const expandbutton = document.getElementById("expandbutton");
+        const article = document.getElementById("article1");
+
+        expandbutton.addEventListener("click", function () {
+          if (article.style.display == "block") {
+            article.style.display = "none";
+            expandbutton.style.transform = "rotate(-180deg)";
+          } else {
+            article.style.display = "block";
+            expandbutton.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Inspiration">
+          How to Prove our Concept?</h1>
+        <button class="expandbutton" id="expandbutton2"></button>
+      </div>
+      <div id="article2">
+        <p class="des-paragraph fade_from_right">
+          We will divide our proof of concept
+          into three parts as follows:
+        </p>
+        <h1 class="des-heading2" id="Separating">
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Separating Serum from Patients' Whole Blood and Purifying
+          RNA:
+        </h1>
+        <p class="des-paragraph fade_from_right">
+          Since our project is still under
+          review by Chang Gung Medical Foundation Institutional Review Board for clinical trial
+          application, currently we are unable to obtain blood samples from colorectal cancer patients to
+          verify the process of circRNA isolation from blood. Thus, in order to confirm that our detection
+          method of circRNA through liquid biopsy will function effectively after successfully accessing
+          the purified circRNA from blood samples, this section will concentrate on a literature review to
+          demonstrate the feasibility of circRNA isolation. <a href="#[1]">[1]</a>
+        </p>
+        <h1 class="des-heading3 fade_from_left">Serum Preparation</h1>
+        <p class="des-paragraph fade_from_right">
+          Each participant is required to
+          provide 8 mL of a blood specimen. After the collection of whole blood, allow the blood to clot
+          by leaving it undisturbed at room temperature for 30 minutes, then remove the clot with a
+          refrigerated centrifuge. The resulting supernatant is the designated serum. Following
+          centrifugation, serum will be transferred into a clean polypropylene tube, ensuring that sample
+          handling is maintained at 2-8°C. <a href="#[2]">[2]</a>
+        </p>
+        <p class="des-paragraph fade_from_right">
+          <b>1. Exosome Isolation</b>
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Serum will be combined with
+          ExoQuick exosome precipitation solution (System Bio-Sciences) according to the manufacturer's
+          instructions. The resulting pellet is designated as an exosome. <a href="#[1]">[1]</a>
+        </p>
+        <p class="des-paragraph fade_from_right">
+          <b>2. Exosomal RNA Extraction</b>
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Total exosomal RNA was extracted
+          from the exosome pellets using the miRNeasy Serum/Serum Kit (Qiagen) according to the provided
+          protocol. <a href="#[1]">[1]</a>
+        </p>
+        <p class="des-paragraph fade_from_right">
+          <b>3. Ribonuclease R Treatment</b>
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Ribonuclease R (Thermo Fisher) will
+          be added to the solution after exosomal RNA extraction. Ribonuclease R digests all linear RNAs
+          but does not affect circular RNA structures, thereby increasing the proportion of circular RNA
+          within the specimen.
+        </p>
+        <h1 class="des-heading2" id="Validation of Circularization">
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Validation of Circularization
+        </h1>
+        <p class="des-paragraph fade_from_right">
+          Due to legal constraints, we are
+          unable to access patient samples for the purification of circRNA. Instead, we mimic circRNA in
+          blood serum by circularizing RNA fragments synthesized from in vitro transcription (IVT).
+        </p>
+        <h1 class="des-heading3 fade_from_left">Results of RNA
+          circularization:</h1>
+        <p class="des-paragraph fade_from_right">
+          Our circularization process involves several steps, including sequence design, cloning, PCR,
+          IVT, circularization and circRNA enrichment. Please refer to <a
+            href="{{ url_for('pages', page='design') }}#Path A" class="home">design page (Path A)</a> for details.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          The results of gel electrophoresis in the following image (Fig. 2) confirmed the success of our
+          circularization process.
+        </p>
+
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/figure-2.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure 2. Agarose gel electrophoresis verifies the circularization process.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          <b>Lane 1:</b> Low range RNA ladder
+          <br><b>Lane 2:</b> Linear RNA produced
+          by in vitro transcription. The presence of bands confirms the success of liner RNA synthesis,
+          and any remaining DNA templates are degraded by DNase I.
+          <br><b>Lane 3:</b> Circularization product. The sample contains circularization product and some linear RNAs remain
+          in the reaction.
+          <br><b>Lane 4:</b> Circularization
+          product + RNase R. Given the circRNA's resistance to RNA exonuclease activity, RNase R is
+          introduced to remove linear RNA. Therefore, the presence of bands indicated the success of
+          circularization.
+        </p>
+        <h1 class="des-heading2" id="Validation of Detection Method 1"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Validation
+          of Detection Method - Amplification Through RCA Followed by Gold Nanoparticles Based-Colorimetric Detection:
+        </h1>
+        <p class="des-paragraph fade_from_right">
+          In this section, we will verify the followings:
+        </p>
+        <h1 class="des-heading3 fade_from_left">(1) Verify whether RCA can amplify circRNA and generate long-repeated
+          cDNA:</h1>
+        <p class="des-paragraph fade_from_right">
+          The gel electrophoresis results presented in the following image (Fig. 3) confirm the success of our RCA
+          process.
+
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/figure-3.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure 3. Agarose gel electrophoresis verifies the RCA process.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          <b>Lane 1:</b> 1000bp ssDNA ladder
+          <br><b>Lane 2:</b> CircRNA (202 ng) after 15 minutes RCA amplification
+          <br><b>Lane 3:</b> CircRNA (202 ng) after 30 minutes RCA amplification reaction
+          <br><b>Lane 4:</b> Low concentration of linear RNA (202 ng) after RCA 15 minutes amplification
+          <br><b>Lane 5:</b> Low concentration of linear RNA (202 ng) after RCA 30 minutes amplification
+          <br><b>Lane 6:</b> High concentration of linear RNA (2457.2 ng) after RCA 15 minutes amplification
+          <br><b>Lane 7:</b> High concentration of linear RNA (2457.2 ng) after RCA 30 minutes amplification
+        </p>
+
+        <p class="des-paragraph fade_from_right">
+          Compare lane 2 and 3 (using circRNA as template) with lane 4, 5, 6 and 7 (using linear RNA as
+          template), the bands observed in lane 2 and 3 located at higher position than those in lane 4,
+          5, 6 and 7. This suggests the success of RCA, generating long-repeated cDNA.
+        </p>
+        <h1 class="des-heading3 fade_from_left">(2) Verify gold nanoparticles based-colorimetric assay:</h1>
+        <p class="des-paragraph fade_from_right">
+          Unfortunately, we were unable to generate a sufficient amount of long-repeated cDNA for testing
+          with probe-conjugated gold nanoparticles (AuNPs) detection before the competition. Therefore, in
+          this section, we are initially adding RCA's no template control (NTC) solution to
+          probe-conjugated gold nanoparticles and testing the relationship between the volume of MgCl2
+          added and the resulting color change.
+        </p>
+
+
+        <div class="containerfig">
+          <img
+            src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/figure-4-1005-aunp-rca-mgcl2-raw-data-5-6-7-8-regression.png" style="width: 50%">
+        </div>
+        <p class="des-figure">Figure 4. The spectrum of adding MgCl2 to Probe conjugated-AuNP containing
+          RCA solution.</p>
+
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/figure-5.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure 5. The color of the Probe-Conjugated Gold Nanoparticles solution is influenced by the varying volumes
+          of added MgCl2.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          In Figure 4. we can observed a redshift in spectrum after adding MgCl2 to the Probe
+          conjugated-AuNP solution with no target cDNA. Besides, in Figure 5, a significant color change
+          can be observed when adding 6-8 µL of 0.21 M MgCl2.
+        </p>
+        <h1 class="des-heading2" id="Validation of Detection Method 2"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Validation
+          of Detection Method - Amplification through RT-RPA Followed by Lateral Flow Test:</h1>
+
+        <h1 class="des-heading3 fade_from_left">(1) Amplify circRNA through RT-RPA </h1>
+
+        <div class="containerfig">
+          <img
+            src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/figure-6-2023-10-10-rt-rpa-dillute-png.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure 6. Gel electrophoresis of diluted RNA sample for RT-RPA. Lane 1: 100 bp DNA Ladder, Lane
+          2: RT-RPA using IVT product of circ_0101802 (385 ng/μL), Lane 3: A 10^4-fold dilution of the IVT
+          product from Insert_0101802 (385 ng/μL); Lane 4: A 10^6-fold dilution of the IVT product from
+          Insert_0101802 (385 ng/μL), Lane 5: A 10^8-fold dilution of the IVT product from Insert_0101802
+          (385 ng/μL), Lane 6: A 10^10-fold dilution of the IVT product from Insert_0101802 (385 ng/μL),
+          Lane 7: A 10^12-fold dilution of the IVT product from Insert_0101802 (385 ng/μL), Lane 8: No
+          Template Control.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Unfortunately, we were unable to test the amplification of circRNA by RT-RPA before the
+          competition. However, we tested the limitation of linear RNA sample amplification through
+          RT-RPA. We speculate that the limit of sample amplification for RT-RPA should be around
+          3.52*10^-10 ng/μL with a reaction time of 10 minutes. In the future, we aim to amplify the
+          circRNA in patient blood.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          In the future, if we have enough long-repeated cDNA, we will be able to test whether the
+          probe-conjugated gold nanoparticles can recognize and bind to it, thereby maintaining a red
+          color.
+        </p>
+        <h1 class="des-heading3 fade_from_left">(2) Detection of
+          RT-RPA-amplified products through PCRD.</h1>
+        <p class="des-paragraph fade_from_right">
+          The resulting RT-RPA products using linear RNA as template were conducted by lateral flow strip
+          (PCRD). In the future, we aim to use RT-RPA to amplify circRNA and test it by PCRD.
+        </p>
+   
+        <table>
+          <tr>
+            <th></th>
+            <th>circ_0004771</th>
+            <th>circ_0101802</th>
+            <th>PCRD</th>
+          </tr>
+          <tr>
+            <td>A.</td>
+            <td style="font-size: 25px;">+</td>
+            <td style="font-size: 25px;">+</td>
+            <td><img src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/diagram-1-a.jpg" style="width: 50%;">
+            </td>
+          </tr>
+          <tr>
+            <td>B.</td>
+            <td style="font-size: 25px;">－</td>
+            <td style="font-size: 25px;">＋</td>
+            <td><img src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/diagram-1-b.jpg"  style="width: 50%;">
+            </td>
+          </tr>
+          <tr>
+            <td>C.</td>
+            <td style="font-size: 25px;">-</td>
+            <td style="font-size: 25px;">-</td>
+            <td><img src="https://static.igem.wiki/teams/4636/wiki/proof-of-concept/diagram-1-c.jpg"  style="width: 50%;">
+            </td>
+          </tr>
+        </table>
+        <p class="des-figure">
+          Diagram 1: The schematic diagram illustrates the different results obtained from the presence or
+          absence of the target circRNA. (＋: added;－: not added)</p>
+        <p class="des-paragraph fade_from_right">
+          In theory, the lateral flow strip should display only one control line when no target sequences
+          added (as shown in diagram 1-C). However, our actual results indicate the presence of a test
+          line during lateral flow test. To address this unexpected outcome, we have learned from a
+          previous study <a href="#[3]">[3]</a> that primer dimers formed by the modified reverse and forward primers can
+          lead
+          to false-positive results. Therefore, we plan to design more specific primers in the future.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Based on the experimental results, we can conclude that when the target RNA is presented in the
+          RT-RPA reaction, it can be successfully amplified and shows a positive result when further
+          tested by PCRD. This observation is consistent with the expected outcome of our assay.
+        </p>
+
+      </div>
+      <script>
+        const expandbutton2 = document.getElementById("expandbutton2");
+        const article2 = document.getElementById("article2");
+
+        expandbutton2.addEventListener("click", function () {
+          if (article2.style.display == "block") {
+            article2.style.display = "none";
+            expandbutton2.style.transform = "rotate(-180deg)";
+          } else {
+            article2.style.display = "block";
+            expandbutton2.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+
+      <div id="Reference">
+        <h1 class="des-ref-heading">Reference</h1>
+        <p class="des-ref-paragraph">
+          [1] Xie, Y., Li, J., Li, P., Li, N., Zhang, Y., Binang, H., Zhao, Y., Duan, W., Chen, Y., Wang, Y., Du, L., &
+          Wang, C. (2020). RNA-Seq Profiling of Serum Exosomal Circular RNAs Reveals Circ-PNN as a Potential Biomarker
+          for Human Colorectal Cancer. Frontiers in oncology, 10, 982. <a id="[1]"
+            href="https://doi.org/10.3389/fonc.2020.00982">https://doi.org/10.3389/fonc.2020.00982</a>
+        </p>
+        <p class="des-ref-paragraph">
+          [2] <a id="[2]"
+            href="https://www.thermofisher.com/tw/zt/home/references/protocols/cell-and-tissue-analysis/elisa-protocol/elisa-sample-preparation-protocols/plasma-and-serum-preparation.html#prot3">https://www.thermofisher.com/tw/zt/home/references/protocols/cell-and-tissue-analysis/elisa-protocol/elisa-sample-preparation-protocols/plasma-and-serum-preparation.html#prot3</a>
+        </p>
+        <p class="des-ref-paragraph">
+          [3] Li, C.-J., Sun, H.-Q., Zhao, W.-X., Wang, X.-Y., Lin, R.-Z., & Yao, Y.-X. (2023). Rapid Assay Using
+          Recombinase Polymerase Amplification and Lateral Flow Dipstick for Identifying Agrilus Mali, a Serious
+          Wood-Boring Beetle of the Western Tianshan Mountains in China. <a id="[3]"
+            href="https://doi.org/10.21203/rs.3.rs-2744727/v1">https://doi.org/10.21203/rs.3.rs-2744727/v1</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% endblock %}

@@ -1,0 +1,896 @@
+{% extends "layout.html" %}
+
+{% block title %}Members{% endblock %}
+
+{% block page_content %}
+<link href="{{ url_for('static', filename = 'swiper.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename = 'swiper-min.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename = 'member.css') }}">
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/diversity-and-inclusion.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/diversity-and-inclusion.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Members', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "United as members, stronger as a team.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+          color: aliceblue;
+          /* font-style: unset; */
+          font-size: xx-large;
+          font-weight: 800;
+          letter-spacing: 8px;
+          font-size: 140px;
+          font-family: inherit;">
+            Members
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+
+                    <li style="padding-top: 10px;
+              padding-bottom: 10px;padding-left: 10px;
+padding-right: 10px;"><a id="sidebaritem1" href="#Problem" class="">WL Members</a>
+                    </li>
+
+
+                    <li style="padding-top: 10px;
+              padding-bottom: 10px;padding-left: 10px;
+padding-right: 10px;"><a id="sidebaritem2" href="#Inspiration" class="">DL Members</a></li>
+                    <li style="padding-top: 10px;
+              padding-bottom: 10px;padding-left: 10px;
+padding-right: 10px;"><a id="sidebaritem3" href="#Our Goal" class="">HP Members</a></li>
+
+
+                </ul>
+            </div>
+        </div>
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Problem" style="color:  rgb(255, 255, 255, 0.8);">
+                    WL members
+                </h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1" style="display:block;">
+
+
+                <!-- end about -->
+
+                <div class="wrapper">
+
+                    <section class="module-team">
+                        <div class="team">
+                            <div class="team-cards">
+
+                                <!-- Slider main container -->
+                                <div class="swiper-container">
+                                    <!-- Additional required wrapper -->
+                                    <div class="swiper-wrapper"></div>
+
+                                </div>
+
+                                <div class="swiper-pagination"></div>
+                                <!-- If we need navigation buttons -->
+                                <div class="navigation">
+                                    <div class="swiper-button-prev"></div>
+                                    <div class="swiper-button-next"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <script>
+                    window.addEventListener("load", event => {
+
+                        var swiperWrapper = document.querySelector('.swiper-wrapper');
+
+                        /* The Team */
+                        var team = [{
+                            name: "Justin",
+                            role: "WL leader",
+                            desc: "Hello everyone! I'm Ping-Yu, Yang. Time to meeting! Does anyone want to order pizza?",
+                            photo: "https://static.igem.wiki/teams/4636/wiki/wl001.jpg",
+
+                        },
+                        {
+                            name: "Ann",
+                            role: "WL member",
+                            desc: "Hi! I’m Ann! Although I’m going to be a senior, my friends say that I look younger than my age🤫",
+                            photo: "https://static.igem.wiki/teams/4636/wiki/wl002.jpg",
+
+                        },
+                        {
+                            name: "Cindy",
+                            role: "WL member",
+                            desc: "Hsinchu on a typhoon day is approaching to form a tornado... Haha (by me who was devastated by the wind)",
+                            photo: "https://static.igem.wiki/teams/4636/wiki/wl003.jpg",
+
+                        },
+                        {
+                            name: "Irene",
+                            role: "WL member",
+                            desc: "Hi everyone~ I'm Irene. Even though I'm quite short, I am the tallest girl in my family.(*☻-☻*)",
+                            photo: "https://static.igem.wiki/teams/4636/wiki/wl004.jpg",
+
+                        },
+                        {
+                            name: "Emma",
+                            role: "WL member",
+                            desc: "Hello, this is Emma. I don't have much to say today. I wish I did... Oh wait, I think our gesture is super cute, isn't it!",
+                            photo: "https://static.igem.wiki/teams/4636/wiki/wl005.jpg",
+
+                        },
+                        {
+                            name: "Herby",
+                            role: "WL member",
+                            desc: "Hello everyone! my name is Kuang-Yi, Shih. I am shy on the outside but crazy in the inside. I am also a very plain and silent person. People say I am really mysterious, but I don’t know why🤪",
+                            photo: "https://static.igem.wiki/teams/4636/wiki/wl006.jpg",
+
+                        },
+                        {
+                            name: "Eric",
+                            role: "WL member",
+                            desc: "Hello everyone~ I'm Eric. I'm a very shy, conservative, and introverted person. Everyone says I'm very strange?",
+                            photo: "https://static.igem.wiki/teams/4636/wiki/wl007.jpg",
+
+                        },
+                        ];
+
+                        /* Social Icons */
+                        /*
+                        var icons = [{
+                          iWebsite: "https://rafaelalucas.com/dailyui/6/assets/link.svg",
+                          iEmail: "https://rafaelalucas.com/dailyui/6/assets/email.svg",
+                          iLinkedin: "https://rafaelalucas.com/dailyui/6/assets/linkedin.svg",
+                          iDribbble: "https://rafaelalucas.com/dailyui/6/assets/dribbble.svg",
+                        }];
+                
+                        var iWebsite = icons[0].iWebsite,
+                          iEmail = icons[0].iEmail,
+                          iLinkedin = icons[0].iLinkedin,
+                          iDribbble = icons[0].iDribbble;
+                */
+
+                        /* Function to populate the team members */
+                        function addTeam() {
+                            for (let i = 0; i < team.length; i++) {
+
+                                /* Variables for the team */
+                                var name = team[i].name,
+                                    role = team[i].role,
+                                    desc = team[i].desc,
+                                    photo = team[i].photo,
+                                    website = team[i].website,
+                                    email = team[i].email,
+                                    linkedin = team[i].linkedin,
+                                    dribbble = team[i].dribbble;
+
+                                /* Template for the Team Cards */
+                                var template = `
+                <div class="swiper-slide">
+                <div class="card">
+                    <span class="bg"></span>
+                    <span class="more"></span>
+                    <figure class="photo"><img src="${photo}"></figure>
+                        <article class="text">
+                            <p class="name">${name}</p>
+                            <p class="role">${role}</p> 
+                            <p class="desc">${desc}</p> 
+                        </article>
+                        
+    
+                    </div>
+                </div>`;
+
+                                swiperWrapper.insertAdjacentHTML('beforeend', template);
+                            }
+                        };
+
+
+                        addTeam();
+
+
+
+                        /* Swiper Settings */
+
+                        var mySwiper = new Swiper(".swiper-container", {
+                            // Optional parameters
+                            direction: "horizontal",
+                            loop: true,
+                            centeredSlides: false,
+                            speed: 800,
+                            slidesPerView: 3,
+                            spaceBetween: 40,
+                            threshold: 5,
+
+
+                            // If we need pagination
+                            pagination: {
+                                el: ".swiper-pagination",
+                                clickable: true
+                            },
+
+                            // Navigation arrows
+                            navigation: {
+                                nextEl: ".swiper-button-next",
+                                prevEl: ".swiper-button-prev"
+                            },
+                            breakpoints: {
+                                1180: {
+                                    slidesPerView: 2,
+                                    spaceBetween: 40,
+                                    centeredSlides: false,
+                                },
+                                799: {
+                                    slidesPerView: 1,
+                                    spaceBetween: 20,
+                                    centeredSlides: true,
+                                    loop: true,
+                                },
+                            }
+                        });
+
+                        /* Show More */
+
+                        var btnShow = document.querySelectorAll('.more');
+
+
+
+                        btnShow.forEach(function (el) {
+                            el.addEventListener('click', showMore);
+                        });
+
+                        function showMore(event) {
+                            var card = event.target.closest(".swiper-slide");
+
+                            if (card.classList.contains('show-more')) {
+                                card.classList.remove('show-more');
+                            } else {
+                                card.classList.add('show-more')
+                            }
+
+                        }
+
+
+                        /* Social Hover */
+                        var icon = document.querySelectorAll('.icon');
+
+                        icon.forEach(function (el) {
+                            el.addEventListener("mouseenter", followCursor);
+
+                        });
+
+
+                        function followCursor(event) {
+                            var pointer = event.currentTarget.closest(".swiper-slide").querySelector('.pointer'),
+                                index = event.currentTarget.dataset.index,
+                                sizeIcon = (60 * index) + 25;
+
+                            pointer.style.transform = `translateX(${sizeIcon}px)`;
+                        }
+
+
+                        /* end */
+                    });
+                </script>
+
+            </div>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Inspiration" style="color:  rgb(255, 255, 255, 0.8);">
+                    DL members</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2" style="display:block;">
+                <!-- end about -->
+
+                <div class="wrapper">
+
+                    <section class="module-team">
+                        <div class="team">
+                            <div class="team-cards">
+
+                                <!-- Slider main container -->
+                                <div class="swiper-container">
+                                    <!-- Additional required wrapper -->
+                                    <div class="swiper-wrapper"></div>
+
+                                </div>
+
+                                <div class="swiper-pagination"></div>
+                                <!-- If we need navigation buttons -->
+                                <div class="navigation">
+                                    <div class="swiper-button-prev"></div>
+                                    <div class="swiper-button-next"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <script>
+                    window.addEventListener("load", event => {
+                        var swiperWrapper2 = document.querySelector('#article2 .swiper-wrapper'); // 使用第二个部分的swiper-wrapper
+
+                        /* DL members */
+                        var team2 = [
+                            {
+                                name: "Arthur",
+                                role: "DL leader",
+                                desc: "Hi! I'm Arthur, a 19-year-old guy from New Taipei City, also known as 'Weather reporter' I would definitely give a five-star rating to the scorching sun at 38 degrees! (ﾉ>ω<)ﾉ",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/dl001-copy.png",
+
+                            },
+                            {
+                                name: "Wader",
+                                role: "<span>&nbsp;</span>DL member<br><span>&nbsp;</span>Team leader",
+                                desc: "Hello, I’m Wader. I am a talkative person. But sometimes I seem to talk too much😓.",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/dl002-copy.png",
+
+                            },
+                            {
+                                name: "Peggy",
+                                role: "<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>DL member<br> Team vice captain",
+                                desc: "Hii~ I’m Peggy~ Sometimes I type slowly… but I can make your chat room full of kaomoji ( •̀ᄇ• )ﻭ✧",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/dl003-copy.png",
+
+                            },
+                            {
+                                name: "Eric lo",
+                                role: "WL member",
+                                desc: "hello~ I‘m Eric. Although I am an introverted and shy person, I still want to ask: Don‘t you think chihuahuas  are great ?",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/dl004-copy.png",
+
+                            },
+                            {
+                                name: "Willian",
+                                role: "WL member",
+                                desc: "Hi I'm William. You want to have a drink or 1v1 with me?",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/dl005-copy.png",
+
+                            },
+
+                        ];
+
+                        /* Function to populate the DL members */
+                        function addTeam2() {
+                            for (let i = 0; i < team2.length; i++) {
+                                var name = team2[i].name,
+                                    role = team2[i].role,
+                                    desc = team2[i].desc,
+                                    photo = team2[i].photo,
+                                    website = team2[i].website,
+                                    email = team2[i].email,
+                                    linkedin = team2[i].linkedin,
+                                    dribbble = team2[i].dribbble;
+
+                                var template = `
+          <div class="swiper-slide">
+            <div class="card">
+              <span class="bg"></span>
+              <span class="more"></span>
+              <figure class="photo"><img src="${photo}"></figure>
+              <article class="text">
+                <p class="name">${name}</p>
+                <p class="role">${role}</p> 
+                <p class="desc">${desc}</p> 
+              </article>
+            </div>
+          </div>`;
+
+                                swiperWrapper2.insertAdjacentHTML('beforeend', template);
+                            }
+                        };
+
+                        addTeam2();
+
+                        /* Swiper Settings for DL members */
+                        var mySwiper2 = new Swiper("#article2 .swiper-container", { // 使用第二个部分的swiper-container
+                            // Optional parameters
+                            direction: "horizontal",
+                            loop: true,
+                            centeredSlides: false,
+                            speed: 800,
+                            slidesPerView: 3,
+                            spaceBetween: 40,
+                            threshold: 5,
+
+                            // If we need pagination
+                            pagination: {
+                                el: "#article2 .swiper-pagination", // 修改为第二个部分的pagination
+                                clickable: true
+                            },
+
+                            // Navigation arrows
+                            navigation: {
+                                nextEl: "#article2 .swiper-button-next", // 修改为第二个部分的按钮
+                                prevEl: "#article2 .swiper-button-prev", // 修改为第二个部分的按钮
+                            },
+                            breakpoints: {
+                                1180: {
+                                    slidesPerView: 2,
+                                    spaceBetween: 40,
+                                    centeredSlides: false,
+                                },
+                                799: {
+                                    slidesPerView: 1,
+                                    spaceBetween: 20,
+                                    centeredSlides: true,
+                                    loop: true,
+                                },
+                            }
+                        });
+
+                        /* Show More for DL members */
+                        var btnShow2 = document.querySelectorAll('#article2 .more'); // 使用第二个部分的按钮选择器
+
+                        btnShow2.forEach(function (el) {
+                            el.addEventListener('click', showMore2);
+                        });
+
+                        function showMore2(event) {
+                            var card = event.target.closest("#article2 .swiper-slide"); // 使用第二个部分的swiper-slide选择器
+
+                            if (card.classList.contains('show-more')) {
+                                card.classList.remove('show-more');
+                            } else {
+                                card.classList.add('show-more')
+                            }
+                        }
+
+                        /* Social Hover for DL members */
+                        var icon2 = document.querySelectorAll('#article2 .icon'); // 使用第二个部分的icon选择器
+
+                        icon2.forEach(function (el) {
+                            el.addEventListener("mouseenter", followCursor2);
+                        });
+
+                        function followCursor2(event) {
+                            var pointer = event.currentTarget.closest("#article2 .swiper-slide").querySelector('.pointer'); // 使用第二个部分的swiper-slide选择器
+                            var index = event.currentTarget.dataset.index;
+                            var sizeIcon = (60 * index) + 25;
+                            pointer.style.transform = `translateX(${sizeIcon}px)`;
+                        }
+
+                        /* end */
+                    });
+
+                </script>
+
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Our Goal" style="color:  rgb(255, 255, 255, 0.8);">
+                    HP members</h1>
+                <button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3" style="display:block;">
+                <!-- end about -->
+
+                <div class="wrapper">
+
+                    <section class="module-team">
+                        <div class="team">
+                            <div class="team-cards">
+
+                                <!-- Slider main container -->
+                                <div class="swiper-container">
+                                    <!-- Additional required wrapper -->
+                                    <div class="swiper-wrapper"></div>
+
+                                </div>
+
+                                <div class="swiper-pagination"></div>
+                                <!-- If we need navigation buttons -->
+                                <div class="navigation">
+                                    <div class="swiper-button-prev"></div>
+                                    <div class="swiper-button-next"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <script>
+                    window.addEventListener("load", event => {
+                        var swiperWrapper3 = document.querySelector('#article3 .swiper-wrapper'); // 使用第二个部分的swiper-wrapper
+
+                        /* DL members */
+                        var team3 = [
+                            {
+                                name: "Kira",
+                                role: "HP leader",
+                                desc: "hi im kira, you can call me ka instead of car (actually pronounced similar)",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/hp001-copy.png",
+
+                            },
+                            {
+                                name: "Bruce",
+                                role: "<span>&nbsp;</span>HP member<br><span>&nbsp;</span>Team Bursar",
+                                desc: "Hi ! I’m Bruce~ Although I may appear stylish with my dyed golden hair, I am actually a pure-hearted little boy.",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/hp002-copy.png",
+
+                            },
+                            {
+                                name: "Yvonne",
+                                role: "HP member",
+                                desc: "Hello! I’m Yvonne,  my goal recently is to eat a lot of cinnamon rolls, and the future goal is to eat cinnamon rolls all over the world!",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/hp003-copy.png",
+
+                            },
+                            {
+                                name: "Christine",
+                                role: "HP member",
+                                desc: "Hi~ I'm Christine Jang. If you want to be in the center while taking group photo, try to be as tall as me.",
+                                photo: "https://static.igem.wiki/teams/4636/wiki/team/hp004-copy.png",
+
+                            },
+
+                        ];
+
+                        /* Function to populate the DL members */
+                        function addTeam3() {
+                            for (let i = 0; i < team3.length; i++) {
+                                var name = team3[i].name,
+                                    role = team3[i].role,
+                                    desc = team3[i].desc,
+                                    photo = team3[i].photo,
+                                    website = team3[i].website,
+                                    email = team3[i].email,
+                                    linkedin = team3[i].linkedin,
+                                    dribbble = team3[i].dribbble;
+
+                                var template = `
+          <div class="swiper-slide">
+            <div class="card">
+              <span class="bg"></span>
+              <span class="more"></span>
+              <figure class="photo"><img src="${photo}"></figure>
+              <article class="text">
+                <p class="name">${name}</p>
+                <p class="role">${role}</p> 
+                <p class="desc">${desc}</p> 
+              </article>
+            </div>
+          </div>`;
+
+                                swiperWrapper3.insertAdjacentHTML('beforeend', template);
+                            }
+                        };
+
+                        addTeam3();
+
+                        /* Swiper Settings for DL members */
+                        var mySwiper3 = new Swiper("#article3 .swiper-container", { // 使用第二个部分的swiper-container
+                            // Optional parameters
+                            direction: "horizontal",
+                            loop: true,
+                            centeredSlides: false,
+                            speed: 800,
+                            slidesPerView: 3,
+                            spaceBetween: 40,
+                            threshold: 5,
+
+                            // If we need pagination
+                            pagination: {
+                                el: "#article3 .swiper-pagination", // 修改为第二个部分的pagination
+                                clickable: true
+                            },
+
+                            // Navigation arrows
+                            navigation: {
+                                nextEl: "#article3 .swiper-button-next", // 修改为第二个部分的按钮
+                                prevEl: "#article3 .swiper-button-prev", // 修改为第二个部分的按钮
+                            },
+                            breakpoints: {
+                                1180: {
+                                    slidesPerView: 2,
+                                    spaceBetween: 40,
+                                    centeredSlides: false,
+                                },
+                                799: {
+                                    slidesPerView: 1,
+                                    spaceBetween: 20,
+                                    centeredSlides: true,
+                                    loop: true,
+                                },
+                            }
+                        });
+
+                        /* Show More for DL members */
+                        var btnShow3 = document.querySelectorAll('#article3 .more'); // 使用第二个部分的按钮选择器
+
+                        btnShow3.forEach(function (el) {
+                            el.addEventListener('click', showMore3);
+                        });
+
+                        function showMore3(event) {
+                            var card = event.target.closest("#article3 .swiper-slide"); // 使用第二个部分的swiper-slide选择器
+
+                            if (card.classList.contains('show-more')) {
+                                card.classList.remove('show-more');
+                            } else {
+                                card.classList.add('show-more')
+                            }
+                        }
+
+                        /* Social Hover for DL members */
+                        var icon3 = document.querySelectorAll('#article3 .icon'); // 使用第二个部分的icon选择器
+
+                        icon2.forEach(function (el) {
+                            el.addEventListener("mouseenter", followCursor3);
+                        });
+
+                        function followCursor3(event) {
+                            var pointer = event.currentTarget.closest("#article3 .swiper-slide").querySelector('.pointer'); // 使用第二个部分的swiper-slide选择器
+                            var index = event.currentTarget.dataset.index;
+                            var sizeIcon = (60 * index) + 25;
+                            pointer.style.transform = `translateX(${sizeIcon}px)`;
+                        }
+
+                        /* end */
+                    });
+
+                </script>
+            </div>
+    </section>
+</div>
+<script src="{{ url_for('static', filename = 'swiper.js') }}"></script>
+<script src="{{ url_for('static', filename = 'swiper-min.js') }}"></script>
+{% endblock %}

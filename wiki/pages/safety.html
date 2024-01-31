@@ -1,0 +1,436 @@
+{% extends "layout.html" %}
+
+{% block title %}Safety{% endblock %}
+
+{% block page_content %}
+
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/safety.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/safety.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Safety', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "Safety is no accident; it's a choice you make.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+          color: aliceblue;
+          /* font-style: unset; */
+          font-size: xx-large;
+          font-weight: 800;
+          letter-spacing: 8px;
+          font-size: 140px;
+          font-family: inherit;">
+            Safety
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a id="sidebaritem2" href="#Problem" class="">Training</a></li>
+                    <li><a id="sidebaritem3" href="#Inspiration" class="">Safe Lab Work</a></li>
+                    <li><a id="sidebaritem4" href="#Reference" class="">Reference</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Problem">Training</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+                <p class="des-paragraph fade_from_right" >
+                    Before entering the laboratories,
+                    we have followed the related rules outlined in the “Regulations Governing Management of
+                    Infectious Biological Materials” in Taiwan. Personnels in bio-laboratories should attend at
+                    least 8 hours of basic education and training courses on bio-safety and bio-security in the
+                    first year, and they should pass the tests for these basic education and training courses. All
+                    NTHU_Taiwan iGEM wet lab members have participated in the following Laboratory Education and
+                    Training Courses provided by the Environmental Protection and Occupational Safety and Health
+                    Center at National Tsing Hua University:
+                </p>
+
+                <p class="des-paragraph-item fade_from_right">
+                    1. General Safety and Health training (3hr)<br>
+                    2. Education and Training for Dangerous and Hazardous Chemicals (3hr) <br>
+                    3. General Education Training for Toxic Chemicals (3hr)<br>
+                    4. Biosafety Education and Training (4hr)<br>
+                    5. Biosecurity Education and Training (4hr)<br>
+                </p>
+            </div>
+            <script>
+                const expandbutton = document.getElementById("expandbutton");
+                const article = document.getElementById("article1");
+
+                expandbutton.addEventListener("click", function () {
+                    if (article.style.display == "block") {
+                        article.style.display = "none";
+                        expandbutton.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article.style.display = "block";
+                        expandbutton.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Inspiration">Safe Lab Work</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <p class="des-paragraph fade_from_right" >
+                    Our project, NanoCircDX, is devoted
+                    to the development of an innovative colorectal cancer screening platform. Currently, we are in
+                    the stage of validating our concepts to ensure their feasibility. Throughout this stage, our
+                    laboratory procedures strictly adhere to the highest safety standards. We do not involve animals
+                    or animal samples in our research, nor do we conduct experiments with human samples. Instead,
+                    our experiments exclusively utilize DNA materials sourced from reputable entities, including
+                    IDT, a distinguished member of the International Gene Synthesis Consortium (IGSC), and Genomics,
+                    the foremost commercial genome sequencing company in Taiwan.
+                </p>
+                <p class="des-paragraph fade_from_right" >
+                    While conducting experiments, we
+                    have implemented the following safety measures:
+                </p>
+                <p class="des-paragraph-item fade_from_right">
+                    1. Always wear appropriate clothing and personal protective equipment,
+                    including closed shoes, long pants, and lab coats while in the laboratory.<br>
+                    2. Wear disposable masks and gloves consistently to prevent contamination
+                    of our samples.<br>
+                    3. Always open the UV light after using the DNA/RNA UV-cleaner
+                        box UVC/T-AR, which provide protection against contamination. UV-radiation from the open lamps
+                        disinfects the working area inactivating DNA/RNA fragments during 15-30 min of exposure.<br>
+                    4. Handle acids and base chemicals in the chemical fume hood. Protect the
+                        operating personnel from being harmed by chemical substance leakage.<br>
+                    5. Experiments related to the synthesis of gold nanoparticles are
+                        conducted exclusively within the Chemical fume hood.<br>
+                    6. Experiments involving DH5-alpha are conducted exclusively within the
+                        laminar flow cabinet.<br>
+                    7. Conduct electrophoresis experiments in a separated area.<br>
+                    8. Our laboratory operations are conducted in separated rooms, each
+                        categorized by manipulation type. Both laboratory rooms strictly adhere to Level 1 standard
+                        microbiological lab safety practices.
+                </p>
+
+                <h1 class="des-heading3 fade_from_left">Prof. Hsing-Ying Lin's Lab</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/img-1.jpg" style="width: 40%; padding-left: 10px; padding-right: 10px">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/img-2.jpg" style="width: 40%; padding-left: 10px; padding-right: 10px">
+                </div>
+                <h1 class="des-heading3 fade_from_left">Prof. Jian-Ming Huang's Lab</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/safety-new/3.jpg" style="width: 40%; padding-left: 10px; padding-right: 10px">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/safety-new/4.jpg" style="width: 40%; padding-left: 10px; padding-right: 10px">
+                </div>
+                <h1 class="des-heading3 fade_from_left">DNA/RNA UV-cleaner box UVC/T-AR</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/safety-new/5.jpg" style="width: 25%">
+                </div>
+                <h1 class="des-heading3 fade_from_left">Chemical fume hood</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/safety-new/6.jpg" style="width: 45%">
+
+                </div>
+                <h1 class="des-heading3 fade_from_left">Laminar flow cabinet is located in a separate room.</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/safety-new/7.jpg" style="width: 40%; padding-left: 10px; padding-right: 10px">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/safety-new/8.jpg" style="width: 40%; padding-left: 10px; padding-right: 10px">
+                </div>
+                <h1 class="des-heading3 fade_from_left">Conduct electrophoresis experiments in a separate area.</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/safety-new/9.jpg" style="width: 45%">
+                </div>
+                <h1 class="des-heading3 fade_from_left">The hallway outside the laboratory</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/safety/safety-new/10.jpg" style="width: 45%">
+                </div>
+               
+            </div>
+            <script>
+                const expandbutton2 = document.getElementById("expandbutton2");
+                const article2 = document.getElementById("article2");
+
+                expandbutton2.addEventListener("click", function () {
+                    if (article2.style.display == "block") {
+                        article2.style.display = "none";
+                        expandbutton2.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article2.style.display = "block";
+                        expandbutton2.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+            
+            <div id="Reference">
+                <h1 class="des-ref-heading">Reference</h1>
+                <p class="des-ref-paragraph">[1] <a href="https://nesh.site.nthu.edu.tw/index.php">https://nesh.site.nthu.edu.tw/index.php</a></p>
+                <p class="des-ref-paragraph">[2] <a href="https://biosan.lv/products/uvct-ar/">https://biosan.lv/products/uvct-ar/</a></p> 
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename = 'expand-button.js') }}"></script>
+    </section>
+</div>
+
+{% endblock %}

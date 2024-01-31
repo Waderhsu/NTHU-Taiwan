@@ -1,0 +1,370 @@
+{% extends "layout.html" %}
+
+{% block title %}Awards{% endblock %}
+
+{% block page_content %}
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/9c4a1ed0-093e-4973-b800-45806c351498.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/9c4a1ed0-093e-4973-b800-45806c351498.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Awards', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                    <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                    <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                    ${firstLetter}
+                </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "Bravery never goes out of fashion.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+
+<div id="content">
+    <section class="banner-container">
+
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container" style="top: 50px;">
+
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+        color: aliceblue;
+        /* font-style: unset; */
+        font-size: xx-large;
+        font-weight: 800;
+        letter-spacing: 8px;
+        font-size: 140px;
+        font-family: inherit;">
+            Awards
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#Award" class="sidebaritem">Awards</a></li>
+                    <li><a href="#Criteria" class="sidebaritem">Criteria</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+
+                    <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a href="#Gold Medal">Gold Medal</a></li>
+                            <li class="sidebaritem_item"><a href="#Silver Medal">Silver Medal</a></li>
+                            <li class="sidebaritem_item"><a href="#Bronze Medal">Bronze Medal</a></li>
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                        const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+                        sideexpandbutton1.addEventListener("click", function () {
+                            if (sidebaritem_item1.style.display == "none") {
+                                sidebaritem_item1.style.display = "block";
+                                sideexpandbutton1.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item1.style.display = "none";
+                                sideexpandbutton1.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                    </script>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-right">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Award">Awards</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+                <div class="containerfig fade_from_bottom" style="margin-top: 30px;">
+                    <img src="https://static.igem.org/websites/common/2023/icons/medal-flat.svg" alt="Gold Medal" id="Gold Medal" style="width: 30%;">
+                </div>
+                <p class="des-note" style="text-align: center; font-size: 48px;">
+                    We won Gold Medal!
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Criteria">Criteria</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <h1 class="des-heading4" id="Bronze Medal">Bronze Medal</h1>
+                <h1 class="des-heading3">Competition Deliverables</h1>
+                <p class="des-paragraph">We completed all the following Competition Deliverables:</p>
+                <p class="des-paragraph-item">
+                    <b>1. Wiki</b>: We have designed a wonderful wiki which explains the detail of our project. Also see our <a href="{{ url_for('pages', page='home') }}">game</a> to explore our project and enjoy!
+                    <br><b>2. Project Promotion Video</b>: We have made a <a href="https://video.igem.org/videos/embed/94538b52-d4b9-4b6d-814a-37e751c1610f">promotion video</a> to introduce our project!
+                    <br><b>3. Presentation Video</b>: We gave our presentation as a TV program!
+                    <br><b>4. Judging Form</b>: We completed our judging form.
+                    <br><b>5. Judging Session</b>: We have successfully presented our project to the judges and proved to be an outstanding team!
+                </p>
+                <h1 class="des-heading3">Project Attributions</h1>
+                <p class="des-paragraph">Many thanks to those who engaged in our project. See our <a href="{{ url_for('pages', page='attributions') }}">Attribution</a> page!</p>
+                <h1 class="des-heading3">Project Description</h1>
+                <p class="des-paragraph">Describe how and why you chose your iGEM project. Visit our <a href="{{ url_for('pages', page='description') }}">Description</a> page to know more about our motivations!</p> 
+                <h1 class="des-heading3">Contribution</h1>
+                <p class="des-paragraph">We have made a useful contribution for future iGEM teams. View our <a href="{{ url_for('pages', page='contribution') }}">Contribution</a> page for more information!</p>
+
+                <h1 class="des-heading4" id="Silver Medal">Silver Medal</h1>
+                <h1 class="des-heading3">Engineering Success</h1>
+                <p class="des-paragraph">We have demonstrated engineering success. Visit our <a href="{{ url_for('pages', page='engineering') }}">Engineering</a> page for more details!</p>
+                <h1 class="des-heading3">Human Practices</h1>
+                <p class="des-paragraph">We focused on the well-beings of the general publics. See our <a href="{{ url_for('pages', page='human-practices') }}">Human Practice</a> page!</p>           
+                
+                <h1 class="des-heading4" id="Gold Medal">Gold Medal</h1>
+                <h1 class="des-heading3">Excellence in Synthetic Biology</h1>
+                <p class="des-paragraph">We specially put our effort in three aspects of our project:</p>
+                <p class="des-paragraph-item">
+                    <b>1. Parts</b>: We have developed a standard protocol of synthesizing circRNA. Go to our <a href="{{ url_for('pages', page='parts') }}">Parts</a> page!
+                    <br><b>2. Hardware</b>: We have made a excellent hardware that help in our experiments. Details are provided in <a href="{{ url_for('pages', page='hardware') }}">Hardware</a> page!
+                    <br><b>3. Integrated Human Practice</b>: We have reached out to professionals and publics to improve our project. Visit our <a href="{{ url_for('pages', page='human-practices') }}">Integrated Human Practice</a> page!
+                </p>
+            </div>
+        </div>
+
+    </section>
+</div>
+{% endblock %}

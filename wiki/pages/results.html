@@ -1,0 +1,1608 @@
+{% extends "layout.html" %}
+
+{% block title %}Results{% endblock %}
+
+{% block page_content %}
+
+<style>
+  .slide--1__darkbg {
+    left: 0%;
+    background: url("https://static.igem.wiki/teams/4636/wiki/header002.jpg") center center no-repeat;
+    background-size: cover;
+    background-position: 0px center, 0px center;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  .slide--1__letter {
+    background: url("https://static.igem.wiki/teams/4636/wiki/header002.jpg") center center no-repeat;
+    background-position: 0px center, 0px center;
+    background-size: cover;
+  }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+  $(document).ready(function () {
+    const $cont = $('.cont');
+    const $slider = $('.slider');
+    const $nav = $('.nav');
+    const winW = $(window).width();
+    const animSpd = 750; // Change also in CSS
+    const distOfLetGo = winW * 0.2;
+    let curSlide = 1;
+    let animation = false;
+    let autoScrollVar = false;
+    let diff = 0;
+
+    // Generating slides
+    let arrCities = ['Results', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+    let numOfCities = arrCities.length;
+    let arrCitiesDivided = [];
+
+    arrCities.map((city) => {
+      let length = city.length;
+      let letters = Math.floor(length / 4);
+      let exp = new RegExp(".{1," + letters + "}", "g");
+
+      arrCitiesDivided.push(city.match(exp));
+    });
+
+    let generateSlide = function (city) {
+      let frag1 = $(document.createDocumentFragment());
+      let frag2 = $(document.createDocumentFragment());
+      const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+      const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+      const $slide =
+        $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+      const letter =
+        $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+      /*
+                      for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                          const text =
+                              $(`<div class="slide__text slide__text--${i + 1}">
+                                  ${arrCitiesDivided[city][i]}
+                              </div>`);
+                          frag1.append(text);
+                      }
+      */
+      const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+      frag2.append(navSlide);
+      $nav.append(frag2);
+
+      $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+      $slider.append($slide);
+
+      if (arrCities[city].length <= 4) {
+        $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+      }
+    };
+
+    for (let i = 0, length = numOfCities; i < length; i++) {
+      generateSlide(i);
+    }
+
+    $('.nav__slide--1').addClass('nav-active');
+
+    // Navigation
+    function bullets(dir) {
+      $('.nav__slide--' + curSlide).removeClass('nav-active');
+      $('.nav__slide--' + dir).addClass('nav-active');
+    }
+
+    function timeout() {
+      animation = true;
+    }
+
+    function pagination(direction) {
+      animation = true;
+      diff = 0;
+      $slider.addClass('animation');
+      $slider.css({
+        'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__darkbg').css({
+        'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__letter').css({
+        'transform': 'translate3d(0, 0, 0)',
+      });
+
+      $slider.find('.slide__text').css({
+        'transform': 'translate3d(0, 0, 0)'
+      });
+    }
+
+    function navigateRight() {
+      if (!autoScrollVar) return;
+      if (curSlide >= numOfCities) return;
+      pagination(0);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide + 1);
+      curSlide++;
+    }
+
+    function navigateLeft() {
+      if (curSlide <= 1) return;
+      pagination(2);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide - 1);
+      curSlide--;
+    }
+
+    function toDefault() {
+      pagination(1);
+      setTimeout(timeout, animSpd);
+    }
+
+
+
+    $(document).on('mouseup touchend', function (e) {
+      $(document).off('mousemove touchmove');
+
+      if (animation) return;
+
+      if (diff >= distOfLetGo) {
+        toDefault();
+      } else if (diff <= -distOfLetGo) {
+        toDefault();
+      } else {
+        toDefault();
+      }
+    });
+
+    $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+      let target = +$(this).attr('data-target');
+      bullets(target);
+      curSlide = target;
+      pagination(1);
+    });
+
+    $(document).on('click', '.side-nav', function () {
+      let target = $(this).attr('data-target');
+
+      if (target === 'right') navigateRight();
+      if (target === 'left') navigateLeft();
+    });
+
+    $(document).on('keydown', function (e) {
+      if (e.which === 39) navigateRight();
+      if (e.which === 37) navigateLeft();
+    });
+
+    $(document).on('mousewheel DOMMouseScroll', function (e) {
+      if (animation) return;
+      let delta = e.originalEvent.wheelDelta;
+
+      if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+      if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+    });
+  });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+  const carouselText = [
+    { text: "Results are the echoes of the choices you make", color: "rgba(255, 255, 255, 0.679)" },
+
+  ]
+
+  $(document).ready(async function () {
+    carousel(carouselText, "#feature-text")
+  });
+
+  async function typeSentence(sentence, eleRef, delay = 100) {
+    const letters = sentence.split("");
+    let i = 0;
+    while (i < letters.length) {
+      await waitForMs(delay);
+      $(eleRef).append(letters[i]);
+      i++;
+    }
+  }
+
+
+  async function deleteSentence(eleRef) {
+    const sentence = $(eleRef).html();
+    const letters = sentence.split("");
+    let i = 0;
+    while (letters.length > 0) {
+      await waitForMs(1000000);
+      letters.pop();
+      $(eleRef).html(letters.join(""));
+    }
+  }
+
+  async function carousel(carouselList, eleRef) {
+    var i = 0;
+    while (true) {
+      updateFontColor(eleRef, carouselList[i].color)
+      await typeSentence(carouselList[i].text, eleRef);
+      await waitForMs(1500);
+      await deleteSentence(eleRef);
+      await waitForMs(500);
+      i++
+      if (i >= carouselList.length) { i = 0; }
+    }
+  }
+
+  function updateFontColor(eleRef, color) {
+    $(eleRef).css('color', color);
+  }
+
+  function waitForMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+</script>
+<script>
+  $(function () {
+    $('.scroll-down').click(function () {
+      $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+      return false;
+    });
+  });
+</script>
+
+<div id="content">
+  <section class="banner-container">
+    <div class="cont">
+      <div class="slider"></div>
+    </div>
+    <div class="typing-container">
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+      <span class="input-cursor"></span>
+    </div>
+    <div class="typing-container">
+      Results
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+    </div>
+    <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+  </section>
+  <section class="content">
+    <div class="main-left">
+      <div class="sidebar">
+        <ul>
+          <li><a href="#Path A" class="sidebaritem">Path A</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+
+          <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#Cloning">Cloning</a></li>
+              <li class="sidebaritem_item"><a href="#PCR">PCR </a></li>
+              <li class="sidebaritem_item"><a href="#In vitro transcription (IVT)">In vitro transcription (IVT)</a></li>
+
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+            const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+            sideexpandbutton1.addEventListener("click", function () {
+              if (sidebaritem_item1.style.display == "none") {
+                sidebaritem_item1.style.display = "block";
+                sideexpandbutton1.style.transform = "rotate(-180deg)";
+
+
+              } else {
+                sidebaritem_item1.style.display = "none";
+                sideexpandbutton1.style.transform = "rotate(-360deg)";
+
+              }
+            });
+          </script>
+          <li><a href="#Path B" class="sidebaritem">Path B</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton2"></button>
+
+          <div id="sidebaritem_item2" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#Gold nanoparticle (AuNPs) synthesis">Gold
+                  nanoparticle (AuNPs) synthesis</a></li>
+              <li class="sidebaritem_item"><a href="#Probe conjugated with gold nanoparticles (AuNPs)">Probe
+                  conjugated with
+                  gold nanoparticles (AuNPs)</a></li>
+              <li class="sidebaritem_item"><a
+                  href="#Probe conjugated with Gold nanoparticle (AuNPs) detection">Probe
+                  conjugated with Gold nanoparticle (AuNPs) detection</a></li>
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton2 = document.getElementById("sideexpandbutton2");
+            const sidebaritem_item2 = document.getElementById("sidebaritem_item2");
+
+            sideexpandbutton2.addEventListener("click", function () {
+              if (sidebaritem_item2.style.display == "none") {
+                sidebaritem_item2.style.display = "block";
+                sideexpandbutton2.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item2.style.display = "none";
+                sideexpandbutton2.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+
+          <li><a href="#Path C" class="sidebaritem">Path C</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton3"></button>
+
+          <div id="sidebaritem_item3" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#Repeated insert sequence synthesis">Repeated insert sequence
+                  synthesis</a></li>
+              <li class="sidebaritem_item"><a href="#Preparation of template for AELA-PCR">Preparation of template
+                  for
+                  AELA-PCR</a></li>
+              <li class="sidebaritem_item"><a href="#AELA PCR">AELA PCR</a></li>
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton3 = document.getElementById("sideexpandbutton3");
+            const sidebaritem_item3 = document.getElementById("sidebaritem_item3");
+
+            sideexpandbutton3.addEventListener("click", function () {
+              if (sidebaritem_item3.style.display == "none") {
+                sidebaritem_item3.style.display = "block";
+                sideexpandbutton3.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item3.style.display = "none";
+                sideexpandbutton3.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+          <li><a href="#Path D" class="sidebaritem">Path D</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton4"></button>
+
+          <div id="sidebaritem_item4" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#Rolling Circle Amplification (RCA)">Rolling
+                  Circle Amplification (RCA)</a></li>
+              <li class="sidebaritem_item"><a
+                  href="#Probe conjugated with gold nanoparticles (AuNPs) detection">Probe
+                  conjugated with gold nanoparticles (AuNPs) detection</a></li>
+      
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton4 = document.getElementById("sideexpandbutton4");
+            const sidebaritem_item4 = document.getElementById("sidebaritem_item4");
+
+            sideexpandbutton4.addEventListener("click", function () {
+              if (sidebaritem_item4.style.display == "none") {
+                sidebaritem_item4.style.display = "block";
+                sideexpandbutton4.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item4.style.display = "none";
+                sideexpandbutton4.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+          <li><a href="#Path E" class="sidebaritem">Path E</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton5"></button>
+
+          <div id="sidebaritem_item5" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#Recombinase Polymerase Amplification (RPA)">Recombinase
+                  Polymerase
+                  Amplification (RPA)</a></li>
+              <li class="sidebaritem_item"><a href="#PCRD">PCRD </a></li>
+
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton5 = document.getElementById("sideexpandbutton5");
+            const sidebaritem_item5 = document.getElementById("sidebaritem_item5");
+
+            sideexpandbutton5.addEventListener("click", function () {
+              if (sidebaritem_item5.style.display == "none") {
+                sidebaritem_item5.style.display = "block";
+                sideexpandbutton5.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item5.style.display = "none";
+                sideexpandbutton5.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+          <li><a href="#Path F" class="sidebaritem">Path F</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton6"></button>
+
+          <div id="sidebaritem_item6" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#RT-RPA">RT-RPA </a></li>
+              <li class="sidebaritem_item"><a href="#PCRD2">PCRD</a></li>
+
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton6 = document.getElementById("sideexpandbutton6");
+            const sidebaritem_item6 = document.getElementById("sidebaritem_item6");
+
+            sideexpandbutton6.addEventListener("click", function () {
+              if (sidebaritem_item6.style.display == "none") {
+                sidebaritem_item6.style.display = "block";
+                sideexpandbutton6.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item6.style.display = "none";
+                sideexpandbutton6.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+          <li><a href="#Path G" class="sidebaritem">Path G</a></li>
+          <li><a href="#Reference" class="sidebaritem">Reference</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="main-right" id="effort">
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Path A">Path A: CircRNA Synthesis</h1>
+        <button class="expandbutton" id="expandbutton"></button>
+
+      </div>
+      <div id="article1">
+        <p class="des-paragraph fade_from_right">
+          <b>Sequence design → Cloning → PCR → In vitro transcription (IVT) → Circularization → CircRNA
+            enrichment</b>
+        </p>
+        <h1 class="des-heading2" id="Cloning"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cloning</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          In this part, we ligase our insert with pJET1.2/blunt
+          Cloning Vector and then transform it in
+          DH5-alpha E. coli in order to produce abundant amounts of our target.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a1.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure A1. Gel electrophoresis results of the colony PCR. lane 1: Bio-100 Mass DNA Ladder, lane
+          2: circ_0004771 colony 1, lane 3: circ_0004771 colony 2, lane 4: circ_0004771 colony 3, lane 5:
+          circ_0004771 colony 4, lane 6: x, lane 7: x, lane 8: circ_0101802 colony 1, lane 9: circ_0101802
+          colony 2, lane 10: circ_0101802 colony 3, lane 11: circ_0101802 colony 4
+        </p>
+        
+        <p class="des-paragraph fade_from_right">
+          Figure A1 shows the gel electrophoresis results of the
+          colony PCR of the transformation product.
+          We can find out that lane 4, 5, 9, and 10 have no unwanted bands, so we culture them and extract
+          their plasmid for sequencing.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a2.png" style="width: 80%">
+        </div>
+        <p class="des-figure">
+          Figure A2. Sequence alignment of circ_0004771 colony 3 PCR product with circ_0004771 insert.
+        </p>      
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a3.png" style="width: 80%">
+        </div>
+        <p class="des-figure">
+          Figure A3. Sequence alignment of circ_0004771 colony 4 PCR product with circ_0004771 insert.
+        </p>  
+       
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a4.png" style="width: 80%">
+        </div>
+        <p class="des-figure">
+          Figure A4. Sequence alignment of circ_0101802 colony 3 PCR product with circ_0101802 insert.
+        </p>        
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a5.png" style="width: 80%">
+        </div>
+        <p class="des-figure">
+          Figure A5. Sequence alignment of circ_0101802 colony 4 PCR product with circ_0101802 insert.
+        </p>    
+      
+        <p class="des-paragraph fade_from_right">
+          The sequencing results show that our product sequence is
+          99% similar to our insert, which indicates the success of the colony and it can be used for
+          further experiments.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          Successfully ligase insert the vector and transform it into
+          DH5-alpha E. coli.
+        </p>
+        <h1 class="des-heading2" id="PCR"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>PCR</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>A. Insert PCR</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+
+        <p class="des-paragraph fade_from_right">
+          Insert PCR is the method we use for
+          the rapid and large-scale production of Insert_0101802 and Insert_0004771. The resulting
+          products can be used for circularization and experiment validation in other sections.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a6.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure A6. PCR result of Insert_0004771. Lane 1 : 100bps ladder, Lane 2 : Insert_0004771
+        </p>    
+        
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a7.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure A7. PCR result of Insert_0101802.Lane 1 : 50bps ladder, Lane 2,3 : Insert_0101802
+        </p>  
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          As shown in the Figure A6 and
+          Figure A7, bright clear bands in the correct position can be seen, which indicates the
+          successful amplifaction of Insert_0101802 and Insert_0004771 by Insert PCR.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>B. Plasmid PCR</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Plasmid is produced in large
+          quantities by DH5-alpha E. coli after cloning. In this part, plasmid is extract from the
+          bacteria (for detailed please visit experiment-Plasmid extraction) and futher conduct plasmid
+          PCR in order to rapidly produce large-scale production of Insert_0101802 and Insert_0004771. The
+          resulting products can be used for circularization and experiment validation in other sections.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a8.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure A8. Plasmid PCR result. Lane 1 : 100bps ladder, Lane 2, 4 : pjet1.2_0004771 , Lane 3, 5 :
+          PCR of pjet1.2_0004771, Lane 6, 8 : pjet1.2_0101802 , Lane 7, 9 : PCR of pjet1.2_0101802
+        </p>  
+        
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          As shown in the figure, we have
+          successfully amplified pjet1.2_0101802 and pjet1.2_0004771 using Plasmid PCR. We will further
+          purify by gel slices and us for further experiment.
+        </p>
+        <h1 class="des-heading2" id="In vitro transcription (IVT)"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>CircRNA synthesis (IVT & circularization & CircRNA enrichment)</h1>
+
+        <p class="des-paragraph fade_from_right">
+          In this process, we utilize
+          the Insert 0101802 (Part) to undergo in vitro transcription (IVT), circularization, and circRNA
+          enrichment. Due to time and resource constraints, circularizing two samples at once is not very
+          efficient. Therefore, we use Insert 0101802 to initially validate the entire circRNA synthesis
+          process's feasibility. Once we confirm the viability of the entire process, we can apply it to
+          all samples to achieve our goal.
+        </p>
+        <p class="des-heading3 fade_from_left"><u>A. Verification of
+              monophosphorylation and circularization product</u>
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><b style="font-size: 18px;">XRN-1 - verification
+            of
+            monophosphorylation</b></h1>
+        <p class="des-paragraph fade_from_right">
+          In order to verify the success of monophosphorylation, we
+          utilize an enzyme, XRN-1. XRN-1 is an
+          exoribonuclease enzyme that could degrade RNA sequences with a 5' monophosphate group.
+          Therefore, RNA that is successfully monophosphorylated could be disintegrated by XRN-1. We run
+          E-gel to compare monophosphorylation product with monophosphorylation product + XRN-1. If the
+          monophosphorylation product + XRN-1 has a band as clear as the monophosphorylation product, then
+          monophosphorylation is failed. Conversely, if the band is less distinct than that of the
+          monophosphorylation product or no band is observed at all, it signifies successful
+          monophosphorylation
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><b style="font-size: 18px;">RNase R - Eliminate
+            linear form
+            RNA</b></h1>
+        <p class="des-paragraph fade_from_right">
+          After circularization process, we are supposed to transform
+          all the linear form RNA into circRNA. However, research related to circularization has not yet
+          achieved 100% circularization rate. Therefore, in order to obtain pure circRNA, we use RNase R
+          to eliminate failed circularization products, which are linear RNAs. After RNase R degrades the
+          linear RNA, circRNA remains.
+        </p>
+
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a9.jpg" style="width: 30%">
+        </div>
+        <p class="des-figure">
+          Figure A9. Verification of monophosphorylation and circularization product. Lane M: low range
+          RNA ladder, Lane 1: Linear form RNA, Lane 2: Monophosphorylation product, Lane 3:
+          Monophosphorylation product + XRN-1, Lane 4: Circularization product, Lane 5: Circularization
+          product + RNase R, Lane 6: Circularization product + XRN-1, Lane7-10: Negative Control
+        </p> 
+        
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">
+          1. Lane1: Lane 1 is the sample of IVT product. After IVT, we obtained linear form RNA, as the
+          above figure shows.
+          <br>2. Lane 2 and Lane 3: Comparing lane 2 and lane 3, lane 2 obtained a brighter band than lane
+          3.
+          After adding XRN-1, the monophosphorylated product has been degraded, leaving failed
+          monophosphorylated samples. Therefore, the remaining band of lane 3 indicates the RNAs that have
+          failed to be monophosphorylated. In summary, by contrast of these two lanes, we know that the
+          efficiency of monophophorylation isn't 100%; there's still room for improvement.
+          <br>3. Lane 4 and Lane 5: Comparing lane 4 with lane 5, lane 4 obtained a brighter band than
+          lane 5.
+          After adding RNase R to the circularized product, linear-form RNA could be degraded, leaving RNA
+          with a circular structure. Therefore, lane 5 represents lane 4 sample eliminating linear form
+          RNA, which means lane 5 are samples successfully circularized.
+          <br>4. Lane 6: In order to reconfirm the success of circularization, we add XRN-1 to
+          Circularization
+          product. In circRNA, there's no monophosphorylated end to be degraded by XRN-1. Therefore,
+          successfully circularized product should remain band after adding XRN-1.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Improvement</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">
+          Sample bands in
+          this
+          E-gel experiment are slightly smear. We suspected that this smear phenomenon is caused by
+          incomplete denature of samples. As a result, we revise denature condition from 65°C, 5 mins to
+          65°C, 15 mins.</p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">After conducting
+          this
+          experiment, we verify success of monophosphorylation and circularization, which proof that we're
+          capable of synthesizing circRNA.
+        </p>
+        <p class="des-heading3 fade_from_left"><u>B. Comparing circularization efficiency of splint with different length</u></p>
+
+        </h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA"> In order to
+          compare
+          circularization efficiency of splint with different length, we carry out circRNA synthesis
+          process using 14-mer splint, 16-mer splint, 18-mer splint, respectively. After running
+          E-gel,
+          splint with highest circularization efficiency obtained strongest band. Through this
+          verification, we could utilize the splint with highest circularization efficiency in the
+          following process.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a10-png.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure A10. Comparing circularization efficiency of splint with different length. Lane 1: low
+          range RNA ladder, Lane 2: Control, Lane 3: Circularization product using 14-mer splint, Lane 4:
+          Circularization product using 16-mer splint, Lane 5: Circularization product using 18-mer splint
+        </p> 
+       
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">
+          Analysis</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">Lane 3, Lane 4, and Lane 5: Comparing lane 3,
+          lane 4, and lane 5, we discovered
+          that lane 4 has the strongest band. It indicates that using a 16-mer splint could maximize
+          circularization yield.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">
+          Achievement</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">After conducting this experiment, we confirm
+          utilizing 16-mer splint could
+          maximize circularization yield.
+        </p>
+        <p class="des-heading3 fade_from_left"><u>C. Distinguish circRNA from linear form RNA</u></p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">Previous studies have mentioned that in gel electrophoresis, circRNA has
+          higher running speed comparing to linear form RNA. This conclusion made use curious that whether
+          our circularization product and linear form RNA could distinguish by their band position. Also,
+          since we could merely distinguish band of ladder in E-gel results, we tried agarose gel instead.
+          By utilizing agarose gel, we could clearly compare our sample bands to ladder band, for
+          confirming size of samples.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a11-png.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure A11. Distinguish circRNA from linear form RNA. Lane 1: low range RNA ladder, Lane 2:
+          Linear form RNA, Lane 3: Circularization product, Lane 4: Circularization product + RNase R,
+          Lane 5: Circularization product + RNase R
+        </p> 
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">
+          1. Lane 2 ~ Lane 5: According to the
+          low-range RNA ladder, the size of the
+          samples could be confirmed. IVT product, circularization product, and circularization product +
+          RNase R are all around 300 bp, which conforms to our assumption.
+          <br>2. Lane 2, Lane 4, Lane 5: Comparing lane 2 and lane 4, 5, we discovered that lane 2 band is
+          higher than lane 4, 5. Previous research have mentioned that circular form RNA runs faster than
+          linear form RNA. Since they obtained the same base pair, we suspect that it's the structure that
+          affects their running speed. As a result, we conclude that Lane 4, Lane 5 is certainly circular
+          RNA.
+
+          </h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">
+          Achievement</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">After conducting this experiment, we confirm
+          that all our samples obtained
+          correct base pair as we expected. Furthermore, by comparing position of linear form RNA and
+          circularization product, we verify the success of circularization.
+
+        </p>
+        <p class="des-heading3 fade_from_left"><u>D. Examine RNase R degradation ability</u></p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">
+          Description</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">In order to proof the degradation ability of
+          RNase R is powerful enough to
+          eliminate all the failed circularization product. We conduct following experiment, adding RNase
+          R into linear form RNA product from in vitro transcription (IVT) process. We expected that RNase
+          R could effectively degrade entire linear form RNA, which confirmed that it could also degrade
+          entire failed circularization product after circRNA synthesis process.
+
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-circrna-synthesis/figure-a12.jpg" style="width: 30%">
+        </div>
+        <p class="des-figure">
+          Figure A12. Examine RNase R degradation ability. Lane M: low range RNA ladder, Lane 1: Linear
+          form RNA, Lane 2: Linear form RNA + RNase R, Lane 3: Circularization product + RNase R, Lane
+          4-10: Negative Control
+        </p> 
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">
+          Analysis</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">
+          <br>1. Lane 1 and Lane 2: In order to make sure the degradation ability of RNase R is powerful
+          enough to eliminate entire linear RNA in a circularized product, we add RNase R to IVT samples.
+          After adding RNase R, we discovered that there's no band in lane 2, which indicates that RNase R
+          has degraded the entire linear form of RNA. This result confirmed that RNase R could effectively
+          eliminate redundant linear-form RNA in circularization samples, leaving pure circRNA.
+          <br>2. Lane 3: After adding RNase R to the circularization product, there's a remaining band.
+          This
+          band is a sample that has been successfully circularized.
+
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">
+          Achievement</h1>
+        <p class="des-paragraph fade_from_right" id="Selection of circRNA">
+          <br>
+          After conducting this experiment, we confirm degradation ability of RNase R is powerful enough
+          to eliminate all the failed circularization product
+
+        </p>
+      </div>
+      <script>
+        const expandbutton = document.getElementById("expandbutton");
+        const article = document.getElementById("article1");
+
+        expandbutton.addEventListener("click", function () {
+          if (article.style.display == "block") {
+            article.style.display = "none";
+            expandbutton.style.transform = "rotate(-180deg)";
+          } else {
+            article.style.display = "block";
+            expandbutton.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Path B" style="font-size: 30px;
+        padding-top: 6px;">
+          Path B: Probe-Conjugated Gold Nanoparticle Synthesis</h1>
+        <button class="expandbutton" id="expandbutton2"></button>
+      </div>
+      <div id="article2">
+        <p class="des-paragraph fade_from_right">
+          <b>Sequence design → Gold nanoparticle (AuNPs) synthesis → Probe conjugated with Gold
+            nanoparticle (AuNPs) → Probe conjugated with gold nanoparticle (AuNPs) detection</b>
+        </p>
+        <h1 class="des-heading2" id="Gold nanoparticle (AuNPs) synthesis"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Gold nanoparticle (AuNPs) synthesis</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+
+          To utilize a colorimetric assay for
+          detecting colorectal cancer, our initial step involves synthesizing gold nanoparticles (AuNPs)
+          of approximately 13 nm in diameter. Once we have successfully synthesized it, we can then
+          proceed to conjugating probes onto these synthesized gold nanoparticles.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-b1.jpg" style="width: 30%">
+        </div>
+        <p class="des-figure">
+          Figure B1. Synthesis of gold nanoparticles in a two-neck flask
+        </p>    
+      
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-b2.jpg" style="width: 80%">
+        </div>
+        <p class="des-figure">
+          Figure B2. The spectrum of the gold nanoparticles exhibits a peak that is close to 520nm.
+        </p>    
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-b3.jpg" style="width: 40%">
+        </div>
+        <p class="des-figure">
+          Figure B3. Examine gold nanoparticles under a scanning electron microscope (SEM) using the
+          following conditions: voltage: 1500 kV, magnification: 230,000 folds.
+        </p> 
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          In previous studies, we discovered that 13 nm gold
+          nanoparticles typically exhibit a peak at 520
+          nm in the spectrum<a href="#[1]">[1]</a>. To validate whether our self-synthesized gold nanoparticles are around 13
+          nm, we conducted a spectrum measurement. The results, shown in Figure B2, indicated a peak that
+          closely aligns with 520 nm, providing strong evidence of successful synthesis. Additionally, we
+          utilized a Scanning Electron Microscope (SEM) to examine gold nanoparticles. The results, shown
+          in Figure B3, directly revealed that the gold nanoparticles have an approximate diameter of 13
+          nm, confirming that we have successfully synthesized gold nanoparticles of the desired size.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          1. Successfully synthesized 13 nm gold nanoparticles.
+        </p>
+        <h1 class="des-heading2" id="Probe conjugated with gold nanoparticles (AuNPs)"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Probe conjugated with gold nanoparticles (AuNPs)</h1>
+        <h1 class= "des-heading3 fade_from_left"><u>A. Nanodrop Spectrum Analysis</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          In this section, the probe will be conjugated with gold
+          nanoparticles through an S-Au bond. Our probe is designed to detect the target cDNA generated by
+          RCA. For more detailed design information, please refer to the Parts page.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-b4.png" style="width: 80%">
+        </div>
+        <p class="des-figure">
+          Figure B4 . A redshift shown in the spectrum of gold nanoparticles after conjugated with probes.
+        </p> 
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis </h1>
+        <p class="des-paragraph fade_from_right">
+          Figure B4 revealed a redshift occurring in the spectrum of
+          gold nanoparticles after conjugated with probes. According to previous studies <a href="#[2]">[2]</a>, the redshift
+          in the spectrum and a decrease in the optical density (O.D.) value are indicative of the
+          successful conjugation of AuNPs with the probe.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          Successfully attached DNA probes to the surface of gold
+          nanoparticles.
+        </p>
+        <h1 class= "des-heading3 fade_from_left"><u>B. X-ray photoelectron spectroscopy (XPS) Analysis</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          In addition to verifying the successful attachment of the
+          probe to gold nanoparticles, we also employed X-ray Photoelectron Spectroscopy (XPS) to examine
+          the presence of DNA probes on the surface of the gold nanoparticles. This involved examining
+          elements associated with DNA probe and gold nanoparticles, such as Au, C, and N, and comparing
+          the differences before and after probe modification on gold nanoparticles.
+        </p>
+        <div class="containerfig fade_from_left">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-b5.jpg" style="width:80%">
+        </div>
+        <p class="des-figure fade_from_right">
+          Figure B5. XPS results of gold nanoparticles and probe-conjugated gold nanoparticles.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          Successfully attached DNA probes to the surface of gold
+          nanoparticles.
+        </p>
+
+        <h1 class="des-heading2" id="Probe conjugated with Gold nanoparticle (AuNPs) detection"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Probe conjugated with Gold nanoparticle (AuNPs) detection</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Probe conjugated with gold
+          nanoparticles will be used to conduct further detection of long reapeat cDNA sequence. For more
+          detailed, please view Path C and Path D.
+        </p>
+      </div>
+      <script>
+        const expandbutton2 = document.getElementById("expandbutton2");
+        const article2 = document.getElementById("article2");
+
+        expandbutton2.addEventListener("click", function () {
+          if (article2.style.display == "block") {
+            article2.style.display = "none";
+            expandbutton2.style.transform = "rotate(-180deg)";
+          } else {
+            article2.style.display = "block";
+            expandbutton2.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Path C" style="font-size: 30px;
+        padding-top: 6px;">Path C: Assess the
+          Functionality of Colorimetric Assay with AELA-PCR
+        </h1><button class="expandbutton" id="expandbutton3"></button>
+      </div>
+      <div id="article3">
+        <p class="des-paragraph fade_from_right">
+          <b>Sequence design → Cloning → PCR → Repeated insert sequence synthesis → Preparation of
+            template for AELA-PCR → AELA-PCR → Probe conjugated AuNPs detection</b>
+        </p>
+        <h1 class="des-heading2" id="Repeated insert sequence synthesis"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Repeated insert sequence synthesis</h1>
+        <p class="des-paragraph fade_from_right">
+          Description: We have added two restriction enzymes, BamH1 and HindIII, to cleave the PCR
+          products. The resulting sticky ends at the 3' and 5' end of the inserts were then joined
+          together using T4 DNA ligase, creating long-repeated insert sequences.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>A. Insert digestion</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-c1.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure C1. The agarose gel electrophoresis result of insert digestion. Lane 1: 100 bp DNA
+          ladder. Lane 2: Insert_0004771 digestion product. Lane 3: Insert_0101802 digestion product.
+        </p> 
+       
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          Lane 2: According to the DNA ladder, the base pair of digested <br>Insert_0004771</br>is between
+          200 bp and 300 bp, which conforms to our expectations.
+
+          <br>Lane 3: According to the DNA ladder, the base pair of digested <br>Insert_0101802</br> is
+          between 300 bp and 400 bp, which conforms to our expectations.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>B. Insert ligation</u></h1>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-c2.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure C2. The agarose gel electrophoresis result of insert ligation. Lane 1: 1 kb DNA ladder,
+          Lane 2: Insert_0004771 ligation product, Lane 3: Insert_0101802 ligation product.
+        </p> 
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          Lane 2: According to above figure, we discovered that the insert sequences are ligated in
+          different fold numbers. Therefore, the result of agarose gel electrophoresis showed multiple
+          bands with equal interval in Lane 2.
+          <br>
+          Lane 3: Similar to Lane 2, it also showed multiple bands with equal interval in Lane 3. The
+          difference between the two lanes was that the band position of Insert_0101802 (Lane 3) was
+          higher than Insert_0004771 (Lane 2).
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          We successfully ligated each single piece of insert into a long-repeated dsDNA.
+        </p>
+
+        <h1 class="des-heading2" id="Preparation of template for AELA-PCR"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Preparation of template for AELA-PCR</h1>
+        <p class="des-paragraph fade_from_right">
+          Description: We reintroduced the cloning process in an attempt to incorporate additional
+          sequences and amplify the long-repeated insert sequences
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>A. Colony PCR</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-c3.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure C3. The agarose gel electrophoresis result of colony PCR. Lane 1: 1kb DNA ladder, Lane 2
+          to Lane 5: the samples of colony PCR were picked from four different colonies.
+        </p> 
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          We observed the absence of bands in Lane 2, 4 and 5. In
+          Lane 3, although there was a band present, its length fell between 500-1000 bp, shorter than our
+          long-repeated insert sequence (approximately 1680 bp in total, 336 bp per piece). In summary, we
+          did not achieve the expected amplification of the inserts.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>B. Plasmid gel electrophoresis</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-c4.png" style="width: 30%">
+        </div>
+        <p class="des-figure">
+          Figure C4. The agarose gel electrophoresis result of plasmid. Lane 1: 1 kb DNA ladder. Lane 2:
+          pUC19 vector only. Lane 3: pUC19 vector ligated with long-repeated insert sequence.
+        </p> 
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          Lane 2: Only the pUC19 vector was loaded into Lane 2. The vector is around 2686 bp long.
+          <br>
+          Lane 3: We ligated the pUC19 vector (which is 2686 bp) with a long-repeated insert sequence
+          (1680 bp in total, 336 bp per piece). The band marked with a red frame was around 4366 bp
+          (vector 2686 bp + insert 1680 bp), which indicated the successful ligation.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          We successfully ligated each single piece of insert into a long-repeated dsDNA.
+        </p>
+        <h1 class="des-heading2" id="AELA PCR"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>AELA PCR</h1>
+        <p class="des-paragraph fade_from_right">
+          Since we failed to amplified the long-repeated insert sequences utilizing colony PCR as
+          mentioned before. We could not further execute the experiments afterwards.
+        </p>
+
+      </div>
+      <script>
+        const expandbutton3 = document.getElementById("expandbutton3");
+        const article3 = document.getElementById("article3");
+
+        expandbutton3.addEventListener("click", function () {
+          if (article3.style.display == "block") {
+            article3.style.display = "none";
+            expandbutton3.style.transform = "rotate(-180deg)";
+          } else {
+            article3.style.display = "block";
+            expandbutton3.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Path D" style="font-size: 30px;
+        padding-top: 6px;">Path D: Amplify
+          CircRNA by RCA for Colorimetric Assay Detection
+        </h1><button class="expandbutton" id="expandbutton4"></button>
+      </div>
+      <div id="article4">
+        <p class="des-paragraph fade_from_right">
+          <b>Sequence design → Cloning → PCR → IVT → Circularization → CircRNA enrichment → RCA → Probe
+            conjugated with gold nanoparticles (AuNPs) detection</b>
+        </p>
+        <h1 class="des-heading2" id="Rolling Circle Amplification (RCA)"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Rolling Circle Amplification (RCA)</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Rolling Circle Amplification (RCA) is a kind of isothermal amplification method that can
+          generate long-repeated complementary DNA (cDNA) of circRNA by reverse transcriptase. Compared to
+          circular form RNA, linear RNA can only be reverse transcribed into complementary DNA (cDNA) with
+          a length identical to that of the RNA template. Thus, in this experiment, we compared the
+          amplification of linear form and circular form RNAs, to confirm whether RCA can generate
+          long-repeated complementary DNA (cDNA) longer than the circRNA.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-d1.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure D1. Gel electrophoresis results verify the RCA process. Lane 1: 1000 bp ssDNA ladder,
+          Lane 2: Circular RNA (202 ng) after 15 minutes RCA amplification, Lane 3: Circular RNA (202 ng)
+          after 30 minutes RCA amplification, Lane 4: Low concentration of linear RNA (202 ng) after RCA
+          15 minutes amplification, Lane 5: Low concentration of linear RNA (202 ng) after RCA 30 minutes
+          amplification, Lane 6: High concentration of linear RNA (2457.2 ng) after RCA 15 minutes
+          amplification, Lane 7: High concentration of linear RNA (2457.2 ng) after RCA 30 minutes
+          amplification.
+        </p> 
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          In Figure D1, compared Lane 2 with Lane 4, we found that
+          Lane 2 showed a higher position than
+          Lane 4, indicating the successful generation of long-repeated complementary DNA (cDNA). By
+          comparing Lane 4 to Lane 5, we concluded that conducting RCA for different time intervals does
+          not significantly affect the results. Additionally, comparing Lane 7 to Lane 5, we observed that
+          a higher sample concentration leads to a greater yield of reverse transcription products.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          Successfully generated a repeated cDNA sequence which is
+          longer than the circRNA sequence for use in the gold nanoparticles colorimetric assay.
+        </p>
+        <h1 class="des-heading2" id="Probe conjugated with gold nanoparticles (AuNPs) detection"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Probe conjugated with gold nanoparticles (AuNPs) detection</h1>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          To determine whether a patient is infected with the
+          disease, we can visually observe the color change of the gold nanoparticle solution under
+          different conditions. According to previous studies, the addition of MgCl2 to the AuNPs solution
+          induces aggregation and a color change (to purple). However, if the probes conjugated on the
+          gold nanoparticles recognize and bind to the RCA product, the long-repeated cDNA sequence
+          prevents AuNPs aggregation and also the color change (red) when MgCl2 is added.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Unfortunately, due to time constraints, we were unable to
+          generate a sufficient amount of long-repeated cDNA for testing with Probe conjugated with gold
+          nanoparticles (AuNPs) detection. Therefore, in this section, we are initially adding RCA NTC
+          solution to Probe-Conjugated Gold Nanoparticles and testing the relationship between the volume
+          of 0.21 M MgCl2 added and the resulting color change. In the future, if we have enough
+          long-repeated cDNA, we will be able to test whether probe-conjugated gold nanoparticles can
+          recognize and bind to it, thereby maintaining the color.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-d2.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure D2. The spectrum of adding MgCl2 to Probe conjugated-AuNP containing RCA solution.
+        </p> 
+        
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-colorimetric-assay/figure-d3.jpg" style="width: 60%">
+        </div>
+        
+        <p class="des-figure">
+          Figure D3. The color of the Probe-Conjugated Gold Nanoparticles solution is influenced by the
+          varying volumes of added 0.21 M MgCl2.
+        </p> 
+       
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          In Figure D2. we can observed a red shift in spectrum after
+          adding MgCl2 to the Probe conjugated-AuNP with no target cDNA. Besides, in Figure D3, a
+          significant color change can be observed when adding 6-8 µL 0.21M MgCl2.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          We find out that 6–8 µL 0.21 M MgCl2 added to the
+          Probe-Conjugated Gold Nanoparticles solution causes the color change and a redshift in spectrum.
+        </p>
+      </div>
+      <script>
+        const expandbutton4 = document.getElementById("expandbutton4");
+        const article4 = document.getElementById("article4");
+
+        expandbutton4.addEventListener("click", function () {
+          if (article4.style.display == "block") {
+            article4.style.display = "none";
+            expandbutton4.style.transform = "rotate(-180deg)";
+          } else {
+            article4.style.display = "block";
+            expandbutton4.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Path E" style="font-size: 30px; padding-top: 6px;">
+          Path E: Access the Functionality of Lateral Flow Test by RPA Products</h1><button class="expandbutton"
+          id="expandbutton5"></button>
+      </div>
+      <div id="article5">
+        <p class="des-paragraph fade_from_right">
+          <b>Sequence design → Cloning → PCR → RPA → PCRD</b>
+        </p>
+        <h1 class="des-heading2" id="Recombinase Polymerase Amplification (RPA)"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Recombinase Polymerase Amplification (RPA)</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Before RT-RPA, the ultimate amplification method of our
+          choice, we adopted only RPA to confirm that the RPA primers we designed can work properly. After
+          the reaction, gel electrophoresis was performed to check whether the band positions of the
+          amplicons represented the same length as our inserts.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-e1.png" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure E1. RPA 2% agarose gel electrophoresis results. Lane 1: Bio-100 Mass DNA Ladder, Lane 2:
+          Insert_0004771+primer 1 (RPA_0004771fw/rv_1), Lane 3 : NTC of Lane 2, Lane 4:
+          Insert_0004771+primer 2 (RPA_0004771fw/rv_2), Lane 5: NTC of Lane 4, Lane 6: X , Lane 7:
+          Insert_0101802+primer 1 (RPA_0101802fw/rv_1), Lane 8 : NTC of Lane 7, Lane 9:
+          Insert_0101802+primer 2 (RPA_0101802fw/rv_2), Lane 10 : NTC of Lane 9.
+        </p>
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          We confirmed the successful amplification of our target circRNA after RPA by verifying the
+          length of the amplicons. However, the electrophoresis result showed that in RPA reaction of
+          Insert_0004771, bands were observed in no template control (NTC) groups, futhermore, the control
+          group and the sample-treated group had the same band positions. We suspect that the reagents
+          might have been contaminated by the sample, leading to this result.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+        <p class="des-paragraph fade_from_right">
+          The RPA primer we designed can function as expected, hence we could get into the next path—using
+          linear RNA, which is the product of in vitro transcription (IVT), to conduct RT (reverse
+          transcription)-RPA.
+        </p>
+
+        <h1 class="des-heading2" id="PCRD"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>PCRD</h1>
+        <p class="des-paragraph fade_from_right">
+          We conducted PCRD lateral flow test using amplicons
+          produced from RT-RPA. (See Path F. PCRD)
+        </p>
+      </div>
+      <script>
+        const expandbutton5 = document.getElementById("expandbutton5");
+        const article5 = document.getElementById("article5");
+
+        expandbutton5.addEventListener("click", function () {
+          if (article5.style.display == "block") {
+            article5.style.display = "none";
+            expandbutton5.style.transform = "rotate(-180deg)";
+          } else {
+            article5.style.display = "block";
+            expandbutton5.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Path F" style="font-size: 25px; padding-top: 8px;">
+          Path F: Conducting RT-RPA Using Linear RNA as template for Lateral Flow Test
+        </h1><button class="expandbutton" id="expandbutton6"></button>
+      </div>
+      <div id="article6">
+        <p class="des-paragraph fade_from_right">
+          <b>Sequence design → Cloning → PCR → IVT → RT-RPA → PCRD</b>
+        </p>
+        <h1 class="des-heading2" id="RT-RPA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>RT-RPA</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>A. RT-RPA Analysis of Serially Diluted
+            Linear RNA Samples</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Since we have ensured that the primers we designed can
+          successfully work in RPA, we conducted a reverse transcription (RT)-RPA to amplify the RNA,
+          which was obtained from in vitro transcription (IVT) of our insert (cDNA) (See Results—CircRNA
+          Synthesis).
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-f1.jpg" style="width: 80%">
+        </div>
+        <p class="des-figure">
+          Figure F1. Perform RT-RPA on a serial dilution of linear RNA samples. Lane 1: No Template
+          Control (NTC); Lane 2: RT-RPA using IVT product of Insert_0004771 (68.2 ng/μL); Lane 3: A
+          10^2-fold dilution of the IVT product from Insert_0004771 (68.2 ng/μL); Lane 4: A 10^4-fold
+          dilution of the IVT product from Insert_0004771 (68.2 ng/μL); Lane 5: A 10^6-fold dilution of
+          the IVT product from Insert_0004771 (68.2 ng/μL); Lane 6: 100 bp DNA Ladder; Lane 7: No Template
+          Control (NTC); Lane 8: RT-RPA of the IVT product from Insert_0101802 (97.8 ng/μL); Lane 9: A
+          10^2-fold dilution of the IVT product from Insert_0101802 (97.8 ng/μL); Lane 10: A 10^4-fold
+          dilution of the IVT product from Insert_0101802 (97.8 ng/μL); Lane 11: A 10^6-fold dilution of
+          the IVT product from Insert_0101802 (97.8 ng/μL).
+        </p>
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          It can be confirmed that reverse transcriptase could effectively work together with RPA in a
+          single step, as indicated by the clear and light band observed in our RT-RPA results.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Additionally, both of the no template control (NTC) using different pair of forward and reverse
+          primers showed bright and clear band. The exist of band in (NTC) may caused by following
+          reason:<br>
+          (1) The contamination of DNA samples in RT-RPA reagents.<br>
+          (2) The formation of self primer-dimer.<br>
+          (3) The formation of hetero primer-dimer between forward and reverse primer.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>B. PCR Analysis of RT-RPA Reagents
+            for DNA samples Contamination</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Since we observed a band in the no template control (NTC)
+          lane of RPA and RT-RPA experiment during gel electrophoresis, we suspected that contamination of
+          the samples ( Insert_0004771 and Insert_0101802) may have contributed to this result. To confirm
+          whether the reagents contained sample contamination, we conducted PCR tests on all RT-RPA
+          reagents, including primers. The PCR tests were performed by utilizing PCR_0101802fw and
+          PCR_0101802rv primers.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-f2.jpg" style="width: 50%">
+        </div>
+        
+        <p class="des-figure">
+          Figure F2. Performance of PCR on the RT-RPA reagents to test for contamination. Lane 1: 100 bp
+          DNA Ladder; Lane 2: Primer free rehydration buffer; Lane 3: RPA_0004771fw_1; Lane 4:
+          RPA_0004771rv_1; Lane 5: RPA_0004771fw_2; Lane 6: RPA_0004771rv_2; Lane 7: RNase Inhibitor; Lane
+          8: dNTP; Lane 9: Magnesium Acetate (MgOAc); Lane 10: Nuclease-free water; Lane 11:
+          ProtoScript®II Reverse Transcriptase.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          By conducting PCR tests on all RT-RPA reagents, the results revealed that bands occurred in Lane
+          2, Lane 4, and Lane 6, corresponding to the reaction using primer-free rehydration buffer,
+          forward primer, or a reverse primer as a sample, respectively. These results indicate the
+          primer-free rehydration buffer and the primers may have been contaminated.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>C. RT-RPA Self-Primer Dimer Testing</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Since we observed a band in the no template control (NTC)
+          lane of the RT-RPA experiment during gel electrophoresis, we suspected that the formation of
+          self-dimer may have caused this result. Therefore, in this experiment, our objective is to add
+          only one primer at once to assess the possibility of self-primer dimer formation during reaction
+          of (NTC).
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-f3.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure F3. Test of Self Primer Dimer. Lane 1: 100 bp DNA Ladder; Lane 2:
+          RPA_0004771fw_1+RPA_0004771rv_1; Lane 3: RPA_0004771fw_2+RPA_0004771rv_2; Lane 4:
+          RPA_0004771fw_1 only; Lane 5: RPA_0004771rv_1 only; Lane 6: RPA_0004771fw_2 only; Lane 7:
+          RPA_0004771rv_2 only.
+        </p>
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          Lane 4, Lane 5, Lane 6, and Lane 7 showed a faint band in the RT-RPA gel electrophoresis result,
+          this may indicate the possibility of self-dimer formation. However, compared to Lane 1 and Lane
+          2, the positions of Lane 4, Lane 5, Lane 6, and Lane 7 are lower. Hence, it is less likely that
+          the prominent band observed in the no template control (NTC) lane of the RT-RPA experiment is a
+          primer's self-dimer.
+        </p>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>D. RT-RPA Hetero-Primer Dimer Testing
+            through NTC Sequencing</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          To determine whether the band observed in the no template
+          control (NTC) lane of the RT-RPA experiment is a result of sample contamination or the formation
+          of hetero-dimer between forward and reverse primer, we conducted a repeat (NTC) of RT-RPA using
+          forward primer RPA_0004771fw_1 and reverse primer RPA_0004771rv_1. Subsequently, we submitted
+          the sample for Sanger sequencing at Genomics (a commercial genome sequencing company in Taiwan)
+          and align the resulting sequence with our insert sequence by NCBI sequence alignment tool.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img
+            src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-f4-sequencing-the-ntc-band.jpg" style="width: 30%">
+        </div>
+        <p class="des-figure">
+          Figure F4. Negative Template Control (NTC) of RT-RPA, using RPA_0004771fw_1 and RPA_0004771rv_1.
+        </p>
+       
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-f5.png" style="width: 80%">
+        </div>
+        <p class="des-figure">
+          Figure F5. Alignment of the Sanger sequencing result with the sequence theory amplified by
+          RPA_0004771fw_1 and RPA_0004771rv_1 primers, which corresponds to Insert_0004771.
+        </p>
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          The result from Sanger sequencing (Figure F5.) indicated a 99% similarity to our target RNA
+          sequence. We have concluded that the band observed in the no template control (NTC) lane is the
+          result of contamination. Therefore, we ordered new primers and primer-free rehydration buffer
+          for further experiments.
+        </p>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>E. RT-RPA New Primer Testing</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Since the band in the no template control (NTC) lane of the
+          RT-RPA experiment during gel electrophoresis is caused by contamination, we used new primers and
+          primer-free rehydration buffer in this experiment.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-f6.jpg" style="width: 30%">
+        </div>
+        <p class="des-figure">
+          Figure F6. NTC of RT-RPA using different primers. Lane 1: 100 bp DNA Ladder; Lane 2: old
+          RPA_0004771fw_2+RPA_0004771rv_2; Lane 3: new RPA_0004771fw_1+RPA_0004771rv_1; Lane 4: new
+          RPA_0004771fw_2+RPA_0004771rv_2.
+        </p>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          Comparing lane 4 with lane 2, there was no band presented in the no template control (NTC) of
+          RT-RPA using the new rehydration buffer and primers. This indicates that the contamination is
+          coming from the rehydration buffer and primers.
+        </p>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>F. Determining the Amplification
+            Threshold of RT-RPA</u></h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          After successfully conducting the no template control (NTC)
+          of RT-RPA, we can now proceed with further experiments. We have diluted our linear RNA sample
+          (generated by IVT) and determined the limit of amplification using RT-RPA. Besides, in this
+          experiment, we added 1.5 μL of both forward and reverse primers (10 μM each) and allowed them to
+          react for 10 minutes.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+        <div class="containerfig">
+          <img
+            src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-f7-gel-electrophoresis-of-diluted-rna-sample-from-rt-rpa.jpg" style="width: 50%">
+        </div>
+        <p class="des-figure">
+          Figure F7. Gel electrophoresis of diluted RNA sample from RT-RPA. Lane 1: 100 bp DNA Ladder,
+          Lane 2: RT-RPA using IVT product of circ_0101802 (385 ng/μL), Lane 3: A 10^4-fold dilution of
+          the IVT product from Insert_0101802 (385 ng/μL); Lane 4: A 10^6-fold dilution of the IVT product
+          from Insert_0101802 (385 ng/μL), Lane 5: A 10^8-fold dilution of the IVT product from
+          Insert_0101802 (385 ng/μL), Lane 6: A 10^10-fold dilution of the IVT product from Insert_0101802
+          (385 ng/μL), Lane 7: A 10^12-fold dilution of the IVT product from Insert_0101802 (385 ng/μL),
+          Lane 8: No template control (NTC).
+        </p>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          As we seen in the gel electrophoresis results, the lower concentration of RNA sample, the
+          lighter its band displays. Additionally, we can found out that the band is very light at
+          diluting the sample solution to 10^-12 times (approximately 3.52*10^-10 ng/μL), thus we
+          speculate that the limit of sample amplification for RT-RPA should be around 3.52*10^-10 ng/μL
+          when we added 1.5 μL of both forward and reverse primer (10 μM) and react for 10 minutes.
+        </p>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test"><u>G. Amplify circRNA by RT-RPA</u></h1>
+      <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+      <p class="des-paragraph fade_from_right">
+        After successfully amplifying linear form RNA through RT-RPA, we switched our samples from linear form RNA to circular form RNA for RT-RPA.
+      </p>
+      <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+      <div class="containerfig">
+        <img
+          src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/20231021rt-rpa.jpg" style="width: 50%">
+      </div>
+      <p class="des-figure">
+        Figure F8. The gel electrophoresis results confirmed the success of the RT-RPA process for circRNA. Lane 1: 100 bp DNA Ladder, Lane 2: No Template Control, Lane 3: Linear form RNA, Lane 4: Circular form RNA
+      </p>
+
+      <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+      <p class="des-paragraph fade_from_right">
+        As we seen in the gel electrophoresis results (Figure F8), both lane 3 and lane 4 have band at the same position, indicate we successfully amplify circRNA through RT-RPA.
+      </p>
+
+        <h1 class="des-heading2" id="PCRD2"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>PCRD</h1>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Description</h1>
+        <p class="des-paragraph fade_from_right">
+          Our outcomes indicated that unnecessary oligonucleotides might form during RT-RPA reactions due
+          to primer-dimers, which remained an unsolved problem. Despite that, we could still conduct
+          lateral flow test with PCRD to confirm whether the customized lateral test strip we designed
+          possessed the ability to catch the labeled-amplicons on it.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Lateral flow test was performed to detect RPA amplicons labeled with digoxigenin (DIG)/biotin
+          and carboxyfluorescein (FAM)/biotin. PCRD cassette (Abington Health) (Figure F8) was used to
+          visualize DIG/biotin or FAM/biotin-labeled amplicons.
+        </p>
+
+        <table>
+          <tr>
+            <th>RT-RPA sample (See Parts_Composite parts for more info)</th>
+            <th>5' modification of primer (See Sequence Design—RPA Primer to learn about primer design)
+            </th>
+            <th>RT-RPA product</th>
+            <th>Corresponding line on the lateral flow strip</th>
+            <th>Antibody type</th>
+          </tr>
+          <tr>
+            <td>Insert_0004771</td>
+            <td>Forward primer: biotin<br>Reverse primer: DIG</td>
+            <td>DIG/biotin labeled-amplicons</td>
+            <td>Test line 1</td>
+            <td>Anti-DIG capture antibody</td>
+          </tr>
+          <tr>
+            <td>Insert_0101802</td>
+            <td>Forward primer: biotin<br>Reverse primer: FAM</td>
+            <td>FAM/biotin labeled-amplicons</td>
+            <td>Test line 2</td>
+            <td>Anti-FAM capture antibody</td>
+          </tr>
+          <tr>
+            <td>/</td>
+            <td>/</td>
+            <td>/</td>
+            <td>Control line (C)</td>
+            <td>Anti-mouse antibody</td>
+          </tr>
+        </table>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/fig-f8.jpg"  style="width: 60%">
+        </div>
+        <p class="des-figure">
+          Fig F8. Composition of a PCRD lateral flow cassette. When the sample is applied to the cassette,
+          the buffer flows down the strip, carrying the carbon-conjugated biotin antibodies and the
+          amplicons with it. If the amplicons are present in the sample, they will bind to the anti-DIG
+          monoclonal antibodies on the test line 1, or anti-FAM antibodies on the test line 2. The carbon
+          particles will accumulate on the test line, making it visible. The rest of carbon-conjugated
+          biotin antibodies will be captured on the C line, which can be served as control.
+        </p>
+
+        <p class="des-paragraph fade_from_right">
+          We utilized the product of RT-RPA directly to conduct
+          lateral flow test. Three kinds of RNA samples were used in RT-RPA reaction: A. Insert_0004771
+          and Insert_0101802 mix, B. Insert_0101802 only, and C. No template control (NTC).
+        </p>
+
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Data</h1>
+
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/results-lateral-flow-test/figure-f9.jpg" style="width: 40%">
+        </div>
+        <p class="des-figure">
+          Fig F9. Results of RT-RPA amplicons identification after 20 min incubation at 39 °C using a
+          PCRD cassette: (A) RT-RPA amplicons of in-vitro transcription (IVT) products of Insert_0004771
+          and Insert_0101802 were added, two black test lines and a control line occured, revealing the
+          successful binding of labeled-amplicons and antibodies on the strip, (B) The second test line
+          corresponded with the RT-RPA product using in-vitro transcribed RNA of Insert_0101802 only, and
+          (C) Only the control line presents when no template control (NTC) is added.
+        </p>
+        
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Analysis</h1>
+        <p class="des-paragraph fade_from_right">
+          In theory, there should be only a control line presented on
+          the lateral flow strip when no target sequences are added (no template control), as shown in
+          Figure F9. Nevertheless, our no template control (NTC) results showed a test line during the
+          lateral flow test. To address this unexpected outcome, we learned from a previous study <a href="#[3]">[3]</a> and
+          concluded that the formation of primer-dimers by the modified reverse and forward primers can
+          lead to false-positive results. Therefore, we plan to design more specific primers in the
+          future.
+        </p>
+
+        <p class="des-paragraph fade_from_right">
+          Our experimental results confirm that when target RNA is
+          present in the RT-RPA reaction, it can be successfully amplified and show a positive result when
+          further tested by PCRD. This observation is consistent with the expected outcome of our assay.
+        </p>
+        <h1 class= "des-heading3 fade_from_left" id="Lateral flow test">Achievement</h1>
+
+        <p class="des-paragraph fade_from_right">
+          We confirmed that the modified RPA primer can work through
+          RT-RPA reaction, and made sure the reverse transcriptase works by conducting RT-RPA reaction. At
+          last, confirming the modified primers we designed can generate labeled amplicons and
+          successfully bind with corresponding antibodies. This was observed by examining the test lines
+          on PCRD.
+        </p>
+
+
+        <script>
+          const expandbutton6 = document.getElementById("expandbutton6");
+          const article6 = document.getElementById("article6");
+
+          expandbutton6.addEventListener("click", function () {
+            if (article6.style.display == "block") {
+              article6.style.display = "none";
+              expandbutton6.style.transform = "rotate(-180deg)";
+            } else {
+              article6.style.display = "block";
+              expandbutton6.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+      </div>
+
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Path G" style="font-size: 30px; padding-top: 6px;">
+          Path G: Amplify CircRNA Utilizing RT-RPA for Lateral Flow Test
+        </h1><button class="expandbutton" id="expandbutton7"></button>
+      </div>
+      <div id="article7">
+        <p class="des-paragraph fade_from_right">
+          Unfortunately, due to time constraints, we were unable to complete this part before Wiki freeze.
+          A significant portion of our time was devoted to determining the amplification threshold of
+          RT-RPA, optimizing reaction times, primer concentrations, and addressing contamination issues.
+          Consequently, amplify circRNAs utilizing RT-RPA will be a key focus part for our future work.
+        </p>
+
+        <script>
+          const expandbutton7 = document.getElementById("expandbutton7");
+          const article7 = document.getElementById("article7");
+
+          expandbutton7.addEventListener("click", function () {
+            if (article7.style.display == "block") {
+              article7.style.display = "none";
+              expandbutton7.style.transform = "rotate(-180deg)";
+            } else {
+              article7.style.display = "block";
+              expandbutton7.style.transform = "rotate(-360deg)";
+            }
+          });
+        </script>
+      </div>
+
+      <div id="Reference">
+        <h1 class="des-ref-heading">Reference</h1>
+        <p class="des-ref-paragraph" id="[1]">
+          [1] Ali, M. M., Kanda, P., Aguirre, S. D., & Li, Y. (2011). Modulation of DNA-modified
+          gold-nanoparticle stability in salt with concatemeric single-stranded dnas for colorimetric
+          bioassay development. <b>Chemistry - A European Journal</b>, <b>17</b>(7), 2052–2056.
+          <a href="https://doi.org/10.1002/chem.201002677"> https://doi.org/10.1002/chem.201002677</a>
+        </p>
+        <p class="des-ref-paragraph" id="[2]">
+          [2] Li, F., Zhang, H., Dever, B., Li, X.-F., & Le, X. C. (2013). Thermal stability of DNA
+          functionalized gold nanoparticles. <b>Bioconjugate Chemistry</b>, <b>24</b>(11), 1790–1797.
+          <a href="https://doi.org/10.1021/bc300687z">https://doi.org/10.1021/bc300687z</a>
+        </p>
+        <p class="des-ref-paragraph" id="[3]">
+          [3] Li, C.-J., Sun, H.-Q., Zhao, W.-X., Wang, X.-Y., Lin, R.-Z., & Yao, Y.-X. (2023). Rapid
+          Assay Using Recombinase Polymerase Amplification and Lateral Flow Dipstick for Identifying
+          Agrilus Mali, a Serious Wood-Boring Beetle of the Western Tianshan Mountains in China.
+        </p>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+{% endblock %}

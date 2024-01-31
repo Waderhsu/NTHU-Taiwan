@@ -1,0 +1,2702 @@
+{% extends "layout.html" %}
+
+{% block title %}Experiments{% endblock %}
+
+{% block page_content %}
+
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/experiments.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/experiments.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Experiment', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "You miss 100% of the shots you don't take.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+          color: aliceblue;
+          /* font-style: unset; */
+          font-size: xx-large;
+          font-weight: 800;
+          letter-spacing: 8px;
+          font-size: 140px;
+          font-family: inherit;">
+            Experiments
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <style>
+        .sidebar ul li {
+            padding: 5px;
+            text-align: center;
+            display: block;
+            font-size: 10px;
+            padding-top: 0.9vh;
+            padding-bottom: 0.9vh;
+        }
+
+        .sidebar ul li a {
+            margin-bottom: 4%;
+        }
+
+        .sidebar {
+            top: 10vh;
+
+        }
+
+
+        .main-right {
+            width: 65%;
+
+        }
+
+        .sideexpandbutton {
+            position: relative;
+            /* width: 10%; */
+            /* display: block; */
+            /* border-radius: 80%; */
+            border-width: 2px;
+            margin-top: -45px;
+        }
+    </style>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+
+                    <li><a id="sidebaritem1" href="#Sequence Design" class="">Sequence Design</a></li>
+                    <li><a id="sidebaritem2" href="#Cloning" class="">Cloning</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+
+                    <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a id="" href="#Ligation">Ligation</a></li>
+                            <li class="sidebaritem_item"><a id="Establishment" href="#Transformation">Transformation</a>
+                            </li>
+                            <li class="sidebaritem_item"><a id="" href="#Colony PCR">Colony PCR</a></li>
+                            <li class="sidebaritem_item"><a id="" href="#Plasmid extraction">Plasmid extraction</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                        const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+                        sideexpandbutton1.addEventListener("click", function () {
+                            if (sidebaritem_item1.style.display == "none") {
+                                sidebaritem_item1.style.display = "block";
+                                sideexpandbutton1.style.transform = "rotate(-180deg)";
+
+
+                            } else {
+                                sidebaritem_item1.style.display = "none";
+                                sideexpandbutton1.style.transform = "rotate(-360deg)";
+
+                            }
+                        });
+                    </script>
+                    <li><a id="sidebaritem3" href="#PCR" class="">All-aspect</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton2"></button>
+
+                    <div id="sidebaritem_item2" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+
+                            <li class="sidebaritem_item"><a id="Establishment" href="#Plasmid PCR">Plasmid PCR</a>
+                            </li>
+                            <li class="sidebaritem_item"><a id="" href="#Insert PCR">Insert PCR</a></li>
+
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton2 = document.getElementById("sideexpandbutton2");
+                        const sidebaritem_item2 = document.getElementById("sidebaritem_item2");
+
+                        sideexpandbutton2.addEventListener("click", function () {
+                            if (sidebaritem_item2.style.display == "none") {
+                                sidebaritem_item2.style.display = "block";
+                                sideexpandbutton2.style.transform = "rotate(-180deg)";
+
+
+                            } else {
+                                sidebaritem_item2.style.display = "none";
+                                sideexpandbutton2.style.transform = "rotate(-360deg)";
+
+                            }
+                        });
+                    </script>
+                    <li><a id="sidebaritem4" href="#In Vitro Transcription (IVT)" class="">In Vitro Transcription
+                            (IVT)</a></li>
+                    <li><a id="sidebaritem5" href="#Circularization" class="">Circularization</a>
+                    </li>
+                    <li><a id="sidebaritem5" href="#CircRNA enrichment" class="">CircRNA enrichment</a>
+                    </li>
+                    <li><a id="sidebaritem5" href="#AuNPs synthesis" class="">AuNPs synthesis</a>
+                    </li>
+                    <li><a id="sidebaritem5" href="#Probe conjugated AuNPs" class="">Probe conjugated AuNPs</a>
+                    </li>
+                    <button class="sideexpandbutton" id="sideexpandbutton3"></button>
+
+                    <div id="sidebaritem_item3" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+
+                            <li class="sidebaritem_item"><a id="Establishment"
+                                    href="#[Option 1] Probe conjugated-AuNP synthesis">[Option 1] Probe
+                                    conjugated-AuNP synthesis</a>
+                            </li>
+                            <li class="sidebaritem_item"><a id=""
+                                    href="#[Option 2] Probe conjugated-AuNP synthesis">[Option 2] Probe
+                                    conjugated-AuNP synthesis</a></li>
+                            <li class="sidebaritem_item"><a id=""
+                                    href="#X-ray photoelectron spectroscopy (XPS) Analysis">X-ray photoelectron
+                                    spectroscopy (XPS) Analysis</a></li>
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton3 = document.getElementById("sideexpandbutton3");
+                        const sidebaritem_item3 = document.getElementById("sidebaritem_item3");
+
+                        sideexpandbutton3.addEventListener("click", function () {
+                            if (sidebaritem_item3.style.display == "none") {
+                                sidebaritem_item3.style.display = "block";
+                                sideexpandbutton3.style.transform = "rotate(-180deg)";
+
+
+                            } else {
+                                sidebaritem_item3.style.display = "none";
+                                sideexpandbutton3.style.transform = "rotate(-360deg)";
+
+                            }
+                        });
+                    </script>
+
+
+                    <li><a id="sidebaritem5" href="#RCA" class="">RCA</a>
+                    </li>
+                    <button class="sideexpandbutton" id="sideexpandbutton4"></button>
+                    <div id="sidebaritem_item4" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+
+                            <li class="sidebaritem_item"><a id="Establishment"
+                                    href="#Using ProtoScript® II Reverse Transcriptase">Using ProtoScript® II
+                                    Reverse Transcriptase</a>
+                            </li>
+                            <li class="sidebaritem_item"><a id="" href="#Using">Using
+                                    Induro® Reverse Transcriptase</a></li>
+
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton4 = document.getElementById("sideexpandbutton4");
+                        const sidebaritem_item4 = document.getElementById("sidebaritem_item4");
+
+                        sideexpandbutton4.addEventListener("click", function () {
+                            if (sidebaritem_item4.style.display == "none") {
+                                sidebaritem_item4.style.display = "block";
+                                sideexpandbutton4.style.transform = "rotate(-180deg)";
+
+
+                            } else {
+                                sidebaritem_item4.style.display = "none";
+                                sideexpandbutton4.style.transform = "rotate(-360deg)";
+
+                            }
+                        });
+                    </script>
+
+                    <li><a id="sidebaritem5" href="#Probe conjugated-AuNP detection" class="">Probe conjugated-AuNP
+                            detection</a>
+                    </li>
+
+                    <li><a id="sidebaritem5" href="#Repeated insert sequence synthesis" class="">Repeated insert
+                            sequence synthesis</a>
+                    </li>
+                    <button class="sideexpandbutton" id="sideexpandbutton5"></button>
+                    <div id="sidebaritem_item5" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+
+                            <li class="sidebaritem_item"><a id="Establishment" href="#Insert digestion">Insert
+                                    digestion</a>
+                            </li>
+                            <li class="sidebaritem_item"><a id="" href="#Insert ligation">Insert ligation</a></li>
+
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton5 = document.getElementById("sideexpandbutton5");
+                        const sidebaritem_item5 = document.getElementById("sidebaritem_item5");
+
+                        sideexpandbutton5.addEventListener("click", function () {
+                            if (sidebaritem_item5.style.display == "none") {
+                                sidebaritem_item5.style.display = "block";
+                                sideexpandbutton5.style.transform = "rotate(-180deg)";
+
+
+                            } else {
+                                sidebaritem_item5.style.display = "none";
+                                sideexpandbutton5.style.transform = "rotate(-360deg)";
+
+                            }
+                        });
+                    </script>
+                    <li><a id="sidebaritem5" href="#Preparation of template for AELA-PCR" class="">Preparation of
+                            template for AELA-PCR</a>
+                    </li>
+                    <button class="sideexpandbutton" id="sideexpandbutton6"></button>
+                    <div id="sidebaritem_item6" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+
+                            <li class="sidebaritem_item"><a id="Establishment" href="#Ligation with vector">Ligation
+                                    with vector</a>
+                            </li>
+                            <li class="sidebaritem_item"><a id="" href="#Transformation">Transformation</a></li>
+                            <li class="sidebaritem_item"><a id="" href="#Colony PCR">Colony PCR</a></li>
+                            <li class="sidebaritem_item"><a id="" href="#Plasmid extraction">Plasmid extraction</a>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton6 = document.getElementById("sideexpandbutton6");
+                        const sidebaritem_item6 = document.getElementById("sidebaritem_item6");
+
+                        sideexpandbutton6.addEventListener("click", function () {
+                            if (sidebaritem_item6.style.display == "none") {
+                                sidebaritem_item6.style.display = "block";
+                                sideexpandbutton6.style.transform = "rotate(-180deg)";
+
+
+                            } else {
+                                sidebaritem_item6.style.display = "none";
+                                sideexpandbutton6.style.transform = "rotate(-360deg)";
+
+                            }
+                        });
+                    </script>
+
+                    <li><a id="sidebaritem5" href="#AELA-PCR" class="">AELA-PCR</a></li>
+                    <li><a id="sidebaritem5" href="#RPA" class="">RPA</a></li>
+                    <li><a id="sidebaritem5" href="#RT-RPA" class="">RT-RPA</a></li>
+                    <li><a id="sidebaritem5" href="#PCRD" class="">PCRD</a></li>
+                    <li><a id="sidebaritem5" href="#Reference" class="">Reference</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Sequence Design">Sequence Design</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+                <p class="des-paragraph fade_from_right">
+                    All necessary DNA sequences for
+                    each step must be designed before beginning the experiment. Please refer to the <a
+                        href="{{ url_for('pages', page='parts') }}" class="home">Parts</a> for more
+                    details.
+                </p>
+            </div>
+            <script>
+                const expandbutton = document.getElementById("expandbutton");
+                const article = document.getElementById("article1");
+
+                expandbutton.addEventListener("click", function () {
+                    if (article.style.display == "block") {
+                        article.style.display = "none";
+                        expandbutton.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article.style.display = "block";
+                        expandbutton.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Cloning">Cloning</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <h1 class="des-heading2" id="Ligation">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Ligation
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">1. Dry bath</p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 2X Reaction Buffer (Thermo Fisher Scientific)<br>
+                    2. pJET1.2/blunt Cloning Vector (50 ng/µL) (Thermo Fisher Scientific)<br>
+                    3. T4 DNA Ligase (400,000 U/mL) (New England Biolabs)<br>
+                    4. Sample (insert)<br>
+                    5. Nuclease-free water (Protech Technology)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Set up the ligation reaction on ice. Vortex briefly and centrifuge for 3-5 s.<br>
+                    <!--table1-->
+                    2. Incubate the ligation mixture at room temperature (22 °C) for 30 min.<br>
+                    3. Use the ligation mixture directly for transformation.
+                </p>
+                <h1 class="des-heading2" id="Transformation">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Transformation
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Dry bath<br>
+                    2. Disposable cell spreaders<br>
+                    3. Incubator
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. DH5-alpha E. coli (New England Biolabs)<br>
+                    2. Sample (ligation product)<br>
+                    3. LB medium plate with ampicillin<br>
+                    4. LB medium with ampicillin (0.1 mg ampicillin / 1 mL LB)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Pipette 100 µL of DH5-alpha E. coli from the stock and then aliquot 50 µL into another
+                    eppendorf tube. Place the tube on ice.
+                    <br>2. Add 5 µL of ligation product to the aliquoted DH5-alpha E. coli, flick the tube, and
+                    incubate it on ice for 25 minutes, flicking gently every ten minutes.
+                    <br>3. Place both tubes in a 42°C dry bath for 45 seconds.
+                    <br>4. In a laminar flow hood, add 1 ml of LB medium with ampicillin to each tube, and incubate
+                    them
+                    at 37°C with shaking for 1 hour.
+                    <br>5. Take 100 µL of the mixture and spread it evenly on a LB medium plate with ampicillin
+                    using
+                    a disposable cell spreaders.
+                    <br>6. Incubate the LB medium plate with ampicillin in an incubator at 37°C for 16 hours.
+                </p>
+                <h1 class="des-heading2" id="Colony PCR">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Colony PCR
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Thermocycler<br>
+                    2. Culture tube<br>
+                    3. Dry bath<br>
+                    4. Incubator
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. LB medium with ampicillin (0.1 mg ampicillin / 1 mL LB)<br>
+                    2. 2X Master Mix (Protech Technology)<br>
+                    3. pJET1.2 Forward Sequencing Primer, 10 µM (Thermo Fischer Scientific)<br>
+                    4. pJET1.2 Reverse Sequencing Primer, 10 µM (Thermo Fischer Scientific)<br>
+                    5. Sample (transformation product)<br>
+                    6. Nuclease-free water (Protech Technology)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Use pipette tips to pick colony, each petri dish choose 4 colonies.
+                    <br>2. Put the colony in 200 µL of LB with ampicillin (0.1 mg ampicillin / 1 mL LB).
+                    <br>3. Shake in a 37°C incubator for 2 hours in preparation for colony PCR.
+                    <br>4. Add the following reagents to PCR tube.
+                    <!--table2-->
+                    <br>5. React in a thermocycler using following setting.(x 35 cycles)
+                    <!--table3-->
+                    <br>6. Perform 1.5% agarose gel electrophoresis.
+                    <br>7. Identify samples with the correct sequence length and no unwanted bands. Then transfer 10
+                    µL
+                    succefully transformed bacteria liquid to 5 mL LB with ampicillin in culture tube.
+                    <br>8. Shake in a 37°C incubator for 16 hours.
+                </p>
+                <h1 class="des-heading2" id="Colony PCR">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Plasmid extraction
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Dry bath<br>
+                    2. Centrifuge
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 50% Glycerol<br>
+                    2. Mini Plus Plasmid DNA Extraction System (Viogene)<br>
+                    3. Sample (colony PCR product)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Take 500 µL of a 16-hour bacterial culture and use it for bacterial cryopreservation. Mix the
+                    500 µL bacterial culture with 500 µL of glycerol in an Eppendorf tube, then store it at -80
+                    °C.<br>
+                    2. Take 1 mL of the remaining 4.5 mL bacterial culture at a time and centrifuge it 1 min at
+                    10,000rpm in Eppendorf tubes. After each centrifugation, discard the supernatant using a
+                    pipette.<br>
+                    3. Add 200 µL Solution1 and pipette it until the cells are completely resuspended.<br>
+                    4. Add 200 µL Solution2 and mix by gently inverting the capped tube 5-6 times. Incubate at
+                    room temperature for 5 min.<br>
+                    5. Add 300 µL Solution3 and mix by gently inverting the capped tube 5-6 times. Incubate at room
+                    temperature for 3 min.<br>
+                    6. Centrifuge it at 10,000 rpm for 5 minutes. You will observe the formation of a dense, white
+                    pellet either along the side or at the base of the tube.<br>
+                    7. Load the spin column into a collection tube, transfer the supernatant from step 6 directly to
+                    spin column, spin for 1 min at 10,000 rpm.<br>
+                    8. Take out the spin column from the collection tube, dispose of the liquid that flows through
+                    it, reinsert the spin column, and then apply 700 µL of washing solution. Centrifuge for 1
+                    minute.<br>
+                    9. Take out the spin column from the collection tube, pour away the liquid, reinsert the spin
+                    column, and then apply 700 µL of washing solution. Centrifuge for 1 minute.<br>
+                    10. Dispose of the filtrate and then centrifuge at 10,000 rpm for 3 minutes to eliminate any
+                    remaining traces of ethanol. Incubate the spin column in a 60 °C oven for 8 minutes.<br>
+                    11. Remove the spin column and place the column in a new Eppendorf tube.<br>
+                    12. Add 50 µL free water into the column. Elute DNA by centrifugation for 1 min and store the
+                    eluted DNA at -20 °C.
+                </p>
+
+            </div>
+            <script>
+                const expandbutton2 = document.getElementById("expandbutton2");
+                const article2 = document.getElementById("article2");
+
+                expandbutton2.addEventListener("click", function () {
+                    if (article2.style.display == "block") {
+                        article2.style.display = "none";
+                        expandbutton2.style.transform = "rotate(-180deg)";
+                    } else {
+                        article2.style.display = "block";
+                        expandbutton2.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="PCR">All-aspect PCR</h1>
+                <button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3">
+                <h1 class="des-heading2" id="Plasmid PCR">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Plasmid PCR
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. PCR tubes<br>
+                    2. Thermocycler
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 2X Master Mix (Protech Technology)<br>
+                    2. Nuclease-free water (Protech Technology)<br>
+                    3. Forward primer (10 μM)<br>
+                    4. Reverse primer (10 μM)<br>
+                    5. Sample (plasmid)<br>
+                    6. Gel/PCR DNA Isolation System (Viogene)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Add the following reagents to PCR tube.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>2X Master Mix</td>
+                        <td>10 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Foward primer</td>
+                        <td>0.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Reverse primer</td>
+                        <td>0.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 20 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>20 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2. React in a thermocycler at following setting.
+                </p>
+                <table>
+                    <tr>
+                        <td>Stage</td>
+                        <td>Temperature</td>
+                        <td>Time</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Denaturation</td>
+                        <td>95 °C</td>
+                        <td>5 min</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Denaturation</td>
+                        <td>95 °C</td>
+                        <td>30 sec</td>
+                        <td rowspan="3">35 cycles</td>
+                    </tr>
+                    <tr>
+                        <td>Annealing</td>
+                        <td>61 °C</td>
+                        <td>30 sec</td>
+                    </tr>
+                    <tr>
+                        <td>Extension</td>
+                        <td>72 °C</td>
+                        <td>1 min</td>
+                    </tr>
+                    <tr>
+                        <td>Extension</td>
+                        <td>72 °C</td>
+                        <td>7 min</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Cooling</td>
+                        <td>4 °C</td>
+                        <td>∞</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    3. Run the plasmid PCR DNA on a 1.5 % agarose gel.<br>
+                    4. Conduct gel purification using Gel/PCR DNA Isolation System followed the provided
+                    protocol.<br>
+                    5. Measure a DNA concentration of the purified product by NanoDrop.
+                </p>
+
+                <h1 class="des-heading2" id="Insert PCR">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Insert PCR
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. PCR tubes<br>
+                    2. Thermocycler
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Pfu Buffer (5 U/µL) (Protech Technology)<br>
+                    2. Pfu Polymerase (5 U/µL) (Protech Technology)<br>
+                    3. Forward primer (10 μM)<br>
+                    4. Reverse primer (10 μM)<br>
+                    5. dNTP (10 mM) (Thermo Fischer Scientific)<br>
+                    6. Sample (template)<br>
+                    7. Gel/PCR DNA Isolation System (VIOGENE)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Add the following reagents to PCR tube.<br>
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>Pfu Buffer</td>
+                        <td>5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Foward primer</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Reverse primer</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>dNTP</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Pfu pol</td>
+                        <td>0.25 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Template (plasmid)</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 50 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>50 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2. React in a thermocycler at following setting.
+                </p>
+                <table>
+                    <tr>
+                        <td>Stage</td>
+                        <td>Temperature</td>
+                        <td>Time</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Denaturation</td>
+                        <td>95 °C</td>
+                        <td>5 min</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Denaturation</td>
+                        <td>95 °C</td>
+                        <td>1 min</td>
+                        <td rowspan="3">35 cycles</td>
+                    </tr>
+                    <tr>
+                        <td>Annealing</td>
+                        <td>61 °C</td>
+                        <td>30 sec</td>
+                    </tr>
+                    <tr>
+                        <td>Extension</td>
+                        <td>68 °C</td>
+                        <td>1 min</td>
+                    </tr>
+                    <tr>
+                        <td>Extension</td>
+                        <td>68 °C</td>
+                        <td>10 min</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Cooling</td>
+                        <td>4 °C</td>
+                        <td>∞</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    3. Run the insert PCR DNA on a 1.5 % agarose gel.<br>
+                    4. Conduct gel purification using Gel/PCR DNA Isolation System followed the provided
+                    protocol.<br>
+                    5. Measure a DNA concentration of the purified product by NanoDrop.
+                </p>
+            </div>
+            <script>
+                const expandbutton3 = document.getElementById("expandbutton3");
+                const article3 = document.getElementById("article3");
+
+                expandbutton3.addEventListener("click", function () {
+                    if (article3.style.display == "block") {
+                        article3.style.display = "none";
+                        expandbutton3.style.transform = "rotate(-180deg)";
+                    } else {
+                        article3.style.display = "block";
+                        expandbutton3.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="In Vitro Transcription (IVT)">
+                    In Vitro Transcription (IVT)
+                </h1><button class="expandbutton" id="expandbutton4"></button>
+            </div>
+            <div id="article4">
+
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Dry bath<br>
+                    2. NanoDrop Spectrophotometers
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Nuclease-free water (Protech Technology)<br>
+                    2. 10X RNA Pol Reaction Buffer (New England Biolabs)<br>
+                    3. NTP (100 mM) (Thermo Fisher Scientific)<br>
+                    4. RNase Inhibitor (40,000 U/mL) (New England Biolabs)<br>
+                    5. DTT (0.1 M) (Thermo Fisher Scientific)<br>
+                    6. T7 RNA Polymerase (50,000 U/µL) (New England Biolabs)<br>
+                    7. GeneJET RNA Cleanup and Concentration Micro Kit (Thermo Fischer Scientific)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Mix the following reagents at room temperature. The T7 RNA polymerase should be added last.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>10X RNA Pol Reaction Buffer</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>NTP</td>
+                        <td>0.1 μL for each</td>
+                    </tr>
+                    <tr>
+                        <td>RNase Inhibitor</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>DTT</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>cDNA (1 μg)</td>
+                        <td>Variable</td>
+                    </tr>
+                    <tr>
+                        <td>T7 RNA poly</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 20 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>20 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2. Incubate at 37 °C for 1 hr.<br>
+                    3. In order to eliminate DNA template used for in vitro transcription (IVT) process, we added DNase
+                    I for DNA degradation.
+                </p>
+                <p class="des-paragraph-item fade_from_right">
+                    <u>DNase I calculation method:</u><br>
+                    a. According to the product information page of Thermo
+                    Fisher<a href="#[1]">[1]</a> two units of DNase I are required to degrade 1 μg of DNA. As a
+                    reference, we could
+                    calculate the amount of DNA to be digested in order to determine the required amount of DNase I
+                    to be added.<br>
+                    b. In the process of in vitro transcription (IVT), we utilize
+                    a fixed amount of DNA template. The weight of the DNA we used is 500 ng. 500 ng = 0.5 μg of DNA;
+                    therefore, the required DNase I is 1 unit. Since the concentration of DNase I is 1 U/μL, the
+                    amount of DNase I needed in this process is 1 μL.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    4. After adding DNase I, incubate the mixture at 37 °C for 15 minutes.<br>
+                    5. Follow the DNase I clean-up protocol of GeneJET RNA Cleanup and Concentration Micro Kit
+                    (Thermo Fischer Scientific) <br>
+                    6. Use NanoDrop to measure the concentration of sample.
+                </p>
+            </div>
+            <script>
+                const expandbutton4 = document.getElementById("expandbutton4");
+                const article4 = document.getElementById("article4");
+
+                expandbutton4.addEventListener("click", function () {
+                    if (article4.style.display == "block") {
+                        article4.style.display = "none";
+                        expandbutton4.style.transform = "rotate(-180deg)";
+                    } else {
+                        article4.style.display = "block";
+                        expandbutton4.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Circularization">Circularization</h1>
+                <button class="expandbutton" id="expandbutton5"></button>
+            </div>
+            <div id="article5">
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. PCR tubes<br>
+                    2. Thermocycler<br>
+                    3. NanoDrop Spectrophotometers
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Sample (IVT product)<br>
+                    2. 18 bp Splint (25 µM)<br>
+                    3. 16 bp Splint (25 µM)<br>
+                    4. 14 bp Splint (25 µM)<br>
+                    5. Pyrophosphatase (1 U/µL)(Thermo Fischer Scientific)<br>
+                    6. T4 RNA ligase 2 (New England Biolabs)<br>
+                    7. T4 RNA ligase 2 Reaction Buffer (New England Biolabs)<br>
+                    8. DNase I (1 U/µL) (Thermo Fischer Scientific)<br>
+                    9. GeneJET Plasmid Miniprep Kit (Thermo Fischer Scientific)<br>
+                    10. RNase-free water (Protech Technology)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+
+                <p class="des-paragraph fade_from_right"><b>Monophosphorylation</b></p>
+                <p class="des-paragraph fade_from_right">
+                    1. In order to monophosphorylate the RNA sample from above-mentioned process, pyrophosphatase is
+                    the enzyme required. According to product page of Thermo Fisher<a href="#[1]">[1]</a>, one unit of
+                    pyrophosphatase
+                    enzyme could catalyzes 1 μmol of inorganic pyrophosphate. As a reference, we could calculate the
+                    mole of RNA to be monophosphorylated, in order to determine the required amount of
+                    pyrophosphatase to be added.<br>
+                    2. The total amount of product could be calculated by following formulas:
+                </p>
+                <p class="des-paragraph-item fade_from_right">
+                    a. Mass of RNA sample: Concentration of RNA × Total volume required to be monophosphorylated = Mass
+                    of RNA sample<br>
+                    b. Mole of RNA sample: (Mass of RNA sample) / (Molecular weight of sequence) = Mole of RNA
+                    sample<br>
+                    c. Pyrophosphatase to be added: Mole of RNA sample (the unit should be convert to μmol) = Unit of
+                    pyrophosphatase enzyme to be added<br>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    3. Incubate the RNA sample that has added monophosphatase at 25°C, for 30 min.<br>
+                    4. Verification of Monophosphorylation:
+                </p>
+                <p class="des-paragraph-item fade_from_right">
+                    a. In order to verify the success of monophosphorylation, we utilize an enzyme, XRN-1. XRN-1 is
+                    an exoribonuclease enzyme that could degrade RNA sequences with a 5' monophosphate group.
+                    Therefore, RNA that is successfully monophosphorylated could be disintegrated by XRN-1.<br>
+                    b. Add the following components for verification: <br>
+                    The sample required is 1 μg, so the volume of sample to be added could be calculate as 1
+                    μg/concentration of monophosphorylated sample.<br>
+                    c. Incubate for 60 minutes at 37 °C.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>XRN-1</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>10X reaction buffer</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>1 μg</td>
+                    </tr>
+                    <tr>
+                        <td>RNase-free water</td>
+                        <td>to 10 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>10 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    5. Follow the protocal of GeneJET Plasmid Miniprep Kit (Thermo Fischer Scientific).<br>
+                    6. Use NanoDrop to measure the concentration of sample.
+                </p>
+                <p class="des-paragraph fade_from_right"><b>Formation of dsRNA</b></p>
+                <p class="des-paragraph fade_from_right">
+                    1. We utilize T4 RNA ligase 2 to back-splice the linear RNA, which requires forming dsRNA using
+                    ssRNA combined with splint.<br>
+                    2. Splint should be added, and the volume could be calculated by following formulas:
+                </p>
+                <p class="des-paragraph-item fade_from_right">
+                    a. Calculate the mole of our ssRNA product: Concentration of RNA × Volume of ssRNA product ÷
+                    Molecular weight of the sequence = Mole of ssRNA product (the unit should be convert to pmol)<br>
+                    b. Calculate the mole of splint should be added: Since the molar ratio of splint : ssRNA
+                    should be 2 : 1, the mole of splint = mole of ssRNA × 2.<br>
+                    c. Calculate the volume of splint should be added: The mole of splint ÷ Concentration of the
+                    splint = Volume of splint
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    3. Incubate the mixture at 95°C for 2 min and turn off thermocycler to let it cool down for 1.5 hr.
+                </p>
+                <p class="des-paragraph fade_from_right"><b>Back splicing</b></p>
+                <p class="des-paragraph fade_from_right">
+                    1. Calculate the total volume of dsRNA product from last step: Volume of splint + Volume of ssRNA =
+                    Volume of dsRNA product.<br>
+                    2. Calculate the concentration of dsRNA mixture: Mole of ssRNA product ÷ Volume of dsRNA product =
+                    Concentration of dsRNA mixture<br>
+                    3. Calculate the volume of dsRNA product required for circularization: The ideal mole of
+                    circularization reagent is 20 µmol. So we could calculate the required volume of dsRNA product by 20
+                    µmol ÷ Concentration of dsRNA mixture.<br>
+                    4. Add the components as following chart:
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>10X T4 RNA ligase 2 Reaction Buffer</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>T4 RNA ligase 2</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>dsRNA product</td>
+                        <td>Variable</td>
+                    </tr>
+                    <tr></tr>
+                        <td>RNase-free water</td>
+                        <td>to 20 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>20 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    5. Incubate the mixture at 25°C for 1hr.<br>
+                    6. In order to eliminate splint DNA used in circularization process, we add DNase I for DNA
+                    degradation.<br>
+                </p>
+                <p class="des-paragraph-item fade_from_right">
+                    a. Two units of DNase I is required to degrade 1 μg of DNA. As a reference, we could calculate
+                    the amount of splint DNA to be digested, in order to determine the required amount of DNase I to
+                    be added.<br>
+                    b. Calculate the mass of the added splint DNA : In original tube of splint, it indicates the
+                    volume and mass of splint. By these two value, we could calculate the mass of splint (µg) per
+                    volume (µL). Then the volume of added splint DNA could be calculate by mass (µg) of splint per
+                    volume (µL) × Volume of splint added = Mass of added splint DNA (µg)<br>
+                    c. Calculate the DNase I should be added: Mass of added splint DNA (μg) × 2 = Unit of DNase
+                    should be added.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    7. Follow the DNase I clean-up protocol of GeneJET RNA Cleanup and Concentration Micro Kit
+                    (Thermo Fischer Scientific).
+                </p>
+            </div>
+            <script>
+                const expandbutton5 = document.getElementById("expandbutton5");
+                const article5 = document.getElementById("article5");
+
+                expandbutton5.addEventListener("click", function () {
+                    if (article5.style.display == "block") {
+                        article5.style.display = "none";
+                        expandbutton5.style.transform = "rotate(-180deg)";
+                    } else {
+                        article5.style.display = "block";
+                        expandbutton5.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="CircRNA enrichment">CircRNA enrichment</h1>
+                <button class="expandbutton" id="expandbutton6"></button>
+            </div>
+            <div id="article6">
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Dry bath<br>
+                    2. E-Gel™ Power Snap Electrophoresis System (Invitrogen™)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. RNase R (10 U/μl) (abcam)<br>
+                    2. RNase inhibitor (40,000 U/ml) (New England Biolabs)<br>
+                    3. 10X RNase R Reaction Buffer (abcam)<br>
+                    4. Nuclease-free water (Protech Technology)<br>
+                    5. Low range RNA ladder or Century™-Plus RNA Markers (Thermo Fischer Scientific)<br>
+                    6. 2X RNA loading dye (New England Biolabs)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right"><b>RNase R degradation</b></p>
+                <p class="des-paragraph fade_from_right">1. RNase R - Eliminate linear form RNA:</p>
+                <p class="des-paragraph-item fade_from_right">
+                    After the circularization process, we are supposed to
+                    transform all the linear RNA into circRNA. However, research related to circularization has not
+                    yet achieved a 100% circularization rate. Therefore, in order to obtain pure circRNA, we use
+                    RNase R to eliminate failed circularization products, which are linear RNAs, to get a higher
+                    percentage of circRNA for further experiments.
+                </p>
+                <p class="des-paragraph fade_from_right">2. Calculate RNase R required for degrading linear RNA:</p>
+                <p class="des-paragraph-item fade_from_right">
+                    a. According to product information page of Abcam<a href="#[3]">[3]</a>, one unit of RNase R could
+                    convert 1 µg of
+                    poly(A) into nucleotides. As a reference, we should calculate the total mass of RNA for further
+                    degradation.<br>
+                    b. Mass of total RNA sample: Concentration of RNA (calculated by previous step by Nanodrop)
+                    × Total volume of RNA = Mass of total RNA sample.<br>
+                    c. Unit of RNase R to be added: Mass of total RNA sample (the unit should be convert to μg) =
+                    Unit of RNase R to be added<br>d. Volume of RNase R to be added: According to Abcam website[4],
+                    concentration of RNase R is 10 U/µL, so the volume of RNase R to be added = Unit of RNase R÷10.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    3. Add the following components:
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>RNA sample</td>
+                        <td>1 μL to 10 μL</td>
+                    </tr>
+                    <tr>
+                        <td>RNase R</td>
+                        <td>0.2 μL to 2 μL (according to RNA sample)</td>
+                    </tr>
+                    <tr>
+                        <td>RNase Inhibitor</td>
+                        <td>0.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>10X RNase R Reaction Buffer/td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 20 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>20 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    4. Incubate the mixture at 37°C for 2hr.<br>
+                    5. Follow protocol of GeneJET Plasmid Miniprep Kit (Thermo Fischer Scientific).
+                </p>
+                <p class="des-paragraph fade_from_right"><b>E-gel EX electrophoresis</b></p>
+                <p class="des-paragraph fade_from_right"><u>Sample preparation</u></p>
+                <p class="des-paragraph fade_from_right">
+                    1. Prepare the sample and mix it with dye in the ratio of one to one.<br>
+                    2. There are ten wells in one E-Gel EX cassette. If the number of loading samples is less than ten,
+                    the empty wells should be filled with water and dye in a one-to-one ratio.<br>
+                    3. The RNA ladder with dye and samples with dye should all be denatured before loading them into
+                    E-Gel EX cassette wells. For RNA ladder denaturation, it has to be denatured at 90 °C for 2 minutes.
+                    While for the denature of the sample, it has to go under 65 °C for 15 minutes.
+                </p>
+                <p class="des-paragraph fade_from_right"><u>Operation</u></p>
+                <p class="des-paragraph fade_from_right">
+                    1. Open up the Thermo Fisher Scientific E-Gel EX package.<br>
+                    2. Take out the E-Gel EX cassette and place it into the E-Gel Power Snap System. Make sure the
+                    electrode is placed correctly.<br>
+                    3. Make sure that the lid of the E-Gel EX cassette has been removed before loading the sample.<br>
+                    4. After the sample has all been loaded, close the lid of the E-Gel Power Snap System.<br>
+                    5. Turn on the E-Gel Power Snap System and set the options and parameters according to your
+                    experiment.<br>
+                    6. After the setting is done, press start to run gel.<br>
+                    7. The results can be observed under the E-Gel Power Snap System hood simultaneously during the run.
+                </p>
+            </div>
+            <script>
+                const expandbutton6 = document.getElementById("expandbutton6");
+                const article6 = document.getElementById("article6");
+
+                expandbutton6.addEventListener("click", function () {
+                    if (article6.style.display == "block") {
+                        article6.style.display = "none";
+                        expandbutton6.style.transform = "rotate(-180deg)";
+                    } else {
+                        article6.style.display = "block";
+                        expandbutton6.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="AuNPs synthesis">AuNPs synthesis</h1>
+                <button class="expandbutton" id="expandbutton7"></button>
+            </div>
+            <div id="article7">
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Two-neck flask<br>
+                    2. Liebig condenser<br>
+                    3. Heating mantle<br>
+                    4. Hot plate/magnetic stirrer<br>
+                    5. Thermometer<br>
+                    6. Automatic pipette<br>
+                    7. Stir Bar<br>
+                    8. 50 mL centrifuge tubes
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. HAuCl<sub>4</sub> powder<br>
+                    2. Deionized water<br>
+                    3. 1% Sodium citrate<br>
+                    4. Aluminum foil
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 3.1 mM HAuCl<sub>4</sub> 5.69 mL + 14.11 mL deionized water mixed in two-neck flask, put a
+                    magnetic
+                    stir bar in the two-neck flask.<br>
+                    2. Heat it in a heating mantle until boiling (130 °C, ocean sand, approximately 10 min), while
+                    gently stirring it (60 rpm). <b>*Note: Put the condenser at one of the neck, the other neck closed
+                        by a stopper (Aluminum
+                        foil).</b><br>
+                    3. Turn the stir to 400 rpm.<br>
+                    4. Add 2.4 mL 1% sodium citrate in the two-neck flask (remember to add it all at once!).<br>
+                    5. When the color changes into burgundy red, keep heating for 10-15 min.<br>
+                    6. Remove the heating mantle, continue stirring.<br>
+                    7. After cooling down, pour all into a centrifugation tube.<br>
+                    8. Test it with NanoDrop spectrophotometer, its peak wavelength will be close to 520 nm.
+                </p>
+                <h1 class="des-heading3 fade_from_left">SEM/EDS Analysis</h1>
+                <p class="des-paragraph fade_from_right"><b>Equipment</b></p>
+                <p class="des-paragraph-item fade_from_right">
+                    1. Diamond glass cutter<br>
+                    2. 250 mL beaker<br>
+                    3. Ultrasonic cleaner<br>
+                    4. Laboratory oven<br>
+                    5. Vacuum dryer<br>
+                    6. SEM-IT800<br>
+                    7. IT800-EDS
+                </p>
+                <p class="des-paragraph fade_from_right"><b>Consumables</b></p>
+                <p class="des-paragraph-item fade_from_right">
+                    1. Silicon wafer<br>
+                    2. Dish detergent<br>
+                    3. Ethanol<br>
+                    4. Acetone<br>
+                    5. Petri dish
+                </p>
+                <p class="des-paragraph fade_from_right"><b>Protocol</b></p>
+                <p class="des-paragraph-item fade_from_right"><u>Sample Preparation</u></p>
+                <p class="des-paragraph-item fade_from_right">
+                    1. Cut the silicon wafer to approximately 0.4 cm*0.4 cm square with a diamond glass cutter.<br>
+                    2. Put the silicon wafer into a clean beaker. Wash the silicon wafer with diluted dish detergent
+                    in an ultrasonic cleaner for 12 minutes.<br>
+                    3. Transfer the silicon wafer to another clean beaker. Wash the silicon wafer with ddH2O in an
+                    ultrasonic cleaner for 12 minutes. Repeat this step three times.<br>
+                    4. Transfer the silicon wafer to another clean beaker. Wash the silicon wafer with ethanol in an
+                    ultrasonic cleaner for 12 minutes.<br>
+                    5. Transfer the silicon wafer to another clean beaker. Wash the silicon wafer with acetone in an
+                    ultrasonic cleaner for 12 minutes.<br>
+                    6. Transfer the silicon wafer to another clean beaker. Wash the silicon wafer with ddH2O in an
+                    ultrasonic cleaner for 12 minutes.<br>
+                    7. Transfer it to a clean petri dish. Dry it in an oven.<br>
+                    8. Drop 1 µL of nanoparticles sample on a silicon wafer.<br>
+                    9. Put it in a vacuum dryer for 1-2 hours, confirm the sample is completely dry.
+                </p>
+                <p class="des-paragraph-item fade_from_right"><u>Analysis</u></p>
+                <p class="des-paragraph-item fade_from_right">
+                    1. Using SEM-IT800 to observe the shape of gold nanoparticles (AuNPs) and measure their
+                    diameter. Additionally, utilizing IT800-EDS to analyze the elemental composition and
+                    distribution in the sample.
+                </p>
+            </div>
+            <script>
+                const expandbutton7 = document.getElementById("expandbutton7");
+                const article7 = document.getElementById("article7");
+
+                expandbutton7.addEventListener("click", function () {
+                    if (article7.style.display == "block") {
+                        article7.style.display = "none";
+                        expandbutton7.style.transform = "rotate(-180deg)";
+                    } else {
+                        article7.style.display = "block";
+                        expandbutton7.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Probe conjugated AuNPs">Probe conjugated AuNPs</h1>
+                <button class="expandbutton" id="expandbutton8"></button>
+            </div>
+            <div id="article8">
+                <h1 class="des-heading2" id="[Option 1] Probe conjugated-AuNP synthesis">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>[Option 1] Probe conjugated-AuNP synthesis
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Disposable scintillation vials<br>
+                    2. Centrifuge<br>
+                    3. 1.5 mL microcentrifuge tube
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Gold nanoparticles (3 mL, 36 pmol, O.D. = 3.24)<br>
+                    2. Deionized water<br>
+                    3. 1M Tris-HCl (pH 7.5)<br>
+                    4. 1 M NaCl<br>
+                    5. 10 mM TCEP<br>
+                    6. DNA probes (1 mM)<br>
+                    7. ddH2O<br>
+                    8. 500 mM acetate buffer (pH 5.2)<br>
+                    9. 1M NaCl<br>
+                    10. Binding buffer (3 mL, 20 mM Tris-HCl, pH 7.5, 100 mM NaCl)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Soak two disposable scintillation vials (20 mL volume) in 12 M NaOH for 1 hr at room
+                    temperature. Rinse the vials with copious amounts of deionized water.<br>
+                    2. Prepare 10 mM TCEP<br>
+                    3. Pipette 1.8 µL of 1 mM DNA, 7.2 μL ddH2O into a 1.5 mL microcentrifuge tube.<br>
+                    4. Add 1 μL of 500 mM acetate buffer (pH 5.2) and 1.5 µL of 10 mM TCEP to each tube to activate
+                    the thiol-modified DNA. Incubate the sample at room temperature for 1 hr.<br>
+                    5. Gold nanoparticles (3 mL, O.D.= 3.24) was incubated at room temperature with the thiol-modified
+                    DNA oligonucleotide (1800 pmol) for 24 hr.<br>
+                    6. Tris-HCl (30 μL, 1 M, pH 7.5; all pH values were measured at 23 °C) and an aqueous solution
+                    of NaCl (270 μL, 1 M) were added, mixed, and incubated at RT for another 24 h.<br>
+                    7. Tris-HCl (15 μL, 1M, pH 7.5) and aqueous solution of NaCl (50 μL, 1M) were added and further
+                    incubated for 24 h.<br>
+                    8. The aged AuNPs were isolated by centrifugation at 15,000 g at RT for 10~30 mins, re-suspended
+                    in the binding buffer, and stored at RT.
+                </p>
+                <h1 class="des-heading2" id="[Option 2] Probe conjugated-AuNP synthesis">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>[Option 2] Probe conjugated-AuNP synthesis
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Disposable scintillation vials<br>
+                    2. Centrifuge<br>
+                    3. 1.5 mL microcentrifuge tube
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 1 mM DNA<br>
+                    2. TCEP (10mM)<br>
+                    3. 12 M NaOH<br>
+                    4. 500 mM acetate buffer (pH 5.2)<br>
+                    5. Gold nanoparticles (O.D.=3.5)<br>
+                    6. Nuclease-free water (Protech Technology)<br>
+                    7. 500 mM Tris acetate (pH 8.2) buffer<br>
+                    8. 1 M NaCl<br>
+                    9. Binding buffer (20 mm Tris-HCl, pH 7.5, 100 mm NaCl)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Soak two disposable scintillation vials (20 mL volume) in 12 M NaOH for 1 hr at room
+                    temperature. Rinse the vials with a copious amount of deionized water.<br>
+                    2. Prepare 10 mM TCEP<br>
+                    3. Pipette 9 µL of 1 mM DNA probe into a 1.5 mL microcentrifuge tube.<br>
+                    4. Add 1 µL of 500 mM acetate buffer (pH 5.2) and 1.5 µL of 10 mM TCEP to each tube to activate
+                    the thiol-modified DNA. Incubate the sample at room temperature for 1 hr.<br>
+                    5. Transfer 3 mL of the already prepared gold nanoparticles (O.D. value 3.5) to each of the two
+                    NaOH-treated glass vials, and then add the TCEP-treated thiol DNA with gentle shaking by hand
+                    (or pipetting), and then mix the solution by stir bar for 16 hr (avoid light).<br>
+                    6. Add 30 µL of 500 mM Tris acetate (pH 8.2) buffer dropwise to each vial with gentle hand
+                    shaking. The final Tris acetate concentration is 5 mM.<br>
+                    7. Add 300 µL of 1 M NaCl dropwise to each vial with gentle hand shaking. Store the two vials in
+                    a drawer for at least another day before use (avoid light).<br>
+                    8. Centrifuge at 10,000 rpm, 20 mins. (The centrifugation condition might change.) <b>
+                        *Note: Adjust the centrifugation condition (duration and/or speed): The supernatant after
+                        centrifugation should be as transparent as possible, instead of a pink color. Also, there
+                        shouldn't be any black dots remaining on the eppendorf's wall, which indicates there's
+                        unfavorable aggregation of gold nanoparticles.</b><br>
+                    9. Remove the supernatant, resuspend with 1 mL of binding buffer.
+                </p>
+                <h1 class="des-heading2" id="Plasmid PCR">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>X-ray photoelectron spectroscopy (XPS) Analysis
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Diamond glass cutter<br>
+                    2. 250 mL beaker<br>
+                    3. Ultrasonic cleaner<br>
+                    4. Oven<br>
+                    5. Vacuum dryer<br>
+                    6. High resolution X-ray Photoelectron Spectrometer (ULVAC-PHI, PHI Quantera Ⅱ)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Silicon wafer<br>
+                    2. Dish detergent<br>
+                    3. Ethanol<br>
+                    4. Acetone<br>
+                    5. Petri dish
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right"><b>Sample Preparation</b></p>
+                <p class="des-paragraph fade_from_right">
+                    1. Cut the silicon wafer to approximately 0.8 cm*0.8 cm square with a diamond glass cutter.<br>
+                    2. Put the silicon wafer in a clean beaker. Wash the silicon wafer with diluted dish detergent
+                    in an ultrasonic cleaner for 12 minutes.<br>
+                    3. Transfer the silicon wafer to another clean beaker. Wash the silicon wafer with ddH2O in an
+                    ultrasonic cleaner for 12 minutes. Repeat this step three times.<br>
+                    4. Transfer the silicon wafer to another clean beaker. Wash the silicon wafer with ethanol in an
+                    ultrasonic cleaner for 12 minutes.<br>
+                    5. Transfer the silicon wafer to another clean beaker. Wash the silicon wafer with acetone in an
+                    ultrasonic cleaner for 12 minutes.<br>
+                    6. Transfer the silicon wafer to another clean beaker. Wash the silicon wafer with ddH2O in an
+                    ultrasonic cleaner for 12 minutes.<br>
+                    7. Transfer it to a clean Petri dish. Dry it in an oven.<br>
+                    8. Drop 30 µL of nanoparticles sample on a silicon wafer.<br>
+                    9. Put it in a vacuum dryer for 1-2 hours, confirm the sample is completely dry.<br>
+                    10. Drop 30 µL of nanoparticles sample on a silicon wafer.<br>
+                    11. Put it in a vacuum dryer for 1-2 hours, confirm the sample is completely dry.
+                </p>
+                <p class="des-paragraph fade_from_right"><b>Analysis</b></p>
+                <p class="des-paragraph fade_from_right">
+                    1. Using High resolution X-ray Photoelectron Spectrometer (ULVAC-PHI, PHI Quantera Ⅱ) to analyze
+                    the elemental composition and distribution in the sample.
+                </p>
+            </div>
+            <script>
+                const expandbutton8 = document.getElementById("expandbutton8");
+                const article8 = document.getElementById("article8");
+
+                expandbutton8.addEventListener("click", function () {
+                    if (article8.style.display == "block") {
+                        article8.style.display = "none";
+                        expandbutton8.style.transform = "rotate(-180deg)";
+                    } else {
+                        article8.style.display = "block";
+                        expandbutton8.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="RCA">RCA</h1>
+                <button class="expandbutton" id="expandbutton9"></button>
+            </div>
+            <div id="article9">
+                <h1 class="des-heading2" id="Using ProtoScript® II Reverse Transcriptase">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Using ProtoScript® II Reverse Transcriptase
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Thermocycler
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. ssRNA ladder (500-9000 bp) (New England Biolabs)<br>
+                    2. Primer 1 (50 μM)<br>
+                    3. Primer 2 (50 μM) <b>*Note: We adopted two primers which differ in sequence and thus the binding
+                        site on the
+                        circRNA, with the attempt to increase the efficiency of RCA.</b><br>
+                    4. dNTP (10 μM) (Thermo Fisher Scientific)<br>
+                    5. 5X ProtoScript II Reaction Buffer (New England Biolabs)<br>
+                    6. ProtoScript® II Reverse Transcriptase (200 U/µL) (New England Biolabs)<br>
+                    7. 0.1 M DTT (Thermo Fisher Scientific)<br>
+                    8. RNase Inhibitor (40 U/mL) (New England Biolabs)<br>
+                    9. Sample 1 (circRNA) (~50 ng)<br>
+                    10. Sample 2 (IVT product, linear RNA) (~50 ng)<br>
+                    11. Nuclease-free water (Protech Technology)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Add the following components. (We employed products generated from circularization and IVT to
+                    compare the differences between RCA products of circular and linear RNAs, by observing gel
+                    electrophoresis result.)
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>CircRNA (variable)</td>
+                        <td>Linear RNA (variable)</td>
+                    </tr>
+                    <tr>
+                        <td>Primer 1</td>
+                        <td>2 μL</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Primer 2</td>
+                        <td>2 μL</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>dNTP</td>
+                        <td>1 μL</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 10 μL</td>
+                        <td>to 10 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>10 μL</td>
+                        <td>10 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2. Denature sample RNA & primers for 5 minutes at 65 °C. Spin briefly and put promptly on ice.<br>
+                    3. Add the following components to the denatured reaction.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>5X ProtoScript 2 RT Reaction Buffer</td>
+                        <td>4 μL</td>
+                    </tr>
+                    <tr>
+                        <td>0.1 M DTT</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>ProtoScript II RT</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>RNase Inhibitor</td>
+                        <td>0.2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 10 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>10 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    4. Incubate the 20 μL RCA reaction in a thermocycler at the following settings.
+                </p>
+                <table>
+                    <tr>
+                        <td>Temperature</td>
+                        <td>Time</td>
+                    </tr>
+                    <tr>
+                        <td>42 °C</td>
+                        <td>60 min</td>
+                    </tr>
+                    <tr>
+                        <td>65 °C</td>
+                        <td>20 min</td>
+                    </tr>
+                    <tr>
+                        <td>4 °C</td>
+                        <td>∞</td>
+                    </tr>
+                </table>
+                <p class="des-note" style="text-align: center;">**Note: React at 42 °C for one hour, then inactivate the enzyme at 65 °C for 20
+                    minutes.**</p>
+                <p class="des-paragraph fade_from_right">
+                    5. Pipet 1 μL ssRNA ladder and 9 μL RNA loading dye in a PCR tube, incubate at 90 °C for 2
+                    minutes, then put it on ice for 1~2 mins. <br>
+                    6. Mix 15 μL RCA product with 3 μL dye. <br>
+                    7. Run gel electrophoresis to confirm the size. <br>
+                    8. The remaining cDNA product should be stored at -20 °C.
+                </p>
+                <h1 class="des-heading2" id="Using">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Using Induro® Reverse Transcriptase
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Thermocycler
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Primer 1 (50 μM) <br>
+                    2. Primer 2 (50 μM) <b>*Note: We adopted two primers which differ in sequence and thus the binding
+                        site on the
+                        circRNA, with the attempt to increase the efficiency of RCA.</b><br>
+                    3. dNTP (10 mM) (Thermo Fisher Scientific) <br>
+                    4. Induro® RT Reaction Buffer (New England Biolabs) <br>
+                    5. Induro® Reverse Transcriptase (200,000 U/mL) (New England Biolabs) <br>
+                    6. RNase inhibitor (New England Biolabs) <br>
+                    7. ssRNA ladder (New England Biolabs) <br>
+                    8. RNA loading dye (New England Biolabs) <br>
+                    9. Nuclease-free water (Protech Technology) <br>
+                    10. Sample (circRNA) (~50 ng) <br>
+                    11. Sample (IVT product, linear RNA) (~50 ng)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Add the following components. (We employ products generated from circularization and IVT to
+                    compare the differences between RCA products of circular and linear RNAs, by observing gel
+                    electrophoresis result.)
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>CircRNA (variable)</td>
+                        <td>Linear RNA (variable)</td>
+                    </tr>
+                    <tr>
+                        <td>Primer 1</td>
+                        <td>2 μL</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Primer 2</td>
+                        <td>2 μL</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>dNTP</td>
+                        <td>1 μL</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 10 μL</td>
+                        <td>to 10 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>10 μL</td>
+                        <td>10 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2. Denature at 65 °C, 5 min and keep on ice for 1~2 mins.<br>
+                    3. Add the following components to the denatured reaction.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>5X ProtoScript 2 RT Reaction Buffer</td>
+                        <td>4 μL</td>
+                    </tr>
+                    <tr>
+                        <td>RNase inhibitor</td>
+                        <td>0.2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Induro RT</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>4.8 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>10 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    4. Incubate at 60 °C, 15 mins, then cool down at 4 °C. <br>
+                    5. Pipet 1 μL ssRNA ladder and 9 μL RNA loading dye into a PCR tube, incubate at 90 °C for 2
+                    minutes, then put it on ice for 1~2 mins. <br>
+                    6. Mix 15 μL RCA product with 3 μL dye. <br>
+                    7. Run agarose gel electrophoresis to check the size of the RCA product. <br>
+                    8. The cDNA product should be stored at -20 °C.
+                </p>
+            </div>
+            <script>
+                const expandbutton9 = document.getElementById("expandbutton9");
+                const article9 = document.getElementById("article9");
+
+                expandbutton9.addEventListener("click", function () {
+                    if (article9.style.display == "block") {
+                        article9.style.display = "none";
+                        expandbutton9.style.transform = "rotate(-180deg)";
+                    } else {
+                        article9.style.display = "block";
+                        expandbutton9.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Probe conjugated-AuNP detection">Probe conjugated-AuNP detection</h1>
+                <button class="expandbutton" id="expandbutton11"></button>
+            </div>
+            <div id="article11">
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. SPECTROstar Nano (UV/Vis spectrometer) <br>
+                    2. Camera (smartphone) <br>
+                    3. Cuvettes
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 0.21 M MgCl<sub>2</sub><br>
+                    2. RCA solution with no target<br>
+                    3. RCA solution with target (circRNA)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right"><b>RCA solution with no target</b></p>
+                <p class="des-paragraph fade_from_right">
+                    1. Dilute probe conjugated-AuNP solution O.D. to 2.56. Conduct UV-Vis spectroscopy by SPECTROstar
+                    Nano.<br>
+                    2. Pipet 180 µL of probe conjugated-AuNP solution into a cuvette. Add 20 µL of RCA with NTC (no
+                    template control) solution. Use SPECTROstar Nano to conduct UV-Vis spectroscopy to compare the
+                    probe-conjugated AuNP solution with the one without the addition of RCA solution (with no
+                    target). Confirm that there was no redshift in the spectrum or aggregation of the gold
+                    nanoparticles.<br>
+                    3. Add 1 µL 0.21 M MgCl<sub>2</sub>, react for 2 minutes during each interval. Take a photo and
+                    conduct
+                    UV-Vis spectroscopy by SPECTROstar Nano.<br>
+                    4. Repeat step 3 for multiple times until the solution undergoes a noticeable color change
+                    and a
+                    redshift in the spectrum. Record the volume of MgCl<sub>2</sub> added.
+                </p>
+                <p class="des-paragraph fade_from_right"><b>RCA solution with target</b></p>
+                <p class="des-paragraph fade_from_right">
+                    1. Dilute probe conjugated-AuNP solution O.D. to 2.56. Conduct UV-Vis spectroscopy by SPECTROstar
+                    Nano. <br>
+                    2. Pipet 180 µL probe conjugated-AuNP solution to a cuvette. Add 20 µL RCA solution containing
+                    RCA amplicons. Use SPECTROstar Nano to conduct UV-Vis spectroscopy to compare the probe
+                    conjugated-AuNP solution with the one without addition of RCA solution. Confirm that there was
+                    no redshift in the spectrum or aggregation of the gold nanoparticles. <br>
+                    3. Add the same volume of 0.21 M MgCl<sub>2</sub> in the "RCA solution with no target" experiment.
+                    Let it
+                    react for 2 minutes. Take a photo and conduct UV-Vis spectroscopy by SPECTROstar Nano. <br>
+                    4. Confirm the target exists or not by observing the color change after adding nanoparticles
+                    and
+                    MgCl<sub>2</sub> to the RCA solution.
+                </p>
+            </div>
+            <script>
+                const expandbutton11 = document.getElementById("expandbutton11");
+                const article11 = document.getElementById("article11");
+
+                expandbutton11.addEventListener("click", function () {
+                    if (article11.style.display == "block") {
+                        article11.style.display = "none";
+                        expandbutton11.style.transform = "rotate(-180deg)";
+                    } else {
+                        article11.style.display = "block";
+                        expandbutton11.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Repeated insert sequence synthesis">Repeated insert sequence synthesis</h1>
+                <button class="expandbutton" id="expandbutton10"></button>
+            </div>
+            <div id="article10">
+                <h1 class="des-heading2" id="Insert digestion">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Insert digestion
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Dry bath
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 10X tangle buffer (Thermo Fisher Scientific)<br>
+                    2. Restriction enzyme: BamH1 (10 U/µL) (Thermo Fisher Scientific)<br>
+                    3. Restriction enzyme: HindIII (10 U/µL) (Thermo Fisher Scientific)<br>
+                    4. Nuclease free water (Protech Technology)<br>
+                    5. Sample (insert)<br>
+                    6. Gel/PCR DNA Isolation System (VIOGENE)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Preheat dry bath to 37 °C<br>
+                    2. Set up the digestion reaction on ice. Vortex briefly and spin down for 3-5 s.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>10X tangle Buffer</td>
+                        <td>10 μL (2X ends)</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>~1 μg</td>
+                    </tr>
+                    <tr>
+                        <td>BamH1</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>HindIII</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 50 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>50 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    3. Incubate the digestion mixture at 37 °C for 1 hr.<br>
+                    4. Run the digested DNA on a 1.5 % agarose gel.<br>
+                    5. Conduct gel purification using Gel/PCR DNA Isolation System followed the provided
+                    protocol.<br>
+                    6. Measure a DNA concentration of the purified product by NanoDrop. (About 50 ng is needed for
+                    the following procedure)<br>
+                    7. Use the purified product directly for ligation.
+                </p>
+                <h1 class="des-heading2" id="Insert ligation">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Insert ligation
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    NA
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Digestion product<br>
+                    2. T4 DNA ligase buffer (10X) (New England Biolabs)<br>
+                    3. T4 DNA ligase (New England Biolabs)<br>
+                    4. Sample (Insert)<br>
+                    5. Gel/PCR DNA Isolation System (VIOGENE)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Set up the ligation reaction on ice. Vortex briefly and spin down for 3-5 s.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>T4 DNA ligase buffer (10X)</td>
+                        <td>2 μL (1X ends)</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>~50 ng</td>
+                    </tr>
+                    <tr>
+                        <td>T4 DNA ligase</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 20 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>20 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2.Incubate at room temperature (25 °C) overnight.
+                    Notice: Since the desired product is about 3000 bp, the incubation time needs to be prolonged
+                    (overnight) for better yields. <br>
+                    3. Run the ligation product on a 1.2 % agarose gel.<br>
+                    4. Conduct gel purification using Gel/PCR DNA Isolation System followed the provided
+                    protocol.<br>
+                    5. Measure a DNA concentration of the purified product by NanoDrop spectrophotometer.<br>
+                    6. Store the insert ligation product at 4 °C.
+                </p>
+            </div>
+            <script>
+                const expandbutton10 = document.getElementById("expandbutton10");
+                const article10 = document.getElementById("article10");
+
+                expandbutton10.addEventListener("click", function () {
+                    if (article10.style.display == "block") {
+                        article10.style.display = "none";
+                        expandbutton10.style.transform = "rotate(-180deg)";
+                    } else {
+                        article10.style.display = "block";
+                        expandbutton10.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Preparation of template for AELA-PCR">Preparation of template for AELA-PCR
+                </h1>
+                <button class="expandbutton" id="expandbutton12"></button>
+            </div>
+            <div id="article12">
+                <h1 class="des-heading2" id="Ligation with vector">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Ligation with vector
+                </h1>
+                <h1 class="des-heading2" id="Plasmid PCR" style="font-size: 24px">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Vector Digestion
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Dry bath
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 10X tangle buffer (Thermo Fisher Scientific)<br>
+                    2. Restriction enzyme: BamH1 (10 U/µL) (Thermo Fisher Scientific)<br>
+                    3. Restriction enzyme: HindIII (10 U/µL) (Thermo Fisher Scientific)<br>
+                    4. Nuclease-free water (Protech Technology)<br>
+                    5. pUC19 vector (New England Biolabs)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Preheat dry bath to 37 °C<br>
+                    2. Set up the digestion reaction on ice. Vortex briefly and spin down for 3-5 s.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>10X tangle buffer</td>
+                        <td>10 μL (ends in 2X)</td>
+                    </tr>
+                    <tr>
+                        <td>pUC19 vector</td>
+                        <td>0.04 pmol</td>
+                    </tr>
+                    <tr>
+                        <td>BamH1</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>HindIII</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 50 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>50 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    3. Incubate the digestion mixture at 37 °C for 1 hr.<br>
+                    4. Use the digest vector directly for ligation.
+                </p>
+                <h1 class="des-heading2" id="Plasmid PCR" style="font-size: 24px">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Vector ligation
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    NA
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Vector digestion product<br>
+                    2. Sample (insert ligation product)<br>
+                    3. T4 DNA ligase buffer (10X) (New England Biolabs)<br>
+                    4. T4 DNA ligase (New England Biolabs)<br>
+                    5. Gel/PCR DNA Isolation System (VIOGENE)<br>
+                    6. Nuclease-free water (Protech Technology)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Set up the ligation reaction on ice. Vortex briefly and spin down for 3-5 s.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>10X T4 DNA ligase buffer</td>
+                        <td>2 μL (2X ends)</td>
+                    </tr>
+                    <tr>
+                        <td>Vector digestion product</td>
+                        <td>0.04 pmol ends</td>
+                    </tr>
+                    <tr>
+                        <td>Insert ligation product</td>
+                        <td>0.04 pmol ends</td>
+                    </tr>
+                    <tr>
+                        <td>T4 DNA ligase</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>to 20 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>20 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2. Incubate at room temperature (25 °C) overnight. <br>
+                    3. Store the insert ligation product at 4 °C or directly use for transformation.
+                </p>
+                <h1 class="des-heading2" id="Transformation">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Transformation
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Dry bath<br>
+                    2. Petri dish<br>
+                    3. Disposable cell spreaders<br>
+                    4. Incubator
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. DH5-alpha E. coli<br>
+                    2. Sample (ligation with vector product)<br>
+                    3. LB Medium plate with ampicillin (0.1 mg ampicillin / 1 mL LB)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Preheat the dry bath to 42 °C.<br>
+                    2. Add 5 μL ligation product into 50 μL DH5-alpha E.coli stock. Do not pipet or vortex, flick
+                    the tube slightly about 5 times.<br>
+                    3. Put the reaction on ice for 2 min.<br>
+                    4. Incubate at 42 °C for precisely 30 sec.<br>
+                    5. Put on ice for 2 min.<br>
+                    6. Add 950 μL cell culture medium.<br>
+                    7. Take 100 μL of the mixture and spread it evenly on a plate using a Disposable cell
+                    spreaders.<br>
+                    8. Incubate the plate in the incubator at 30 °C for 24 hr.
+                </p>
+                <h1 class="des-heading2" id="Colony PCR">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Colony PCR
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Culture tube<br>
+                    2. PCR tube<br>
+                    3. Thermocycler
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. LB medium with ampicillin (0.1 mg ampicillin / 1 mL LB)<br>
+                    2. 2X Master Mix (Protech Technology)<br>
+                    3. PCRforAELA_fw primer, 10 μM<br>
+                    4. PCRforAELA_rv primer, 10 μM<br>
+                    5. Sample (transform product)<br>
+                    6. Gel extraction system
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Use pipette tips to pick colony, each Petri dish choose 2 colonies<br>
+                    2. Put the colony in 200 μL of LB with ampicillin (1 μL ampicillin/1mL LB)<br>
+                    3. Shake in a 37°C incubator for 2 hours in preparation for colony PCR.<br>
+                    4. Add the following reagent to PCR tube
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>2X Master Mix</td>
+                        <td>10 μL (1X ends)</td>
+                    </tr>
+                    <tr>
+                        <td>Free water</td>
+                        <td>7 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Foward primer</td>
+                        <td>0.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Reverse primer</td>
+                        <td>0.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>20 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    5. Conduct PCR at following thermal cycle.
+                </p>
+                <table>
+                    <tr>
+                        <td>Stage</td>
+                        <td>Temperature</td>
+                        <td>Time</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Denaturation</td>
+                        <td>94 °C</td>
+                        <td>1 min</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Denaturation</td>
+                        <td>94 °C</td>
+                        <td>30 sec</td>
+                        <td rowspan="3">35 cycles</td>
+                    </tr>
+                    <tr>
+                        <td>Annealing</td>
+                        <td>61 °C</td>
+                        <td>30 sec</td>
+                    </tr>
+                    <tr>
+                        <td>Extension</td>
+                        <td>72 °C</td>
+                        <td>1 min 5 sec</td>
+                    </tr>
+                    <tr>
+                        <td>Extension</td>
+                        <td>72 °C</td>
+                        <td>7 min</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Cooling</td>
+                        <td>4 °C</td>
+                        <td>∞</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    6. Run the PCR product on a 1.2 % Agarose Gel.<br>
+                    7. We found out that there was no band presented on the agarose gel, we want to purify the
+                    plasmid to run gel electrophoresis instead. To extract plasmid, transfer 10 μL bacteria liquid
+                    to 5 mL LB with ampicillin in a culture tube first.<br>
+                    8. Shake in a 37 °C incubator for 16 hours.
+                </p>
+                <h1 class="des-heading2" id="Plasmid extraction">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Plasmid extraction
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Centrifuge tube
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Mini Plus Plasmid DNA Extraction System (Viogene)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Perform plasmid extraction follow the protocol provided by the manufacturer.<br>
+                    2. Run the extracted plasmid on a 1.2 % agarose gel to identify whether the ligation process was
+                    successful.
+                </p>
+            </div>
+            <script>
+                const expandbutton12 = document.getElementById("expandbutton12");
+                const article12 = document.getElementById("article12");
+
+                expandbutton12.addEventListener("click", function () {
+                    if (article12.style.display == "block") {
+                        article12.style.display = "none";
+                        expandbutton12.style.transform = "rotate(-180deg)";
+                    } else {
+                        article12.style.display = "block";
+                        expandbutton12.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="AELA-PCR">AELA-PCR</h1>
+                <button class="expandbutton" id="expandbutton13"></button>
+            </div>
+            <div id="article13">
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. PCR tubes<br>
+                    2. Thermocycler
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. i-Taq 2X PCR master mix kit (Intron Biotechnologies)<br>
+                    (the kit contains 2.5 U/μL of DNA polymerase, 2.5 mM each of dNTPs, and 1X reaction buffer with
+                    3 mM MgCl<sub>2</sub>)<br>
+                    2. Forward primer (0.2 μM)<br>
+                    3. Reverse primer (10 μM) <b>*Note: The concentration ratio of the extended (rv) primer to
+                        un-extended (fw) primer should be 20:1. (<a href="{{ url_for('pages', page='parts') }}"
+                            class="home">See Parts_AELA_PCR</a>)</b><br>
+                    4. Nuclease-free water (Protech Technology)<br>
+                    5. Sample (long-repeated dsDNA)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Add the following reagents to PCR tube.<br>
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>i-Taq mix</td>
+                        <td>10 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Primer mix (extended primer:un-extended primer = 20:1)</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Long-repeated dsDNA sample</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Nuclease-free water</td>
+                        <td>8 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>20 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2. Conduct PCR at following thermal cycle.<br>
+                    3. React in a thermocycler at following setting.
+                </p>
+                <table>
+                    <tr>
+                        <td>Stage</td>
+                        <td>Temperature</td>
+                        <td>Time</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Denaturation of dsDNA</td>
+                        <td>95 °C</td>
+                        <td>2 min</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3">Exponential phase</td>
+                        <td>95 °C</td>
+                        <td>20 sec</td>
+                        <td rowspan="3">35 cycles</td>
+                    </tr>
+                    <tr>
+                        <td>58 °C</td>
+                        <td>15 sec</td>
+                    </tr>
+                    <tr>
+                        <td>72 °C</td>
+                        <td>40 sec</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2">Linear phase</td>
+                        <td>95 °C</td>
+                        <td>20 sec</td>
+                        <td rowspan="2">25 cycles</td>
+                    </tr>
+                    <tr>
+                        <td>72 °C</td>
+                        <td>50 sec</td>
+                    </tr>
+                    <tr>
+                        <td>Forming ssDNA amplicons</td>
+                        <td>72 °C</td>
+                        <td>2 min</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    4. Conduct agarose gel electrophoresis to confirm our PCR products.
+                </p>
+            </div>
+            <script>
+                const expandbutton13 = document.getElementById("expandbutton13");
+                const article13 = document.getElementById("article13");
+
+                expandbutton13.addEventListener("click", function () {
+                    if (article13.style.display == "block") {
+                        article13.style.display = "none";
+                        expandbutton13.style.transform = "rotate(-180deg)";
+                    } else {
+                        article13.style.display = "block";
+                        expandbutton13.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="RPA">RPA</h1>
+                <button class="expandbutton" id="expandbutton14"></button>
+            </div>
+            <div id="article14">
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. 8 Low Profile PCR tube<br>
+                    2. Thermocycler<br>
+                    3. Mini centrifuge
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Rehydration buffer (TwistDx)<br>
+                    2. Forward primer (10 µM)<br>
+                    3. Reverse primer (10 µM)<br>
+                    4. MgOAc (280 mM) (TwistDx)<br>
+                    5. RNAse-free water (Protech Technology)<br>
+                    6. Sample (insert)<br>
+                    7. TwistAmp® Basic reaction pellets tubes (TwistDx)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Add the following reagents to TwistAmp® Basic reaction pellets tubes.
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>Primer free rehydration buffer</td>
+                        <td>29.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Foward primer</td>
+                        <td>2.4 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Reverse primer</td>
+                        <td>2.4 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>~100 ng</td>
+                    </tr>
+                    <tr>
+                        <td>RNase-free water</td>
+                        <td>to 47.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>47.5 μL</td>
+                    </tr>
+                </table>
+                <p class="des-note" style="text-align: center;">**Note: Forward primer and reverse primer are designed by ourselves. For more
+                    details, please view <a href="#{{ url_for('pages', page='parts') }}#36019">Parts_RPA primer.**</a></p>
+                <p class="des-paragraph fade_from_right">
+                    2. Add 2.5 µL of 280 mM MgOAc to the lid of TwistAmp® Basic reaction pellets tubes.<br>
+                    3. Spin down with a mini centrifuge to introduce MgOAc into the rehydrated material and initiate
+                    the reactions.<br>
+                    4. Vortex briefly and spin down once again.<br>
+                    5. Incubate the tubes in thermocycler under 37˚C for 20 minutes.<br>
+                    6. After 20 minutes, run gel electrophoresis to confirm if the amplification is successful. For
+                    the lateral flow test, follow the prescribed instructions to appropriately dilute the reaction
+                    products.
+                </p>
+            </div>
+            <script>
+                const expandbutton14 = document.getElementById("expandbutton14");
+                const article14 = document.getElementById("article14");
+
+                expandbutton14.addEventListener("click", function () {
+                    if (article14.style.display == "block") {
+                        article14.style.display = "none";
+                        expandbutton14.style.transform = "rotate(-180deg)";
+                    } else {
+                        article14.style.display = "block";
+                        expandbutton14.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="RT-RPA">RT-RPA</h1>
+                <button class="expandbutton" id="expandbutton15"></button>
+            </div>
+            <div id="article15">
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Thermocycler
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Primer free rehydration buffer (TwistDx)<br>
+                    2. Forward primer (10 µM)<br>
+                    3. Reverse primer (10 µM)<br>
+                    4. ProtoScript® II Reverse Transcriptase (200 U/µL) (New England Biolabs)<br>
+                    5. RNase inhibitor (New England Biolabs)<br>
+                    6. dNTP (10 mM) (Thermo Fischer Scientific)<br>
+                    7. RNase free water (Protech Technology)<br>
+                    8. Sample (IVT product, linear RNA)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Prepare reaction mix in 1.5 mL tube
+                </p>
+                <table>
+                    <tr>
+                        <td>Reagents</td>
+                        <td>Amount</td>
+                    </tr>
+                    <tr>
+                        <td>Primer free rehydration buffer</td>
+                        <td>29.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Foward primer</td>
+                        <td>2.4 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Reverse primer</td>
+                        <td>2.4 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Protoscript RT</td>
+                        <td>0.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>RNase inhibitor</td>
+                        <td>0.5 μL</td>
+                    </tr>
+                    <tr>
+                        <td>dNTP</td>
+                        <td>1 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Sample</td>
+                        <td>2 μL</td>
+                    </tr>
+                    <tr>
+                        <td>RNase-free water</td>
+                        <td>to 50 μL</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td>50 μL</td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    2. Add reaction mix to a TwistAmp® Basic reaction. Pipette to mix.<br>
+                    3. Add 2.5 μL of 280 mM Magnesium Acetate (MgOAc) and mix well to start the reaction. <b>*Note: RPA
+                        reactions start as soon as MgOAc is added.</b><br>
+                    4. Incubate at 39 ˚C for 20 minutes.<br>
+                    5. After 20 minutes, run gel electrophoresis to confirm if the amplification is successful. For
+                    the lateral flow test, follow the prescribed instructions to appropriately dilute the reaction
+                    products.
+                </p>
+            </div>
+            <script>
+                const expandbutton15 = document.getElementById("expandbutton15");
+                const article15 = document.getElementById("article15");
+
+                expandbutton15.addEventListener("click", function () {
+                    if (article15.style.display == "block") {
+                        article15.style.display = "none";
+                        expandbutton15.style.transform = "rotate(-180deg)";
+                    } else {
+                        article15.style.display = "block";
+                        expandbutton15.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="PCRD">PCRD</h1>
+                <button class="expandbutton" id="expandbutton16"></button>
+            </div>
+            <div id="article16">
+                <h1 class="des-heading3 fade_from_left">Equipment</h1>
+                <p class="des-paragraph fade_from_right">
+                    NA
+                </p>
+                <h1 class="des-heading3 fade_from_left">Consumables</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. PCRD (lateral flow strip cassette) (Abingdon Health)<br>
+                    2. PCRD Extraction Buffer (Abingdon Health)<br>
+                    3. Sample (RT-RPA product)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Protocol</h1>
+                <p class="des-paragraph fade_from_right">
+                    1. Pipette 6 µL of the amplification product into a 0.5 mL tube.<br>
+                    2. Transfer 84 µL of the PCRD Extraction Buffer supplied into the tube and mix thoroughly.<br>
+                    3. Open the foiled PCRD, add 75 µL of the diluted reaction mixture to the sample well of a PCRD
+                    test cassette.<br>
+                    4. Leave the cassette in a horizontal position for 10 mins while the result develops. Read the
+                    result visually at 10 mins. Ignore any changes which occur after 10 mins.
+                </p>
+            </div>
+            <script>
+                const expandbutton16 = document.getElementById("expandbutton16");
+                const article16 = document.getElementById("article16");
+
+                expandbutton16.addEventListener("click", function () {
+                    if (article16.style.display == "block") {
+                        article16.style.display = "none";
+                        expandbutton16.style.transform = "rotate(-180deg)";
+                    } else {
+                        article16.style.display = "block";
+                        expandbutton16.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div id="Reference" style="display:block;">
+                <h1 class="des-ref-heading">Reference</h1>
+                <p class="des-ref-paragraph">[1]
+                    <a style="word-wrap: break-word;" id="[1]"
+                        href="https://www.thermofisher.com/order/catalog/product/EF022SKAFB001?ef_id=Cj0KCQjwnMWkBhDLARIsAHBOftoRPvAmH5H5ades6_zg-NfxauPrhK4FU7fLkJR8HwkrpuzhgW_EWcEaApmfEALw_wcB:G:s&s_kwcid=AL!3652!3!635884956165!p!!g!!pyrophosphatase!17547406734!147243632801&cid=bid_nat_mrn_r01_co_cp0000_pjt0000_bid00000_0se_gaw_nt_awa_awa&gclid=Cj0KCQjwnMWkBhDLARIsAHBOftoRPvAmH5H5ades6_zg-NfxauPrhK4FU7fLkJR8HwkrpuzhgW_EWcEaApmfEALw_wcB">
+                        https://www.thermofisher.com/order/catalog/product/EF022SKAFB001?ef_id=Cj0KCQjwnMWkBhDLARIsAHBOftoRPvAmH5H5ades6_zg-NfxauPrhK4FU7fLkJR8HwkrpuzhgW_EWcEaApmfEALw_wcB:G:s&s_kwcid=AL!3652!3!635884956165!p!!g!!pyrophosphatase!17547406734!147243632801&cid=bid_nat_mrn_r01_co_cp0000_pjt0000_bid00000_0se_gaw_nt_awa_awa&gclid=Cj0KCQjwnMWkBhDLARIsAHBOftoRPvAmH5H5ades6_zg-NfxauPrhK4FU7fLkJR8HwkrpuzhgW_EWcEaApmfEALw_wcB</a>
+                </p>
+                <p class="des-ref-paragraph">[2]
+                    <a id="[2]" href="https://www.thermofisher.com/order/catalog/product/EN0521">
+                        https://www.thermofisher.com/order/catalog/product/EN0521</a>
+                </p>
+                <p class="des-ref-paragraph">[3]
+                    <a id="[3]" href="https://www.abcam.com/products/sample-preparation-kits/rnase-r-ab286929.html">
+                        https://www.abcam.com/products/sample-preparation-kits/rnase-r-ab286929.html</a>
+                </p>
+            </div> 
+        </div>
+</div>
+</section>
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

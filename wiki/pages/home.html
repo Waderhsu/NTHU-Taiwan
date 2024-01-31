@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="https://static.igem.wiki/common/icons/favicons/igem-2022.svg"/>
+    <link rel="license" href="https://creativecommons.org/licenses/by/4.0/"/>
+
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename = 'bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename = 'style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'slick.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'slick-theme.css') }}">
+
+    <title>Home | NTHU-Taiwan - iGEM 2023</title>
+
+</head>
+<body>
+    <!-- Loading -->
+    <div id="loader-wrapper">
+
+        <img style="position:relative; margin-top: -100px; width:80%"
+        src="https://static.igem.wiki/teams/4636/wiki/loadingpanda.gif">
+    </div>
+
+    <script>
+        var loader = document.getElementById("loader-wrapper");
+        window.addEventListener("load", function () {
+            loader.style.display = "none";
+            document.getElementById('content').style.opacity = 1;
+            document.getElementById('content').style.visibility = 'visible';
+        })
+    </script>
+
+    <!-- Navigation -->
+    {% include 'menu.html' %}
+    <div style="height: 76px;display: block;"></div>
+    <script src="{{ url_for('static', filename = 'phaser.min.js') }}"></script>
+    <main>
+        <script defer src="{{ url_for('static', filename = 'game.js') }}"></script>
+    </main>
+
+    <script src="{{ url_for('static', filename = 'fade.js') }}"></script>
+  </body>
+  </html>

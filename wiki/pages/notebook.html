@@ -1,0 +1,1313 @@
+{% extends "layout.html" %}
+
+{% block title %}Diversity & Inclusivity{% endblock %}
+
+{% block page_content %}
+
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/header002.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/header002.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Notebooks', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "Small steps lead to big adventures.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+          color: aliceblue;
+          /* font-style: unset; */
+          font-size: xx-large;
+          font-weight: 800;
+          letter-spacing: 8px;
+          font-size: 140px;
+          font-family: inherit;">
+            Notebook
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a id="sidebaritem1" href="#February" class="">February</a></li>
+                    <li><a id="sidebaritem2" href="#March" class="">March</a></li>
+                    <li><a id="sidebaritem2" href="#April" class="">April</a></li>
+                    <li><a id="sidebaritem2" href="#May" class="">May</a></li>
+                    <li><a id="sidebaritem2" href="#June" class="">June</a></li>
+                    <li><a id="sidebaritem2" href="#July" class="">July</a></li>
+                    <li><a id="sidebaritem2" href="#August" class="">August</a></li>
+                    <li><a id="sidebaritem2" href="#September" class="">September</a></li>
+                    <li><a id="sidebaritem2" href="#October" class="">October</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="February">February</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Wet Lab group were divided into four groups. To seek
+                    inspiration for our project, each group is tasked with researching and reporting on previous
+                    award-winning iGEM teams.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Project brainstorming and previous case studies.<br>
+                    2. Ensure scholarship deadlines and apply requirement.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 2</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    We were still studying the past winning projects and tried to derive possible themes from their projects. In this week, four proposals emerged.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Brainstorm Projects and previous case studies.<br>
+                    2. Ensure scholarship deadlines and apply requirement.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We attempted to identify more promising projects.<br>
+                    2. Consequently, four additional new proposals came to fruition this week.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Brainstorm Projects and previous case studies.<br>
+                    2. Ensure scholarship deadlines and apply requirement.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 4</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    We provided more detailed redesigns for four out of the
+                    eight proposals discussed in the last two weeks. Following this, we had a discussion to
+                    determine their feasibility.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Brainstorm Projects and previous case studies.<br>
+                    2. Ensure scholarship deadlines and apply requirement.
+                </p>
+
+            </div>
+            <script>
+                const expandbutton = document.getElementById("expandbutton");
+                const article = document.getElementById("article1");
+
+                expandbutton.addEventListener("click", function () {
+                    if (article.style.display == "block") {
+                        article.style.display = "none";
+                        expandbutton.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article.style.display = "block";
+                        expandbutton.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="March">March</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    In this week, the WL team was divided into two groups
+                    instead
+                    of four. Each group had to choose one out of the four proposals discussed last week and delve
+                    into
+                    further discussions. We faced a difficult decision between 'disease detection' and
+                    'bio-electricity'. In the end, we opted to pursue 'bio-electricity' as our subject, aiming to
+                    generate electricity through microorganisms.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Discuss the application of microbial fuel cell and to think
+                    up an innovative solution to apply.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Contact entrepreneurs and inquiry of our project
+                    suggestion.<br>
+                    2. Explan different thoughts of biodegradable materials for
+                    kit's
+                    cover.<br>
+                    3. Discuss online educational program.<br>
+                    4. Design advertisement music.<br>
+                    5. Apply and prepare of current scholarships.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 2</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    We came up with two ideas related to bio-electricity.
+                    Firstly, we aimed to desalinate seawater using a microbial fuel cell. Secondly, we proposed to degrade
+                    polylactate, synthesized by E. coli, into lactate using an optogenetic system. The lactate would
+                    then be utilized to generate electricity through Shewanella bacteria.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Understand the working principle of detection kit and find
+                    the appropriate professors to help. Also determine the structure of Dry Lab.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We discussed an online educational program.<br>
+                    2. We designed advertisement music.<br>
+                    3. Apply and prepare for current scholarships.
+                </p>
+                
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    After conducting extensive data querying, we discovered
+                    that the development of microbial fuel cells has reached an advanced stage. Consequently, we shifted
+                    our focus towards identifying promising proposals in the field of disease detection, which was the
+                    right issue we tried to deal with.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Separate the job by individual strength. Also discuss about
+                    using proper method to predict the structure.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We prepared posting scientific-related knowledge on an
+                    Instagram account for promoting synthetic biology.<br>
+                    2. Discussed about comic book design.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 4</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We opted to utilize circular RNA present in human saliva as
+                    a biomarker for cancer detection.<br>
+                    2. Tried to use several DNA oligo with hairpin structure to
+                    recognized and amplify circular RNA.<br>
+                    3. Planned to employ a lateral flow strip to display the test
+                    results.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Try to use KinDA to simulate the hairpins, while using the
+                    3D RNA score to compare and select the most ideal target.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We prepared posting scientific-related knowledge on an
+                    Instagram account for promoting synthetic biology.<br>
+                    2. We contact professors and inquiry of project direction and
+                    further research methods.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 5</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We identified three circular RNA that highly related to
+                    breast cancer.<br>
+                    2. After consulting with some professors, they advised us to
+                    explore types of cancer other than breast cancer that are challenging to detect using current
+                    diagnostic methods.<br>
+                    3. Discovered some isothermal amplification methods. Such as
+                    rolling circle amplification(RCA), recombinase polymerase amplification(RPA), reverse
+                    transcription
+                    recombinase polymerase amplification (RT-RPA) and Loop-mediated Isothermal Amplification(LAMP).
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    Finish our project report power point file and prepared
+                    meeting with professor meeting.
+                </p>
+            </div>
+            <script>
+                const expandbutton2 = document.getElementById("expandbutton2");
+                const article2 = document.getElementById("article2");
+
+                expandbutton2.addEventListener("click", function () {
+                    if (article2.style.display == "block") {
+                        article2.style.display = "none";
+                        expandbutton2.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article2.style.display = "block";
+                        expandbutton2.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="April">April</h1>
+                <button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Comprehended the mechanism and reaction temperature of RCA,
+                    RT-RPA, RPA, and LAMP, respectively.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Choose the target circRNA and determine how to calculate
+                    the reaction rate. Further discuss the detail about 3D RNA score and RPA model.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Scholarship apply schedule (platform researching and email
+                    contact) arranged.<br>
+                    2. Educational project content preparation.<br>
+                    3. Preparation for interviewing doctors.<br>
+                    4. Preparation for interviewing professors.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 2</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Discovered PCRD, a lateral flow cassette we applied to
+                    detect cancer.<br>
+                    2. We tried to explore the experimental protocols of RCA and
+                    RT-RPA using circular RNA as a template. In the end, we couldn't discover any literature
+                    mentioned how to amplify circular RNA through RT-RPA.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Need to change the target circRNA and solve the problems of
+                    the reaction rate and 3D RNA score. Heating equipment needs to find a battery for heating.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We arranged the scholarship application schedule (platform
+                    research and email contact).<br>
+                    2. We prepared the educational project content.<br>
+                    3. We prepared interviews with doctors.<br>
+                    4. We prepared to interview professors.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Since there were no references mentioned on how to amplify
+                        circular RNA by RT-RPA, we came up with another solution to fix this problem. We planned to
+                        transform circular RNA to complementary DNA utilizing reverse transcription, then amplify the
+                        cDNA through RPA.<br>
+                    2. We found that ProtoScript II reverse transcriptase
+                        exhibited higher efficiency. We were curious about its potential inclusion in the RCA process.<br>
+                    3. Investigated the mechanism of PCRD, then determined its
+                        feasibility.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Building up the models of RPA/ RCA/ Lamp, PCRD/ Hairpin and
+                    fluid. Also establishing the software and wiki structure.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Team logo design.<br>
+                    2. Explanation about who the sponsors are.
+                </p>
+
+
+            </div>
+            <script>
+                const expandbutton3 = document.getElementById("expandbutton3");
+                const article3 = document.getElementById("article3");
+
+                expandbutton3.addEventListener("click", function () {
+                    if (article3.style.display == "block") {
+                        article3.style.display = "none";
+                        expandbutton3.style.transform = "rotate(-180deg)";
+                    } else {
+                        article3.style.display = "block";
+                        expandbutton3.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="May">May</h1>
+                <button class="expandbutton" id="expandbutton4"></button>
+            </div>
+            <div id="article4">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Investigated the MgCl2 concentration causing the
+                    aggregation of RCA products, and determine the presence of modified probes or hairpin structures
+                    on gold nanoparticles.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Check the sequence that cDNA is replacing. Also
+                    establishing the buffer diffusion model. Then use software to judge the reaction is completed.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Discussion and preparation of an academic conference.<br>
+                    2. Grant prize apply—preparation and check.<br>
+                    3. Voting for the final decision of team logo design.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">
+                    Week 2
+                </h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We found that after the circularization process, RNase R is
+                    needed to eliminate linear form RNA. By adding RNase R, we could ensure the purity of our
+                    circularization product.<br>
+                    2. Utilize selected circRNA as our target, design a
+                    corresponding RCA primer.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Need to set up a terminal time for the diffusion model to
+                    stop. The heating equipment needs to combine with software.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We designed our promotion video.<br>
+                    2. We discussed and contacted the biotechnological companies
+                        and sponsors.<br>
+                    3. We contacted the travel agency and inquired about the
+                        travel schedules.<br>
+                    4. We prepared our questionnaire.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Ensure whether the sequence in circBank is complementary to
+                    circRNA or cDNA of circRNA.<br>
+                    2. Design a primer for RPA and RCA.<br>
+                    3. Design a DNA probe which is attached to a gold particle.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    PCRD model needs to wait for the input value to be tested
+                    and also think up the storing method and look up the changing color trend. For hardware,
+                    designing the automatic placement of the salt.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Educational science camp preparation and discussion.<br>
+                    2. Inviting foreign and other iGEM teams for iGEM map
+                    collaboration.
+                </p>
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 4</h1>
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Ensure all the chemicals and kits are needed. Check
+                    protocols and detailed information for further experiments.<br>
+                    2. Find access to thiol-modified DNA, then find protocols for
+                    attaching thiol-modified DNA to gold nanoparticles.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    List out the exact components for heating equipment. Think
+                    up the tool for creating the application. Apply for the sponsorship or tuition.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Voting for the final decision of team logo design.<br>
+                    2. Wiki preparation and suggestion.
+                </p>
+            </div>
+            <script>
+                const expandbutton4 = document.getElementById("expandbutton4");
+                const article4 = document.getElementById("article4");
+
+                expandbutton4.addEventListener("click", function () {
+                    if (article4.style.display == "block") {
+                        article4.style.display = "none";
+                        expandbutton4.style.transform = "rotate(-180deg)";
+                    } else {
+                        article4.style.display = "block";
+                        expandbutton4.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="June">June</h1>
+                <button class="expandbutton" id="expandbutton5"></button>
+            </div>
+            <div id="article5">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Clarify cloning process, consider enzyme restriction site
+                    for digesting insert and vector sequence.<br>
+                    2. Clarify each step for enzymatic circularization, including
+                    the verification way using gel electrophoresis method.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Use Simscale for the diffusion model. Get familiar with
+                    RCA, RPA, DnaProbe, and the PCRD model. Ask senior about the details of the heating equipment.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Wiki designing & concept brainstorming.<br>
+                    2. Wiki characters design.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 2</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Comparing the pros and cons of T4 RNA ligase 1 and T4 RNA
+                    ligase 2. Determine using splint to bring the sequence close together, elevate circularization
+                    efficiency.<br>
+                    2. Determine to use pyrophosphate in the monophosphorylation
+                    process in circRNA synthesis.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Wiki designing & concept brainstorming.<br>
+                    2. Wiki characters design.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Design a splint for circularization. According to research,
+                    we found that RNA might not spontaneously form a circular structure, thus we design a splint
+                    targeting back-splicing junction for higher specificity.<br>
+                    2. Use RNAfold web server to predict the splint structure.<br>
+                    Avoid secondary structure of splint, also design the entropy of the splint close to 1.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Preparation and discussion of educational science camp and
+                    life science camp promotion.<br>
+                    2. Shoot photos for each lab.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 4</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We found that we should eliminate redundant splint DNA
+                    after circularization. So we determine to use DNase I for degradation of splint DNA.<br>
+                    2. Determine the type of gel we used to verify the
+                    circularization process. Candidates including polyacrylamide gel, agarose gel. Find the pros and
+                    cons of each type of gel.<br>
+                    3. Determine the vector we're going to use in the cloning
+                    project.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Reaching the tutorial of Simbiology. Briefly setting up the
+                    geometric factors of the diffusion model. Wiki had added the progress list and the sidebar.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Making our own questionnaire.<br>
+                    2. Preparation for NYCU academic conference communication.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">
+                    Week 5
+                </h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We tried to find previous research related to developing
+                    long-repeated ligased insert sequence in AELA-PCR.<br>
+                    2. Ensure the condition to ligase splint to our target
+                    sequence for circularization.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    We made the final decision of the traveling agency and
+                    traveling schedule.
+                </p>
+            </div>
+            <script>
+                const expandbutton5 = document.getElementById("expandbutton5");
+                const article5 = document.getElementById("article5");
+
+                expandbutton5.addEventListener("click", function () {
+                    if (article5.style.display == "block") {
+                        article5.style.display = "none";
+                        expandbutton5.style.transform = "rotate(-180deg)";
+                    } else {
+                        article5.style.display = "block";
+                        expandbutton5.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="July">July</h1>
+                <button class="expandbutton" id="expandbutton6"></button>
+            </div>
+            <div id="article6">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Clarify each step in our workflow pathways.<br>
+                    2. Try to synthesize gold nanoparticles.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Understand that the radius may affect the segregation
+                    extent. Purchase the essential components and discuss the possible game type to create.<br>
+                    2. Discuss the game design thoughts with Human Practice.
+                    Determine the game content, background and how to combine the information in it.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Collaboration response of World Nature Conservation Day.<br>
+                    2. Wiki character design progress.<br>
+                    3. Colorectal Cancer alliance contact and biotech companies
+                    contact.<br>
+                    4. Preparation of educational science camp.<br>
+                    5. Preparation for flight to France.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 2</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Clarify condition of protocols in our workflow pathways.<br>
+                    2. Confirm rotating speed of hula mixer and stir bar with
+                    advisor.
+                </p>
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Understand the reasons of segregation and changing color,
+                    further quantify the extent. Add some word effects in wiki page.
+                </p>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Wiki character design progress.<br>
+                    2. Preparation for interviewing Colorectal Cancer's patient
+                        and doctor.<br>
+                    3. Research for funding platform.<br>
+                    4. Preparation for online meeting collaboration.<br>
+                    5. Instagram post of educational content brainstorming.<br>
+                    6. Scholarship and sponsors contact.<br>
+                    7. Wiki page and report model design.
+                </p>
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Clarify condition of protocols in our workflow pathways.<br>
+                    2. Doing research and making comparisons of running circRNA in
+                        E-Gel EX and Agarose gel.<br>
+                    3. We found that band position of linear RNA and circRNA have
+                        difference in E-Gel EX, we could use the difference to distinguish linear RNA from circRNA.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Have solved the problems of heating equipment. Try to use
+                    machine learning for setting up the model. Improving the game fluency.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Wiki character design progress.<br>
+                    2. Preparation for interviewing Colorectal Cancer's patient
+                        and doctor.<br>
+                    3. Research for funding platform.<br>
+                    4. Preparation for online meeting collaboration.<br>
+                    5. Instagram post of educational content brainstorming.<br>
+                    6. Scholarship and sponsors contact.<br>
+                    7. Wiki page and report model design.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 4</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Clarify condition of protocols in our workflow pathways.<br>
+                    2. Try to synthesize gold nanoparticles, modified O.D. value
+                    by centrifuge synthesized gold nanoparticle samples.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Can use Simbiology to generate ODEs and simulate the graph.
+                    The blueshift range has determined. Renewing the games and thoughts on the wiki page.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Instagram reels collaboration of lab life.<br>
+                    2. Team roster check.<br>
+                    3. Mentorship contact and problem solving.<br>
+                    4. Wiki graphic preparation.<br>
+                    5. Traveling agency contacting.<br>
+                    6. Apply for current scholarship.
+                </p>
+            </div>
+            <script>
+                const expandbutton6 = document.getElementById("expandbutton6");
+                const article6 = document.getElementById("article6");
+
+                expandbutton6.addEventListener("click", function () {
+                    if (article6.style.display == "block") {
+                        article6.style.display = "none";
+                        expandbutton6.style.transform = "rotate(-180deg)";
+                    } else {
+                        article6.style.display = "block";
+                        expandbutton6.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="August">August</h1>
+                <button class="expandbutton" id="expandbutton7"></button>
+            </div>
+            <div id="article7">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We prepared the needed buffer for gold nanoparticle
+                    synthesis in advance.<br>
+                    2. Senior Peter took us to combine nanogold + probe on 8/5.<br>
+                    3. Prepare the report and poster of the Linkou exchange
+                    meeting.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Collaborate with several teams, prepare the script and
+                    rehearse beforehand. Thinking up the structure of application for machine learning.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Preparation and discussion for promotion video.<br>
+                    2. Discussion of wiki page design.<br>
+                    3. Preparation of NYCU educational podcast collaboration and
+                        Instagram reels collaboration.<br>
+                    4. Preparation of educational science camp work sheets.<br>
+                    5. Contact for entrepreneurship interview.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 2</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Rehearsal for the Linkou exchange conference.<br>
+                    2. Read carefully about judging criteria, judging form from
+                    iGEM.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Rehearse for the upcoming collaboration and giving some
+                    possible problems. Revise the script to improve fluency.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Preparation and discussion for promotion video.<br>
+                    2. Discussion of wiki page design.<br>
+                    3. Preparation of NYCU educational podcast collaboration and
+                        Instagram reels collaboration.<br>
+                    4. Preparation of educational science camp work sheets.<br>
+                    5. Contact for entrepreneurship interview.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Prepare for the education camp and decide how to convey the
+                    synthetic biology concept to children so they can understand.<br>
+                    2. Conducting ligation with vector experiment part in
+                    AELA-PCR, we tried to endlong the time for better ligation outcome.<br>
+                    3. Organize wiki structure and content.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Rehearse for the collaboration. Finding the relationship of
+                    cDNA radius to the segregation of the particles. Put the collaboration team by geographical
+                    location in wiki page.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Wiki background design and wiki game progress report.<br>
+                    2. Discussion for team cloth design.<br>
+                    3. Preparation for entrepreneur intervie with doctor interview.<br>
+                    4. Final check of NYCU academic conference communicational
+                        preparation and discussion.<br>
+                    5. Preparation for educational science camp.<br>
+                    6. Preparation and final checking of scholarship applying
+                        document.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 4</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We successfully synthesized 13nm AuNPs.<br>
+                    2. We found out that EDS cannot detect the probe, so we seek
+                        to use XPS to assist in the detection of probes conjugated with AuNPs.<br>
+                    3. We conducted RT-RPA experiment, however failed due to no
+                        template control shows band.<br>
+                    4. Conduct Insert PCR, and colony PCR.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Discuss about the volcano plot, distribution of particles
+                    and calculate the segregate extent. Had added the reset button, music, etc. in the game.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Explanation of project related SDGs.<br>
+                    2. Questionnaire form discussion.<br>
+                    3. Advices and suggestions explaining for presentation
+                        methods.<br>
+                    4. Judging rubric explanation.<br>
+                    5. Wiki game progress report.<br>
+                    6. Reminder for Michigan Synthetic Biology team collaboration.<br>
+                    7. Preparation for traveling.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 5</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We saw 13nm gold nanoparticle under XPS.<br>
+                    2. We diluted the RT-RPA sample and run gel to see the testing
+                    limit of the amplification method.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Determine the necessity of AUC/ ROC graphs. Simulate the
+                    diffusion phenomenon in several ways. Redesign the title and add maps of wiki page.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Animation making of experimental process of RCA, RPA, nano
+                    particles gathering, circular RNA detecting and wiki game.<br>
+                    2. Preparation and discussion of promotion video timeline.
+                </p>
+            </div>
+            <script>
+                const expandbutton7 = document.getElementById("expandbutton7");
+                const article7 = document.getElementById("article7");
+
+                expandbutton7.addEventListener("click", function () {
+                    if (article7.style.display == "block") {
+                        article7.style.display = "none";
+                        expandbutton7.style.transform = "rotate(-180deg)";
+                    } else {
+                        article7.style.display = "block";
+                        expandbutton7.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="September">September</h1>
+                <button class="expandbutton" id="expandbutton8"></button>
+            </div>
+            <div id="article8">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We discussed safety form content, and finished them.<br>
+                    2. We conduct circularization experiment. we analyzed and
+                        reviewed problems which may lead to circularization experiment failure.<br>
+                    3. We conduct AELA experiment. We successfully finished the
+                        parts including insert ligation, digestion, ligation with vector, however failed at the process
+                        of transform.<br>
+                    4. We prepared a waiver for the gold nanoparticle we have
+                        synthesized.<br>
+                    4. We conduct RT-RPA experiment. Unfortunately, we failed the
+                        experiment since there is always a band in no template control (NTC). We tried to analyze and
+                        review the problems in each step which may lead to RT-RPA experiment failure.<br>
+                    5. We successfully conducted RPA experiment to ensure the RPA
+                        primer we designed works.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Add some effects in the game and discuss the ranking
+                    system. The hardware simulation graph has been elaborated.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Completing scholarship applying document.<br>
+                    2. Discussion of presentation way for NYCU academic conference
+                        communication.<br>
+                    3. Reminder of promoting synthetic biology on science camp.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 2</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Try the condition of adding how much MgCl2 will lead to
+                    gold nanoparticle solution color change.<br>
+                    2. Referring Wiki page from the 7th-grade NTHU iGEM team.<br>
+                    3. We found out that there should be a minimum concentration
+                        of IVT concentration before conducting the circularization experiment.<br>
+                    4. We successfully conduct the circularization experiment.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Can use R language to run the cluster heat map. The
+                    revision on hardware equipment.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Checking for scholarship applying document.<br>
+                    2. Explanation and discussion of wiki game transcription.<br>
+                    3. Presentation video editing.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Starting the blue print of our wiki design-Experiment.<br>
+                    2. Starting the blueprint of our wiki design-Proof of Concept.<br>
+                    3. Starting the blueprint of our wiki design-Engineering
+                        Cycle.<br>
+                    4. Revising our reagents used for the RCA experiment, by
+                        changing ProtoScript II RT to Induro, since we couldn't get multiple copies of cDNA.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Update the wiki page. Revise the equations of the PCRD
+                    model and transform the equations into ODEs. Design a handbook of the hardware. Need some
+                    pictures for the PCRD model for machine learning.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Completing promotion video shooting, editing, and
+                    uploading.<br>
+                    2. Preparation of traveling schedule.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 4</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Revising the process of the Circularization experiment to
+                    get a better yield of the target circularized RNA.<br>
+                    2. Referenced the iGEM Wiki of three other schools.<br>
+                    3. Decide how to express our Wiki design-Proof of Concept.<br>
+                    4. Decide how to express our Wiki design-Engineering cycle by
+                        dividing into 3 main sections.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Confirming and retrieving the data with Wet Lab, further
+                    integrate the model. Upload the code onto github and renovate the hardware.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Writing wiki content for human practice pages and related
+                    graphic drawing.<br>
+                    2. Final check for scholarship applying document.<br>
+                    3. Report for traveling schedule.
+                </p>
+            </div>
+            <script>
+                const expandbutton8 = document.getElementById("expandbutton8");
+                const article8 = document.getElementById("article8");
+                expandbutton8.addEventListener("click", function () {
+                    if (article8.style.display == "block") {
+                        article8.style.display = "none";
+                        expandbutton8.style.transform = "rotate(-180deg)";
+                    } else {
+                        article8.style.display = "block";
+                        expandbutton8.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="October">October</h1>
+                <button class="expandbutton" id="expandbutton9"></button>
+            </div>
+            <div id="article9">
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 1</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Wiki content submission: continue modifying Wiki layout,
+                    Wiki content.<br>
+                    2. Uploading experiment pictures and diagrams onto Wiki.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Using the initial value from paper. Need to set up a
+                    time-depending function for diffusion. Do the animation of the whole automatic procedure. Debug
+                    the wiki page.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Checking and modifying the judging form.<br>
+                    2. Wiki content completing and discussion.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 2</h1>
+
+                <p class="des-heading3 fade_from_left">WL:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. We successfully conduct the RT-RPA experiment with no band
+                    showing on the no template control line.<br>
+                    2. We finished Wiki content based on the wet labs part.
+                </p>
+
+                <p class="des-heading3 fade_from_left">DL:</p>
+                <p class="des-paragraph fade_from_right">
+                    Finish up the application, machine learning model. Do the
+                    diffusion model and compare under different concentrations.
+                </p>
+
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Preparation and discussion of the presentation video.<br>
+                    2. Shooting and editing the presentation video.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 3</h1>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Preparation for France traveling.<br>
+                    2. Preparation for final presentation and questions.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 4</h1>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    1. Preparation for France traveling.<br>
+                    2. Preparation for final presentation and questions.
+                </p>
+
+                <h1 class="des-heading4" id="CircRNA synthesis">Week 5</h1>
+                <p class="des-heading3 fade_from_left">HP:</p>
+                <p class="des-paragraph fade_from_right">
+                    Fly to France.
+                </p>
+            </div>
+            <script>
+                const expandbutton9 = document.getElementById("expandbutton9");
+                const article9 = document.getElementById("article9");
+
+                expandbutton9.addEventListener("click", function () {
+                    if (article9.style.display == "block") {
+                        article9.style.display = "none";
+                        expandbutton9.style.transform = "rotate(-180deg)";
+                    } else {
+                        article9.style.display = "block";
+                        expandbutton9.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+        </div>
+
+    </section>
+</div>
+
+{% endblock %}

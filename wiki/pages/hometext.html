@@ -1,0 +1,466 @@
+{% extends "layout.html" %}
+
+{% block title %}Hometext{% endblock %}
+
+{% block page_content %}
+<div id="content">
+  <div class="containerfig" style="padding-top: 50px">
+    <img src="https://static.igem.wiki/teams/4636/wiki/homepage/demo.gif" alt="NanoCircDx"
+      style="width: 100%; background-color: var(--light-purple);">
+  </div>
+  <section class="content" style="padding: 0px">
+    <div class="main">
+      <!-- gif -->
+      <div id="article1" style="display:block;">
+        <p class="des-paragraph fade_from_right" style="text-align: center;">
+          NanoCircDx is a colorectal cancer screening platform built by students from NTHU_iGEM. We are committed to
+          increasing the early detection rate of colorectal cancer in order to enhance the chances of successful
+          treatment for patients. A detailed overview of our project can be found on our Project Description page.
+        </p>
+      </div>
+
+      <div id="article2" style="display:block;">
+        <div class="main-page-column-container">
+          <div class="main-page-column">
+            <h1 class="des-heading2-2 fade_from_top">Colorectal Cancer Post a Great Threat to Humankind</h1>
+            <p class="des-paragraph fade_from_right">
+              Colorectal cancer is the third most common cancer globally and the second leading cause of cancer-related
+              deaths in 2022, resulting in nearly one million deaths annually <a href="#ref1">[1]</a>.
+            </p>
+            <div class="main-page-column-container">
+              <div class="main-page-column" id="home-icon">
+                <div class="containerfig">
+                  <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/problem-fig2-1.png"
+                    alt="Fig2-1" id="Fig2-1" style="max-width: 100%; max-height: 100%;">
+                </div>
+              </div>
+              <div class="main-page-column" id="home-container">
+                <h1 class="des-paragraph fade_from_top" id="home-heading">Insufficient precision:</h1>
+                <p class="des-paragraph fade_from_right" id="home-description">
+                  The fecal immunochemical test (FIT) has shown a misdiagnosis rate of up to 30%, underscoring the urgent need to develop an alternative detection method with higher accuracy.
+                </p>
+              </div>
+            </div>
+            <div class="main-page-column-container">
+              <div class="main-page-column" id="home-icon">
+                <div class="containerfig">
+                  <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/problem-fig2-2.png"
+                    alt="Fig2-2" id="Fig2-2" style="max-width: 100%; max-height: 100%;">
+                </div>
+              </div>
+              <div class="main-page-column" id="home-container">
+                <h1 class="des-paragraph fade_from_top" id="home-heading">The preparation of colonoscopy is cumbersome
+                  and time-consuming:</h1>
+                <p class="des-paragraph fade_from_right" id="home-description">
+                  Prior to the colonoscopy, individuals are required to consume a large amount of bowel preparation
+                  solution the day before the procedure and can only drink water.
+                </p>
+              </div>
+            </div>
+            <div class="main-page-column-container">
+              <div class="main-page-column" id="home-icon">
+                <div class="containerfig">
+                  <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/problem-fig2-3.png"
+                    alt="Fig2-3" id="Fig2-3" style="max-width: 100%; max-height: 100%;">
+                </div>
+              </div>
+              <div class="main-page-column" id="home-container">
+                <h1 class="des-paragraph fade_from_top" id="home-heading">Invasion:</h1>
+                <p class="des-paragraph fade_from_right" id="home-description">
+                  The invasion of colonoscopy generally lowers the public's willingness to undergo such a medical
+                  procedure.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="main-page-column">
+            <h1 class="des-heading2-2 fade_from_top" style="color: #FFFFFF00">Colorectal Cancer Post a Great Threat to
+              Humankind</h1>
+            <div class="containerfig" style="padding-top: 40px; padding-bottom: 40px">
+              <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/problem-fig1.png"
+                alt="Problem Fig. 1" style="width: 80%; height: auto;">
+            </div>
+            <p class="des-paragraph fade_from_right">
+              Current screening methods for colorectal cancer primarily involve the Fecal immunochemical test (FIT). If blood is detected in the stool sample, further examination is typically conducted by doctors using colonoscopy to observe the presence of polyps in the colon. However, this screening method has several drawbacks, such as inconvenience and high invasiveness.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div id="article4" style="display:block;">
+        <h1 class="des-heading2-2 fade_from_top" style="text-align: center;">Our Solution</h1>
+        <p class="des-paragraph fade_from_right" style="text-align: center;">
+          Research has demonstrated that early detection can make colorectal cancer highly curable. Therefore, we have decided to develop a diagnostic technology platform for cancer screening using liquid biopsy. With just a tube of blood sample provided by individuals, we can determine the potential presence of colorectal cancer through circular RNA (circRNA) detection in the serum. We use two detection methods for our experiments: 
+        </p>
+        <!-- Solution -->
+        <div class="containerfig">
+          <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/solution-1.png"
+            alt="solution" style="width: 20%; height: auto; margin-top: 20px; margin-bottom: 20px">
+        </div>
+        <!-- <div class="containerfig">
+          <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/solution-2.png"
+            alt="solution" style="width: 20%; height: auto; margin-top: 20px; margin-bottom: 40px">
+        </div> -->
+        <div class="main-page-column-container">
+          <div class="main-page-column">
+            <div class="containerfig">
+              <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/solution-3.png"
+                alt="solution" style="width: 30%; height: auto;">
+            </div>
+            <p class="des-paragraph fade_from_right">
+              RCA (Rolling Circle Amplification) is an isothermal amplification method performed at around 60-65°C. This process generates long-repeated complementary DNA (cDNA). <a href="#ref2">[2]</a>
+            </p>
+            <div class="containerfig">
+              <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/solution-4.png"
+                alt="solution" style="width: 30%; height: auto;">
+            </div>
+            <p class="des-paragraph fade_from_right">
+              After RCA process, the resulting cDNA are mixed with probe-conjugated gold (AuNPs) nanoparticles solution. The probes on the surface of AUNPs then recognize and bind to those cDNA products.
+            </p>
+            <div class="containerfig">
+              <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/solution-5.png"
+                alt="solution" style="width: 70%; height: auto;">
+            </div>
+            <p class="des-paragraph fade_from_right">
+              When treating the mixed solution with salts, the presence of cDNA in the probe-conjugated gold nanoparticle solution (indicating a high circRNA level) prevents the aggregation of AuNPs, resulting in a red color. Conversely, the absence of cDNA (indicating a low circRNA level) leads to a blue-purple color.
+            </p>
+          </div>
+          <div id="verticle-line"></div>
+          <div class="main-page-column">
+            <div class="containerfig">
+              <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/solution-6.png"
+                alt="solution" style="width: 90%; height: auto;">
+            </div>
+            <p class="des-paragraph fade_from_right">
+              RT-RPA (Reverse Transcription-Recombinase Polymerase Amplification) is an amplification method. It offers an isothermal
+              alternative to PCR(Polymerase Chain Reaction) <a href="#ref1">[3]</a>.
+            </p>
+            <div class="containerfig">
+              <img src="https://static.igem.wiki/teams/4636/wiki/homepage/pcrd.gif" style="width: 90%">
+              <!--<video width="640" height="360" controls autoplay loop muted  style="width: 90%; height: auto;">
+                <source src="https://video.igem.org/w/jjjVqj3xMTGJzMsvqVdD2R" type="video/mp4">
+                Your browser does not support the video tag. See our video <a href="https://video.igem.org/w/jjjVqj3xMTGJzMsvqVdD2R">here</a>
+              </video>-->
+            </div>
+            <p class="des-paragraph fade_from_right">
+              After the RT-RPA, the amplicons are applied to the lateral flow cassette (PCRD). The presence of amplicons (depicted in white) with different tags (blue, yellow, and green) initially binds to carbon particles. Subsequently, they are recognized by their respective antibodies on the test lines, resulting in a black coloration.
+            </p>
+            <div class="containerfig">
+              <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/pcrd-new.png"
+                alt="Problem Fig. 2" style="width: 90%; height: auto;">
+            </div>
+            <p class="des-paragraph fade_from_right">
+              Three lines (one control line and two test lines) indicates a high risk of developing colorectal cancer. Conversely, one line observed represents a negative outcome.
+            </p>
+          </div>
+        </div>
+
+        <p class="des-note fade_from_right" style="text-align: center;">
+          Read more on the <a
+            href="https://2023.igem.wiki/nthu-taiwan/experiments">Experiment</a> page.
+            <!-- <a class="nav_button" href="{{ url_for('pages', page='experiments') }}">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              Click to go Experiments!
+            </a> -->
+          </p>
+      </div>
+
+      <div id="article5" style="display:block;">
+        <div class="main-page-column-container">
+          <div class="main-page-column">
+            <h1 class="des-heading2-2 fade_from_top">Unique Selling Points</h1>
+            <p class="des-paragraph fade_from_right">
+              NanoCircDx presents clear benefits compared to existing methods for colorectal cancer detection. Our
+              approach needs just one tube of blood sample to evaluate the potential of colorectal cancer, offering:
+              <br>1. Early identification of the disease.
+              <br>2. Enhanced accuracy and speed in screening.
+              <br>3. Greater user acceptance.
+              <br>4. Non-invasive procedure.
+            </p>
+            <p class="des-note fade_from_right">
+              Read more on the <a
+                href="https://2023.igem.wiki/nthu-taiwan/entrepreneurship">Entrepreneurship</a> page.
+                <!-- <a class="nav_button" href="{{ url_for('pages', page='entrepreneurship') }}">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  Click to go Entrepreneurship!
+                </a> -->
+              </p>
+          </div>
+
+          <div class="main-page-column">
+            <!-- <h1 class="des-heading2 fade_from_top" style="color: #FFFFFF00">Unique selling points</h1> -->
+            <div class="containerfig" style="padding-top: 50px">
+              <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/selling-points.png"
+                alt="Unique selling points" style="width: 60%; height: auto;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="article6" style="display:block;">
+        <div class="main-page-column-container">
+          <div class="main-page-column">
+            <h1 class="des-heading2-2 fade_from_top" style="color: #FFFFFF00">Impact</h1>
+            <div class="containerfig" style="padding-top: 60px">
+              <img class="fade_from_top" src="https://static.igem.wiki/teams/4636/wiki/homepage/impact.png" alt="Impact"
+                style="width: 80%; height: auto;">
+            </div>
+          </div>
+          <div class="main-page-column">
+            <h1 class="des-heading2-2 fade_from_top">Impact</h1>
+            <p class="des-paragraph fade_from_right">
+              We combined our project with four SDGS to contribute to the creation of a sustainable life.<br>
+              3 - Good Health and Well-Being:<br>
+              Increase screening rates and reduce colorectal cancer mortality by developing a less minimally invasive,
+              highly accurate, and cost-effective method for colorectal cancer detection.<br>
+              4 - Quality Education:<br>
+              Make colorectal cancer information accessible to the public through camps, social media, and a wiki
+              game.<br>
+              9 - Industry, Innovation, And Infrastructure:<br>
+              To venture into entrepreneurship, creating more job opportunities and accelerating innovation within the
+              liquid biopsy technology sector.<br>
+              17 - Partnerships for The Goals:<br>
+              Engaged in cross-border and cross-disciplinary collaborations with numerous iGEM teams. <a
+                href="#ref4">[4]</a>
+            </p>
+            <p class="des-note fade_from_right">
+              Read more on the <a
+                href="https://2023.igem.wiki/nthu-taiwan/sustainable">Sustainable Development Impact</a> page.
+                <!-- <a class="nav_button" href="{{ url_for('pages', page='sustainable') }}">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  Click to go Sustainable Development Impact!
+                </a> -->
+              </p>
+          </div>
+        </div>
+      </div>
+
+      <div id="article7" style="display:block;">
+        <h1 class="des-heading2-2 fade_from_top" style="text-align: center;">Future Potential</h1>
+        <p class="des-paragraph fade_from_right" style="text-align: center;">
+          Current circular RNA detection methods are limited to lab settings and lack rapid screening. Our study has
+          great potential to establish swift circular RNA biomarker screening for colorectal cancer. Furthermore, we
+          intend to expand this concept for diagnosing diverse diseases and their related circular RNAs in the
+          future.
+        </p>
+        <div class="containerfig" style="padding-top: 0px">
+          <img class="fade_from_top"
+            src="https://static.igem.wiki/teams/4636/wiki/homepage/future-potential-new.png" alt="Future potential"
+            style="width: 80%; height: auto;">
+        </div>
+      </div>
+
+      <div id="horizontal-line"></div>
+
+      <div id="article9" style="display:block;">
+        <h1 class="des-heading3 fade_from_top" style="text-align: center;">Watch our promotion video!</h1>
+        <!-- promotion video -->
+        <div class="containerfig" style="padding: 60px">
+          <iframe title="NTHU-Taiwan: NanoCircDX (2023) - Project Promotion [English]" width="560" height="315"
+            src="https://video.igem.org/videos/embed/94538b52-d4b9-4b6d-814a-37e751c1610f" frameborder="0"
+            allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+        </div>
+      </div>
+
+      <div id="article10" style="display:block;">
+        <h1 class="des-ref-heading fade_from_top">Reference</h1>
+        <p class="des-ref-paragraph fade_from_right" id="ref1">
+          [1] World Health Organization. (2023, July 11). News Room. World Health Organization.
+          <a
+            href="https://www.who.int/news-room/fact-sheets/detail/colorectal-cancer">https://www.who.int/news-room/fact-sheets/detail/colorectal-cancer</a>
+        </p>
+        <p class="des-ref-paragraph fade_from_right" id="ref2">
+          [2] Boss, M., & Arenz, C. (2020). A Fast and Easy Method for Specific Detection of Circular RNA by
+          Rolling-Circle Amplification. Chembiochem: a European journal of chemical biology, 21(6), 793-796.
+          <a href="https://doi.org/10.1002/cbic.201900514">https://doi.org/10.1002/cbic.201900514</a>
+        </p>
+        <p class="des-ref-paragraph fade_from_right" id="ref3">
+          [3] Salazar, A., Ochoa-Corona, F. M., Talley, J. L., & Noden, B. H. (2021). Recombinase polymerase
+          amplification (RPA) with lateral flow detection for three Anaplasma species of importance to livestock health.
+          Scientific reports, 11(1), 15962.
+          <a href="https://doi.org/10.1038/s41598-021-95402-y">https://doi.org/10.1038/s41598-021-95402-y</a>
+        </p>
+        <p class="des-ref-paragraph fade_from_right" id="ref4">
+          [4] The Global Goals. (2015). Home. The Global Goals.
+          <a href="https://www.globalgoals.org/">https://www.globalgoals.org/</a>
+        </p>
+      </div>
+    </div>
+    <script>
+      $(document).ready(function () {
+          const $cont = $('.cont');
+          const $slider = $('.slider');
+          const $nav = $('.nav');
+          const winW = $(window).width();
+          const animSpd = 750; // Change also in CSS
+          const distOfLetGo = winW * 0.2;
+          let curSlide = 1;
+          let animation = false;
+          let autoScrollVar = false;
+          let diff = 0;
+    
+          // Generating slides
+          let arrCities = ['Attributions', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+          let numOfCities = arrCities.length;
+          let arrCitiesDivided = [];
+    
+          arrCities.map((city) => {
+              let length = city.length;
+              let letters = Math.floor(length / 4);
+              let exp = new RegExp(".{1," + letters + "}", "g");
+    
+              arrCitiesDivided.push(city.match(exp));
+          });
+    
+          let generateSlide = function (city) {
+              let frag1 = $(document.createDocumentFragment());
+              let frag2 = $(document.createDocumentFragment());
+              const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+              const firstLetter = arrCitiesDivided[city][0].charAt(0);
+    
+              const $slide =
+                  $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                        <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                        <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                    </div>`);
+    
+              const letter =
+                  $(`<div class="slide__letter slide--${numSlide}__letter">
+                        ${firstLetter}
+                    </div>`);
+              /*
+                              for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                  const text =
+                                      $(`<div class="slide__text slide__text--${i + 1}">
+                                          ${arrCitiesDivided[city][i]}
+                                      </div>`);
+                                  frag1.append(text);
+                              }
+              */
+              const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+              frag2.append(navSlide);
+              $nav.append(frag2);
+    
+              $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+              $slider.append($slide);
+    
+              if (arrCities[city].length <= 4) {
+                  $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+              }
+          };
+    
+          for (let i = 0, length = numOfCities; i < length; i++) {
+              generateSlide(i);
+          }
+    
+          $('.nav__slide--1').addClass('nav-active');
+    
+          // Navigation
+          function bullets(dir) {
+              $('.nav__slide--' + curSlide).removeClass('nav-active');
+              $('.nav__slide--' + dir).addClass('nav-active');
+          }
+    
+          function timeout() {
+              animation = true;
+          }
+    
+          function pagination(direction) {
+              animation = true;
+              diff = 0;
+              $slider.addClass('animation');
+              $slider.css({
+                  'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+              });
+    
+              $slider.find('.slide__darkbg').css({
+                  'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+              });
+    
+              $slider.find('.slide__letter').css({
+                  'transform': 'translate3d(0, 0, 0)',
+              });
+    
+              $slider.find('.slide__text').css({
+                  'transform': 'translate3d(0, 0, 0)'
+              });
+          }
+    
+          function navigateRight() {
+              if (!autoScrollVar) return;
+              if (curSlide >= numOfCities) return;
+              pagination(0);
+              setTimeout(timeout, animSpd);
+              bullets(curSlide + 1);
+              curSlide++;
+          }
+    
+          function navigateLeft() {
+              if (curSlide <= 1) return;
+              pagination(2);
+              setTimeout(timeout, animSpd);
+              bullets(curSlide - 1);
+              curSlide--;
+          }
+    
+          function toDefault() {
+              pagination(1);
+              setTimeout(timeout, animSpd);
+          }
+    
+    
+    
+          $(document).on('mouseup touchend', function (e) {
+              $(document).off('mousemove touchmove');
+    
+              if (animation) return;
+    
+              if (diff >= distOfLetGo) {
+                  toDefault();
+              } else if (diff <= -distOfLetGo) {
+                  toDefault();
+              } else {
+                  toDefault();
+              }
+          });
+    
+          $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+              let target = +$(this).attr('data-target');
+              bullets(target);
+              curSlide = target;
+              pagination(1);
+          });
+    
+          $(document).on('click', '.side-nav', function () {
+              let target = $(this).attr('data-target');
+    
+              if (target === 'right') navigateRight();
+              if (target === 'left') navigateLeft();
+          });
+    
+          $(document).on('keydown', function (e) {
+              if (e.which === 39) navigateRight();
+              if (e.which === 37) navigateLeft();
+          });
+    
+          $(document).on('mousewheel DOMMouseScroll', function (e) {
+              if (animation) return;
+              let delta = e.originalEvent.wheelDelta;
+    
+              if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+              if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+          });
+      });
+    </script>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,714 @@
+{% extends "layout.html" %}
+
+{% block title %}Project Description{% endblock %}
+
+{% block page_content %}
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/header001.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/header001.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Description', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                    <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                    <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                    ${firstLetter}
+                </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "Earth care is self-care.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+
+<div id="content">
+    <section class="banner-container">
+
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container" style="top: 50px;">
+
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+        color: aliceblue;
+        /* font-style: unset; */
+        font-size: xx-large;
+        font-weight: 800;
+        letter-spacing: 8px;
+        font-size: 140px;
+        font-family: inherit;">
+            Description
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#Problem" class="sidebaritem">Problem</a></li>
+                    <li><a href="#Inspiration" class="sidebaritem">Inspiration</a></li>
+                    <li><a href="#Our Goal" class="sidebaritem">Our Goal</a></li>
+                    <li><a href="#Solution" class="sidebaritem">Solution</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+
+                    <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a id="" href="#Selection of circRNA">Selection of circRNA</a></li>
+                            <li class="sidebaritem_item"><a id="Establishment" href="#Establishment of detection system assisted by syntheticbiology">Establishment of detection system assisted by synthetic biology</a></li>
+                            <li class="sidebaritem_item"><a id="" href="#Detection system for circRNA">Detection system for circRNA</a></li>
+                            <button class="sideexpandbutton" id="sideexpandbutton2"></button>
+                            <div id="sidebaritem_item2" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                                <ul>
+                                    <li class="sidebaritem_item"><a id="Gold" href="#Gold nanoparticle-based colorimetric assay">Gold nanoparticle-based colorimetric assay</a></li>
+                                    <li class="sidebaritem_item"><a id="" href="#Lateral flow test">Lateral flow test</a></li>
+                                </ul>
+                            </div>
+                            <script>
+                                const sideexpandbutton2 = document.getElementById("sideexpandbutton2");
+                                const sidebaritem_item2 = document.getElementById("sidebaritem_item2");
+
+                                sideexpandbutton2.addEventListener("click", function () {
+                                    if (sidebaritem_item2.style.display == "none") {
+                                        sidebaritem_item2.style.display = "block";
+                                        sideexpandbutton2.style.transform = "rotate(-180deg)";
+                                    } else {
+                                        sidebaritem_item2.style.display = "none";
+                                        sideexpandbutton2.style.transform = "rotate(-360deg)";
+                                    }
+                                });
+                            </script>
+
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                        const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+                        sideexpandbutton1.addEventListener("click", function () {
+                            if (sidebaritem_item1.style.display == "none") {
+                                sidebaritem_item1.style.display = "block";
+                                sideexpandbutton1.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item1.style.display = "none";
+                                sideexpandbutton1.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                    </script>
+                    <li><a href="#Advantages and innovations" class="sidebaritem">Advantages and innovations</a></li>
+                    <li><a href="#Reference" class="sidebaritem">Reference</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Problem">Problem
+                </h1>
+                <button class="expandbutton" id="expandbutton"></button>
+
+            </div>
+            <div id="article1">
+                <p class="des-paragraph fade_from_right">
+                    We aim to establish a detection
+                    system for early-stage colorectal cancer as our goal for this year. Colorectal cancer ranks
+                    among the top three in both incidence and mortality rates in Taiwan, and it is also prevalent
+                    globally, ranking among the top five in terms of prevalence and mortality rates. Early detection
+                    of colorectal cancer significantly increases the chances of successful treatment. Therefore, if
+                    we can invent a tool or technique capable of detecting colorectal cancer at an early stage, it
+                    would effectively prevent the worsening of the condition and increase early treatment rates. <a
+                        href="#[1]">[1]</a>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Currently, the primary screening
+                    methods for colorectal cancer involve the use of fecal immunochemical test to detect stool.
+                    If blood is detected in the stool, further examination using colonoscopy is
+                    performed to observe the presence of polyps in the colon. However, there are several issues with
+                    the current screening methods. Firstly, the accuracy of fecal immunochemical tests in colorectal
+                    cancer first stage
+                    is 41.2%, which means there is a 58.8% misdiagnosis rate and insufficient precision.
+                    Secondly, colonoscopy, while it provides a direct view of lesions in the colon and enables
+                    biopsy, requires burdensome preparatory measures. Patients are required to consume a large
+                    amount of bowel preparation solution and undergo strict dietary restrictions and medication
+                    limitations. This process is often challenging, and the invasive nature of colonoscopy may
+                    decrease the willingness of the general public to undergo the examination. <a href="#[2]">[2]</a>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In summary, the current screening
+                    methods have drawbacks such as insufficient accuracy, burdensome preparation, and invasiveness.
+                    Therefore, we hope to establish a rapid, convenient, and accurate method for early detection of
+                    colorectal cancer.
+                </p>
+            </div>
+            <script>
+                const expandbutton = document.getElementById("expandbutton");
+                const article = document.getElementById("article1");
+
+                expandbutton.addEventListener("click", function () {
+                    if (article.style.display == "block") {
+                        article.style.display = "none";
+                        expandbutton.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article.style.display = "block";
+                        expandbutton.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Inspiration">
+                    Inspiration</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <p class="des-paragraph fade_from_right">
+                    When it comes to detection systems,
+                    the most crucial aspect is determining the target for detection. Therefore, in our iGEM case
+                    study, we continuously search for suitable biomarkers to serve as the detection target. In the
+                    iGEM-2022 Patras team <a href="#[3]">[3]</a>, they utilized a novel biomarker, circular form RNA
+                    (circRNA), as the
+                    detection target for lung cancer. Subsequently, we conducted extensive research on circRNA and
+                    found that these circRNAs often exhibit abnormal expression levels in various diseases, making
+                    them a promising new biomarker as indicated by numerous literature sources <a href="#[4]">[4]</a>.
+                    However, there is
+                    currently limited research on detecting circRNA, and the detection methods can only conduct in a
+                    laboratory, making it challenging to generalize.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In recent years, due to the impact
+                    of the COVID-19 pandemic, we have become familiar with rapid screening assays. These assays can
+                    swiftly detect the presence of COVID-19 infection with just a few drops of bodily fluids.
+                    Inspired by this, we envisioned utilizing similar rapid screening methods to swiftly,
+                    conveniently, and accurately to detect circRNA within the human body.
+                </p>
+            </div>
+            <script>
+                const expandbutton2 = document.getElementById("expandbutton2");
+                const article2 = document.getElementById("article2");
+
+                expandbutton2.addEventListener("click", function () {
+                    if (article2.style.display == "block") {
+                        article2.style.display = "none";
+                        expandbutton2.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article2.style.display = "block";
+                        expandbutton2.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Our Goal">Our Goal
+                </h1><button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3">
+                <p class="des-paragraph fade_from_right">
+                    We aim to establish a fast,
+                    convenient, and accurate detection system for early-stage colorectal cancer by measuring the
+                    expression levels of circRNA in patients' blood. This system enables the assessment of the risk
+                    of developing colorectal cancer.
+                </p>
+            </div>
+            <script>
+                const expandbutton3 = document.getElementById("expandbutton3");
+                const article3 = document.getElementById("article3");
+
+                expandbutton3.addEventListener("click", function () {
+                    if (article3.style.display == "block") {
+                        article3.style.display = "none";
+                        expandbutton3.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article3.style.display = "block";
+                        expandbutton3.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Solution">Solution
+                </h1><button class="expandbutton" id="expandbutton4"></button>
+            </div>
+            <div id="article4">
+                <h1 class="des-heading2" id="Selection of circRNA">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Selection of circRNA
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    We have decided to research a
+                    blood-based cancer detection system that requires only a single tube of blood sample from
+                    patients to determine the presence of colorectal cancer. After conducting extensive data
+                    querying, we have identified circRNA in the blood as our primary target for investigation.
+                    Specifically, we will focus on two types of circRNA: hsa_circ_0101802 and
+                    hsa_circ_0004771, as potential biomarkers. These circRNAs have been observed to be upregulated
+                    in colorectal cancer patient's serum. Ranging between 0 and 1, a higher area under curve (AUC)
+                    value indicates higher sensitivity and specificity, better at identifying true positive and
+                    true negative samples. According to research, hsa_circ_0004771 hsa_circ_0101802 and have AUC
+                    value of 0.854 and 0.86, respectively. <a href="#[5]">[5]</a><a href="#[6]">[6]</a>
+                    Which demonstrated these two circRNAs have high specificity and sensitivity in clinical studies.
+                    This makes them highly suitable candidates for detecting the presence of colorectal cancer in
+                    patients.
+                </p>
+
+                <h1 class="des-heading2"
+                    id="Establishment of detection system assisted by syntheticbiology">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Establishment of detection system assisted by synthetic biology
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    We employ synthetic biology
+                    techniques to engineer E. coli for the production of circRNA precursors (complementary DNA).
+                    Followed by circRNA synthesis, the resulting circRNA will serve as the detection targets in our
+                    testing system. The objective of this approach is to mimic the expression of circRNAs in
+                    patients' bodies and validate the effectiveness of our detection system
+                </p>
+                <h1 class="des-heading2" id="Detection system for circRNA">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Detection system for circRNA
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    We have designed two methods for
+                    detecting the target cicRNAs: “Gold nanoparticle-based colorimetric assay” and “lateral flow
+                    rapid screening assay”.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/description/figure-1.jpg">
+                </div>
+                <p class="des-figure">
+                    Figure 1. Overall concept of our project. “RCA” is the abbreviation of “Rolling Circle
+                    Amplification”. “AuNPs” is the abbreviation of “Gold Nanoparticles”. “RT-RPA” is the
+                    abbreviation of “Reverse Transcription-Recombinase Polymerase Amplification”. “PCRD” is a kind
+                    of lateral flow strip.
+                </p>
+                <h1 class="des-heading3 fade_from_left" id="Gold nanoparticle-based colorimetric assay">1. Gold
+                    nanoparticle-based colorimetric assay</h1>
+                <p class="des-paragraph fade_from_right">
+                    In the gold nanoparticle-based
+                    colorimetric assay, considering the circRNA may exist in low concentration in human serum, we
+                    incorporate an isothermal amplification method known as rolling circle amplification (RCA) to
+                    enhance the circRNA signal by producing long-repeated complementary DNA (cDNA) (Figure 2). (see
+                    <a href="{{ url_for('pages', page='design') }}" class="home">page design</a> for the mechanism of
+                    RCA)
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/description/figure-2.jpg">
+                </div>
+                <p class="des-figure">
+                    Figure 2. A diagram shows how RCA amplify circular RNA by producing long repeated
+                    single-stranded complementary DNA.
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    Additionally, we introduce a
+                    single-stranded DNA oligo, referred to as a probe, to act as a bridge connecting the cDNA and
+                    gold nanoparticles. This design is effective because the probes are complementary to the RCA
+                    products.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    The gold nanoparticle solution
+                    normally appears in red color. However, a color change to purple occurs when aggregations form
+                    upon the addition of salts <a href="#[7]">[7]</a>. Exploiting this characteristic, when a high level
+                    of circRNA is
+                    present in the tested sample and is amplified by RCA, the resulting cDNAs can specifically
+                    attach to the probe-conjugated gold nanoparticles. This inhibits the aggregation of gold
+                    nanoparticles, and the solution retains its red color when treated with salts. Conversely, if
+                    the tested sample contains a low level of expressed circRNA, the gold nanoparticle solution
+                    turns blue (Figure 3).
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/description/figure-3.jpg" style="width: 60%;">
+                </div>
+                <p class="des-figure">
+                    Figure 3. A diagram shows the mechanism of gold nanoparticle-based colorimetric assay.
+                </p>
+                <h1 class="des-heading3 fade_from_left" id="Lateral flow test">2. Lateral flow test</h1>
+                <p class="des-paragraph fade_from_right">
+                    In lateral flow test, we take
+                    advantage of a lateral flow strip, PCRD (Abingdon Health) <a href="#[8]">[8]</a>. PCRD includes one
+                    control (C) line
+                    and two test (T) lines. The purpose of these lines is to confirm the presence of circRNA in the
+                    sample and ensure the test's accuracy. For the function of PCRD, the target sequence should be
+                    modified with different tags both at the 3'- and 5'-ends. Initially, the sequences modified with
+                    biotin can bind to the anti-biotin on the surface of carbon particles in conjugated pad.
+                    Subsequently, sequences modified with DIG (or FAM) can bind to the anti-DIG (or anti-FAM) and
+                    become immobilized, resulting in the black color on the test line. For control line, the
+                    anti-biotin on the surface of carbon particles can attach to the anti-mouse, leading to the
+                    black color on the control line (Figure 4).
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/description/figure-4.jpg" style="width: 60%;">
+                </div>
+                <p class="des-figure">
+                    Figure 4. A diagram shows the mechanism of lateral flow strip (PCRD).
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Reverse transcription-recombinase
+                    polymerase amplification (RT-RPA) is an isothermal amplification method that is introduced not
+                    only to amplify circRNA but also to incorporate modified primers to the amplicons. (see <a
+                        href="{{ url_for('pages', page='design') }}" class="home">page design</a> for the mechanism of
+                    RT-RPA). RT-RPA amplifies circRNA by producing double-stranded
+                    complementary DNA (cDNA); the resulting amplicons contain modified primers at the 3'- and
+                    5'-ends, respectively (Figure 5).
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/description/figure-5.jpg">
+                </div>
+                <p class="des-figure">
+                    Figure 5. The mechanism of recombinase polymerase amplification (RPA).
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Followed by RT-RPA, the amplified
+                    product is dropped onto the purchased PCRD. If T line and C line both appear to be observed,
+                    indicating a high level of circRNA (indicating a risk of colorectal cancer) in the sample, while
+                    only C line observed represents a negative outcome (no disease).
+                </p>
+
+            </div>
+            <script>
+                const expandbutton4 = document.getElementById("expandbutton4");
+                const article4 = document.getElementById("article4");
+
+                expandbutton4.addEventListener("click", function () {
+                    if (article4.style.display == "block") {
+                        article4.style.display = "none";
+                        expandbutton4.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article4.style.display = "block";
+                        expandbutton4.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Advantages and innovations">
+                    Advantages and innovations</h1><button class="expandbutton" id="expandbutton5"></button>
+            </div>
+            <div id="article5">
+                <p class="des-paragraph fade_from_right">
+                    1. Our design, compared to existing methods for detecting colorectal cancer, requires only a
+                    single
+                    tube of blood sample for detection. This approach has a higher acceptance rate among the general
+                    public, and the use of two circRNAs ensures a high detection accuracy. Furthermore, our system
+                    allows for the early detection of the risk of colorectal cancer in patients.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    2. Currently, there is a lack of literature on the rapid screening of circRNA. We have created
+                    two novel early colorectal cancer detection method, which make a significant contribution to
+                    future research in colorectal cancer-related diagnosis.
+                </p>
+                <a class="nav_button" href="{{ url_for('pages', page='design') }}">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Click to go Design!
+                </a>
+            </div>
+            <script>
+                const expandbutton5 = document.getElementById("expandbutton5");
+                const article5 = document.getElementById("article5");
+
+                expandbutton5.addEventListener("click", function () {
+                    if (article5.style.display == "block") {
+                        article5.style.display = "none";
+                        expandbutton5.style.transform = "rotate(-180deg)";
+
+
+                    } else {
+                        article5.style.display = "block";
+                        expandbutton5.style.transform = "rotate(-360deg)";
+
+                    }
+                });
+            </script>
+            <div id="Reference">
+                <h1 class="des-ref-heading">Reference</h1>
+                <p class="des-ref-paragraph">
+                    [1] <a id="[1]"
+                        href="https://www.cancer.org/cancer/types/colon-rectal-cancer/detection-diagnosis-staging/survival-rates.html">https://www.cancer.org/cancer/types/colon-rectal-cancer/detection-diagnosis-staging/survival-rates.html</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [2] Chakrabarti, S., Peterson, C. Y., Sriram, D., & Mahipal, A. (2020). Early stage colon
+                    cancer: Current treatment standards, evolving paradigms, and future directions. <b>World journal
+                    of gastrointestinal oncology</b>, <b>12</b>(8), 808-832. <a id="[2]"
+                        href="https://doi.org/10.4251/wjgo.v12.i8.808">https://doi.org/10.4251/wjgo.v12.i8.808</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [3] <a id="3"
+                        href="https://2022.igem.wiki/patras-medicine/model/">https://2022.igem.wiki/patras-medicine/model/</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [4] Verduci, L., Tarcitano, E., Strano, S., Yarden, Y., & Blandino, G. (2021). CircRNAs: role in
+                    human diseases and potential use as biomarkers. <b>Cell death & disease</b>, <b>12</b>(5), 468. <a id="[4]"
+                        href="https://doi.org/10.1038/s41419-021-03743-3">https://doi.org/10.1038/s41419-021-03743-3</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [5] Pan, B., Qin, J., Liu, X., He, B., Wang, X., Pan, Y., Sun, H., Xu, T., Xu, M., Chen, X., Xu,
+                    X., Zeng, K., Sun, L., & Wang, S. (2019). Identification of Serum Exosomal hsa-circ-0004771 as a
+                    Novel Diagnostic Biomarker of Colorectal Cancer. <b>Frontiers in genetics</b>, <b>10</b>, 1096. <a id="[5]"
+                        href="https://doi.org/10.3389/fgene.2019.01096">https://doi.org/10.3389/fgene.2019.01096</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [6] Bai, L., Gao, Z., Jiang, A., Ren, S., & Wang, B. (2021). circ_0101802 functions as a sponge
+                    of miR-1236-3p to facilitate the proliferation, migration and invasion of colorectal cancer via
+                    regulating MACC1. <b>Journal of pharmacological sciences</b>, <b>147</b>(1), 104-113. <a id="[6]"
+                        href="https://doi.org/10.1016/j.jphs.2021.06.002">https://doi.org/10.1016/j.jphs.2021.06.002</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [7] Chang, C. C., Chen, C. P., Wu, T. H., Yang, C. H., Lin, C. W., & Chen, C. Y. (2019). Gold
+                    Nanoparticle-Based Colorimetric Strategies for Chemical and Biological Sensing Applications.
+                    <b>Nanomaterials (Basel, Switzerland)</b>, <b>9</b>(6), 861. <a id="[7]"
+                        href="https://doi.org/10.3390/nano9060861">https://doi.org/10.3390/nano9060861</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [8] <a id="[8]"
+                        href="https://www.abingdonhealth.com/products/pcrd/">https://www.abingdonhealth.com/products/pcrd/</a>
+                </p>
+            </div>
+        </div>
+
+    </section>
+</div>
+{% endblock %}

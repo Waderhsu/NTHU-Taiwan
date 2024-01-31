@@ -1,0 +1,1187 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="https://static.igem.wiki/common/icons/favicons/igem-2022.svg" />
+    <link rel="license" href="https://creativecommons.org/licenses/by/4.0/" />
+
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename = 'bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename = 'style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'slick.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'slick-theme.css') }}">
+
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'arcgis.css') }}">
+
+    <title>Collaborations | NTHU-Taiwan - iGEM 2023</title>
+
+    <!-- Loading -->
+    <style>
+        #loader-wrapper {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 50;
+            left: 2000;
+            background-color: #7b5b8a;
+            z-index: 100000;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+
+        }
+    </style>
+
+    <div id="loader-wrapper">
+
+        <img style="position:relative; margin-top: -100px; width:80%"
+            src="https://static.igem.wiki/teams/4636/wiki/loadingpanda.gif">
+    </div>
+
+    <script>
+        var loader = document.getElementById("loader-wrapper");
+        window.addEventListener("load", function () {
+            loader.style.display = "none";
+            document.getElementById('content').style.opacity = 1;
+            document.getElementById('content').style.visibility = 'visible';
+        })
+    </script>
+
+</head>
+
+<body>
+    <div id="content">
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+
+        <script src="{{ url_for('static', filename = 'slick.min.js') }}" async></script>
+        <style>
+            .slide--1__darkbg {
+                left: 0%;
+                background: url("https://static.igem.wiki/teams/4636/wiki/header003.jpg") center center no-repeat;
+                background-size: cover;
+                background-position: 0px center, 0px center;
+                transform: translate3d(0, 0, 0);
+                will-change: transform;
+            }
+
+            .slide--1__letter {
+                background: url("https://static.igem.wiki/teams/4636/wiki/header003.jpg") center center no-repeat;
+                background-position: 0px center, 0px center;
+                background-size: cover;
+            }
+        </style>
+        <script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+        <script>
+            $(document).ready(function () {
+                const $cont = $('.cont');
+                const $slider = $('.slider');
+                const $nav = $('.nav');
+                const winW = $(window).width();
+                const animSpd = 750; // Change also in CSS
+                const distOfLetGo = winW * 0.2;
+                let curSlide = 1;
+                let animation = false;
+                let autoScrollVar = false;
+                let diff = 0;
+
+                // Generating slides
+                let arrCities = ['Collaborations', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+                let numOfCities = arrCities.length;
+                let arrCitiesDivided = [];
+
+                arrCities.map((city) => {
+                    let length = city.length;
+                    let letters = Math.floor(length / 4);
+                    let exp = new RegExp(".{1," + letters + "}", "g");
+
+                    arrCitiesDivided.push(city.match(exp));
+                });
+
+                let generateSlide = function (city) {
+                    let frag1 = $(document.createDocumentFragment());
+                    let frag2 = $(document.createDocumentFragment());
+                    const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+                    const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+                    const $slide =
+                        $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                    <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                    <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                </div>`);
+
+                    const letter =
+                        $(`<div class="slide__letter slide--${numSlide}__letter">
+                    ${firstLetter}
+                </div>`);
+                    /*
+                                    for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                        const text =
+                                            $(`<div class="slide__text slide__text--${i + 1}">
+                                                ${arrCitiesDivided[city][i]}
+                                            </div>`);
+                                        frag1.append(text);
+                                    }
+                    */
+                    const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+                    frag2.append(navSlide);
+                    $nav.append(frag2);
+
+                    $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+                    $slider.append($slide);
+
+                    if (arrCities[city].length <= 4) {
+                        $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+                    }
+                };
+
+                for (let i = 0, length = numOfCities; i < length; i++) {
+                    generateSlide(i);
+                }
+
+                $('.nav__slide--1').addClass('nav-active');
+
+                // Navigation
+                function bullets(dir) {
+                    $('.nav__slide--' + curSlide).removeClass('nav-active');
+                    $('.nav__slide--' + dir).addClass('nav-active');
+                }
+
+                function timeout() {
+                    animation = true;
+                }
+
+                function pagination(direction) {
+                    animation = true;
+                    diff = 0;
+                    $slider.addClass('animation');
+                    $slider.css({
+                        'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+                    });
+
+                    $slider.find('.slide__darkbg').css({
+                        'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+                    });
+
+                    $slider.find('.slide__letter').css({
+                        'transform': 'translate3d(0, 0, 0)',
+                    });
+
+                    $slider.find('.slide__text').css({
+                        'transform': 'translate3d(0, 0, 0)'
+                    });
+                }
+
+                function navigateRight() {
+                    if (!autoScrollVar) return;
+                    if (curSlide >= numOfCities) return;
+                    pagination(0);
+                    setTimeout(timeout, animSpd);
+                    bullets(curSlide + 1);
+                    curSlide++;
+                }
+
+                function navigateLeft() {
+                    if (curSlide <= 1) return;
+                    pagination(2);
+                    setTimeout(timeout, animSpd);
+                    bullets(curSlide - 1);
+                    curSlide--;
+                }
+
+                function toDefault() {
+                    pagination(1);
+                    setTimeout(timeout, animSpd);
+                }
+
+
+
+                $(document).on('mouseup touchend', function (e) {
+                    $(document).off('mousemove touchmove');
+
+                    if (animation) return;
+
+                    if (diff >= distOfLetGo) {
+                        toDefault();
+                    } else if (diff <= -distOfLetGo) {
+                        toDefault();
+                    } else {
+                        toDefault();
+                    }
+                });
+
+                $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+                    let target = +$(this).attr('data-target');
+                    bullets(target);
+                    curSlide = target;
+                    pagination(1);
+                });
+
+                $(document).on('click', '.side-nav', function () {
+                    let target = $(this).attr('data-target');
+
+                    if (target === 'right') navigateRight();
+                    if (target === 'left') navigateLeft();
+                });
+
+                $(document).on('keydown', function (e) {
+                    if (e.which === 39) navigateRight();
+                    if (e.which === 37) navigateLeft();
+                });
+
+                $(document).on('mousewheel DOMMouseScroll', function (e) {
+                    if (animation) return;
+                    let delta = e.originalEvent.wheelDelta;
+
+                    if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+                    if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+                });
+            });
+        </script>
+        <script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+        <script>
+            const carouselText = [
+                { text: "Alone we can do so little; together we can do so much.", color: "rgba(255, 255, 255, 0.679)" },
+
+            ]
+
+            $(document).ready(async function () {
+                carousel(carouselText, "#feature-text")
+            });
+
+            async function typeSentence(sentence, eleRef, delay = 100) {
+                const letters = sentence.split("");
+                let i = 0;
+                while (i < letters.length) {
+                    await waitForMs(delay);
+                    $(eleRef).append(letters[i]);
+                    i++;
+                }
+            }
+
+
+            async function deleteSentence(eleRef) {
+                const sentence = $(eleRef).html();
+                const letters = sentence.split("");
+                let i = 0;
+                while (letters.length > 0) {
+                    await waitForMs(1000000);
+                    letters.pop();
+                    $(eleRef).html(letters.join(""));
+                }
+            }
+
+            async function carousel(carouselList, eleRef) {
+                var i = 0;
+                while (true) {
+                    updateFontColor(eleRef, carouselList[i].color)
+                    await typeSentence(carouselList[i].text, eleRef);
+                    await waitForMs(1500);
+                    await deleteSentence(eleRef);
+                    await waitForMs(500);
+                    i++
+                    if (i >= carouselList.length) { i = 0; }
+                }
+            }
+
+            function updateFontColor(eleRef, color) {
+                $(eleRef).css('color', color);
+            }
+
+            function waitForMs(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms))
+            }
+        </script>
+        <script>
+            $(function () {
+                $('.scroll-down').click(function () {
+                    $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+                    return false;
+                });
+            });
+        </script>
+
+
+
+        <section class="banner-container">
+            <div class="cont">
+                <div class="slider"></div>
+            </div>
+            <div class="typing-container" style="top: 50px;">
+                <span id="sentence" class="sentence"></span>
+                <span id="feature-text"
+                    style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+                <span class="input-cursor"></span>
+            </div>
+            <div class="typing-container" style="margin-top: -250px;
+            color: aliceblue;
+            /* font-style: unset; */
+            font-size: xx-large;
+            font-weight: 800;
+            letter-spacing: 8px;
+            font-size: 140px;
+            font-family: inherit;">
+                Collaborations
+                <span id="sentence" class="sentence"></span>
+                <span id="feature-text"
+                    style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+            </div>
+            <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+        </section>
+        <section class="content">
+            <div class="main-left">
+                <div class="sidebar">
+                    <ul>
+                        <li><a id="sidebaritem1" href="#Problem" class="">Our own collaboration</a></li>
+                        <li><a id="sidebaritem2" href="#Inspiration" class="">Other collaborations</a></li>
+                        <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+                        <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                            <ul>
+                                <li class="sidebaritem_item"><a href="#Patrias Medicine - World Health Day">Patrias Medicine - World Health Day</a></li>
+                                <li class="sidebaritem_item"><a href="#iGEM IniCRETE - World Wildlife Day">iGEM IniCRETE - World Wildlife Day</a></li>
+                                <li class="sidebaritem_item"><a href="#igem.ionis - Bioart">igem.ionis - Bioart</a></li>
+                                <li class="sidebaritem_item"><a href="#Aix-Marseille - Biodiversity">Aix-Marseille - Biodiversity</a></li>
+                                <li class="sidebaritem_item"><a href="#2023 iGEM Taiwan Seminar at Linkou">2023 iGEM Taiwan Seminar at Linkou</a></li>
+                                <li class="sidebaritem_item"><a href="#Online meeting with Yi-ye China and JLU_China">Online meeting with Yi-ye China and JLU_China</a></li>
+                            </ul>
+                        </div>
+                        <script>
+                            const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                            const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+                            sideexpandbutton1.addEventListener("click", function () {
+                                if (sidebaritem_item1.style.display == "none") {
+                                    sidebaritem_item1.style.display = "block";
+                                    sideexpandbutton1.style.transform = "rotate(-180deg)";
+
+
+                                } else {
+                                    sidebaritem_item1.style.display = "none";
+                                    sideexpandbutton1.style.transform = "rotate(-360deg)";
+
+                                }
+                            });
+                        </script>
+
+                    </ul>
+
+                </div>
+            </div>
+
+
+            <div class="main-right" id="effort">
+                <div class="headingbox">
+                    <h1 class="des-heading1" id="Problem">
+                        Our own collaboration
+                    </h1>
+                    <button class="expandbutton" id="expandbutton"></button>
+
+                </div>
+                <div id="article1" style="display:block;">
+                    <h1 class="des-heading2">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>iGEM Map
+                    </h1>
+                    <script src="https://js.arcgis.com/4.17/"></script>
+                    <div id="map" class="map"></div>
+                    
+                    <h1 class="des-heading3 fade_from_left" id="Path A">Goal:</h1>
+                    <p class="des-paragraph fade_from_right">
+                        In order to continue the spirit of internationalization from our senior, we launched an advanced
+                        version of iGEM map compared to the last version from 2022 NTHU Taiwan iGEM team. The purpose of
+                        our 2023 iGEM map is to allow iGEMers from different countries, different area and different
+                        regions to have a platform to show their project, results, rough ideas and their team logo or
+                        charactor.
+                    </p>
+                    <h1 class="des-heading3 fade_from_left" id="Path A">Process:</h1>
+                    <p class="des-paragraph fade_from_right">
+                        During the process of developing an advanced version of iGEM map, our Dry Lab members tried hard
+                        to design an movable global model which contained merely every country on the earth, and each
+                        point or so-called dot represented the country that collaborated with us. When you point the
+                        small dot on the earth model, you will see the information about the certain iGEM team and their
+                        project and character/team logo. Turning the earth model to North, East, South or West direction
+                        could let you have a further look at the other iGEM teams that collaborated with us on other
+                        regions. As for our human practice members' contribution, we contacted as many countries as we
+                        could through Instagram and emails, and fully explained our ideas of this iGEM map. Moreover,
+                        invited them to join this international plan of gathering the iGEMers together in order to meet
+                        each others' ideas and project through a small and movable online global map.
+                    </p>
+                    <h1 class="des-heading3 fade_from_left" id="Path A">Result:</h1>
+                    <p class="des-paragraph fade_from_right">
+                        In this collaboration, iGEMers from all over the world whom participated on the plan could see
+                        each others on the three-dimensional earth map model, which allowed them to browsing map through
+                        different directions. Plus, teams on the map would provided a brief introduction about their
+                        project, their role or logo, and links to their team's social platform and wiki. Thus, viewers
+                        could have an brief understand about each others and could contact each other through this map.
+                        The plan of iGEM map linked iGEM commmunity together through a small online global model, made
+                        iGEM teams get to know each others just by the easy action of clicking on the map!
+                    </p>
+                    <!--
+                    <script src="{{ url_for('static', filename = 'arcgis.js') }}"></script>-->
+
+                </div>
+                <script>
+                    const expandbutton = document.getElementById("expandbutton");
+                    const article = document.getElementById("article1");
+
+                    expandbutton.addEventListener("click", function () {
+                        if (article.style.display == "block") {
+                            article.style.display = "none";
+                            expandbutton.style.transform = "rotate(-180deg)";
+
+
+                        } else {
+                            article.style.display = "block";
+                            expandbutton.style.transform = "rotate(-360deg)";
+
+                        }
+                    });
+                </script>
+                <div class="headingbox">
+                    <h1 class="des-heading1" id="Inspiration">
+                        Other collaborations</h1>
+                    <button class="expandbutton" id="expandbutton2"></button>
+                </div>
+                <div id="article2" style="display:block;">
+                    <h1 class="des-heading2" id="Patrias Medicine - World Health Day">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Patrias Medicine - World Health Day
+                    </h1>
+                    <div class="chatbox-container">
+                        <div class="chatbox-icon fade_from_left">
+                            <img class="fade_from_left"
+                                src="https://static.igem.wiki/teams/4636/wiki/patras-med-igem-2023.png" alt="" style=" width: 70%; height: 85%; margin: 0
+                                    auto; margin-top: 5px; margin-left: 11px;">
+                        </div>
+                        <p class="chatbox-des-left fade_from_left">
+                            Specifically, we would like to
+                            organize an online collaboration due to the World Health Day, on April 7. Each team will
+                            send us
+                            a picture of a paperboard with a health-related phrase written on it. The paperboard will be
+                            decorated and coloured as each team wishes.
+                        </p>
+                        <div class="chatbox-fig-right">
+                            <img class="fade_from_right"
+                                src="https://static.igem.wiki/teams/4636/wiki/collaborationpatras.jpeg" alt="Fig1-1"
+                                id="Fig1-1" style="position: relative;
+                                        opacity: 1;
+                                        top: 0px;
+                                        /* height: 500px; */
+                                        border-radius: 50px;
+                                        width: 100%;
+                                        margin-left: 0px;
+                                        border: 3px solid white;
+                                        margin-right: 20px;
+                                        right: 0px;">
+                        </div>
+                    </div>
+                    <h1 class="des-heading2" id="iGEM IniCRETE - World Wildlife Day">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>iGEM IniCRETE - World Wildlife Day
+                    </h1>
+                    <div class="chatbox-container">
+                        <div class="chatbox-icon fade_from_left">
+                            <img class="fade_from_left" src="https://static.igem.wiki/teams/4636/wiki/inicrete.jpg"
+                                alt="" style=" width: 70%; height: 85%; margin: 0
+                                    auto; margin-top: 5px; margin-left: 11px;border-radius: 50px;">
+                        </div>
+                        <p class="chatbox-des-left fade_from_left">
+                            May 22nd is known as World Wildlife
+                            Day, and to celebrate it we would like iGEM teams from different countries all around the
+                            world
+                            to send us a photo of one or more members of their team (with their logo and country name)
+                            and
+                            together with it a small paragraph talking about their countries' national animal.
+                        </p>
+                        <div class="chatbox-fig-right">
+                            <img class="fade_from_right"
+                                src="https://static.igem.wiki/teams/4636/wiki/world-wildlife-day.jpeg" alt="Fig1-1"
+                                id="Fig1-1" style="    position: relative;
+                                        opacity: 1;
+                                        top: 0px;
+                                        /* height: 500px; */
+                                        border-radius: 50px;
+                                        width: 100%;
+                                        margin-left: 0px;
+                                        border: 3px solid white;
+                                        margin-right: 20px;
+                                        right: 0px;">
+                        </div>
+                    </div>
+
+                    <h1 class="des-heading2" id="igem.ionis - Bioart">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>iGEM.ionis - Bioart
+                    </h1>
+                    <div class="chatbox-container">
+                        <div class="chatbox-icon fade_from_left">
+                            <img class="fade_from_left"
+                                src="https://static.igem.wiki/teams/4636/wiki/collaborations/ionis-patras.jpg" alt=""
+                                style=" width: 70%; height: 85%; margin: 0
+                                    auto; margin-top: 5px; margin-left: 11px;border-radius: 50px;">
+                        </div>
+                        <p class="chatbox-des-left fade_from_left">
+                            The collaboration is based on Agar
+                            Art, it consists of the design of a drawing on a petri dish agar from culture medium. You
+                            can
+                            also use pencils to draw on the petri dish. The drawing must relate to your iGEM research
+                            project.
+                        </p>
+                        <div class="chatbox-fig-right">
+                            <img class="fade_from_right"
+                                src="https://static.igem.wiki/teams/4636/wiki/igem-ionis-bioart.jpeg" alt="Fig1-1"
+                                id="Fig1-1" style="    position: relative;
+                                        opacity: 1;
+                                        top: 0px;
+                                        /* height: 500px; */
+                                        border-radius: 50px;
+                                        width: 100%;
+                                        margin-left: 0px;
+                                        border: 3px solid white;
+                                        margin-right: 20px;
+                                        right: 0px;">
+                        </div>
+                    </div>
+
+                    <h1 class="des-heading2" id="Aix-Marseille - Biodiversity">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Aix-Marseille - Biodiversity
+                    </h1>
+                    <div class="chatbox-container">
+                        <div class="chatbox-icon fade_from_left">
+                            <img class="fade_from_left"
+                                src="https://static.igem.wiki/teams/4636/wiki/aix-marseille-terralgi.png" alt="" style=" width: 70%; height: 85%; margin: 0
+                                    auto; margin-top: 5px; margin-left: 11px;">
+                        </div>
+                        <p class="chatbox-des-left fade_from_left">
+                            This year our team works against drought by containing grounds humidity to protect our
+                            ecosystem. We're inviting you to collaborate with us by sending us a photo, or more of your
+                            favorite plants in a space that you love, in your home or outside. at the end of this month
+                            we'll collect all of your photos paired with a little anecdote you find funny or
+                            heartwarming about this plant so we can create a collage and highlight our ecosystems and
+                            favorite plants which make our planet so special. Let's celebrate our biodiversity and its
+                            importance.
+                        </p>
+                        <div class="chatbox-fig-right">
+                            <img class="fade_from_right"
+                                src="https://static.igem.wiki/teams/4636/wiki/aix-marseille-biodiversity.jpeg"
+                                alt="Fig1-1" id="Fig1-1" style="    position: relative;
+                                        opacity: 1;
+                                        top: 0px;
+                                        /* height: 500px; */
+                                        border-radius: 50px;
+                                        width: 100%;
+                                        margin-left: 0px;
+                                        border: 3px solid white;
+                                        margin-right: 20px;
+                                        right: 0px;">
+                        </div>
+                    </div>
+                    <h1 class="des-heading2" id="2023 iGEM Taiwan Seminar at Linkou">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>2023 iGEM Taiwan Seminar at Linkou
+                    </h1>
+                    <p class="des-paragraph fade_from_right">
+                        There are many iGEM teams from
+                        different places in Taiwan at this exchange. We spent two days reporting on our project, setting
+                        up our booth, and introducing our theme NanoCircDx to everyone.
+                    </p>
+                    <p class="des-paragraph fade_from_right">
+                        During these two days, we learned
+                        different strengths from each of the following teams and
+                        exchanged different knowledge:
+                    </p>
+                    <p class="des-paragraph-item fade_from_right">
+                        1. <b>CCU_Taiwan</b>: CCU_Taiwan's presentation production capabilities and reporting fluency are very
+                        amazing and worth learning!<br>
+                        2. <b>CSMU_Taiwan</b>: CSMU_Taiwan's English expression and answers to questions are very fluent.<br>
+                        3. <b>iGEM_KCIS</b>: iGEM_KCIS all retain enthusiasm and curiosity for new things. At the same time, we
+                        also shared the operation of Metlab with them.<br>
+                        4. <b>iGEM_KCISLK</b>: iGEM_KCISLK adds a dramatic effect when reporting, which we also learned as a
+                        reference for future reports.<br>
+                        5. <b>NCHU_Taichung</b>: The captain of NCHU_Taichung shared with us on the stage the leadership style
+                        a captain should have which is really impressive.<br>
+                        6. <b>Wist_iGEM</b>: We are very impressed by Wist_iGEM's project. In addition to its completeness, it
+                        also considers Taiwan's economic and business issues.
+                    </p>
+                    <div class="containerfig">
+                        <img src="https://static.igem.wiki/teams/4636/wiki/collaborations/2023-igem-taiwan-seminar-at-linkou-1.jpg">
+                    </div>
+                    <p class="des-figure">
+                        Figure 1. 2023 iGEM Taiwan Seminar at Linkou
+                    </p>
+                    <div class="containerfig">
+                        <img src="https://static.igem.wiki/teams/4636/wiki/collaborations/2023-igem-taiwan-seminar-at-linkou-2.png" alt="Fig1-1" id="Fig1-1">
+                    </div>
+                    <p class="des-figure">
+                        Figure 2. Picture with CCU_Taiwan team.
+                    </p>
+                    <div class="containerfig">
+                        <img src="https://static.igem.wiki/teams/4636/wiki/collaborations/2023-igem-taiwan-seminar-at-linkou-3.jpg">
+                    </div>
+                    <p class="des-figure">
+                        Figure 3. Group photo of all the participants.
+                    </p>
+
+                    <h1 class="des-heading2" id="Online meeting with Yi-ye China and JLU_China">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Online meeting with Yi-Ye_China and JLU_China
+                    </h1>
+                    <p class="des-paragraph fade_from_right">
+                        Since we have a similar
+                        project(cancer communication), we decided to communicate and share our projects online together.
+                        In this meeting, we exchanged some questions about the source of rapid screening test strips and
+                        the differences in detection methods between different cancers.
+                    <div class="containerfig">
+                        <img src="https://static.igem.wiki/teams/4636/wiki/collaborations/online-meeting-with-yi-ye-china-and-jlu-china.png">
+                    </div>
+                    <p class="des-figure">
+                        Figure 4. Online meeting with Yi-Ye_China and JLU_China
+                    </p>
+                    </p>
+                </div>
+                <script>
+                    const expandbutton2 = document.getElementById("expandbutton2");
+                    const article2 = document.getElementById("article2");
+
+                    expandbutton2.addEventListener("click", function () {
+                        if (article2.style.display == "block") {
+                            article2.style.display = "none";
+                            expandbutton2.style.transform = "rotate(-180deg)";
+
+
+                        } else {
+                            article2.style.display = "block";
+                            expandbutton2.style.transform = "rotate(-360deg)";
+
+                        }
+                    });
+                </script>
+            </div>
+        </section>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <nav id="body-nav">
+            <div>
+                <div class="menubar navbar navbar-expand-lg navbar-light bg-light fixed-top">
+                    <a href="{{ url_for('pages', page='hometext') }}" style="height: 100%;"><img
+                            src="https://static.igem.wiki/teams/4636/wiki/logo/transparent-logo.png" alt="logo"
+                            style="width: auto; max-height: 100%;"></a>
+                    <a href="{{ url_for('pages', page='hometext') }}" class="home">NanoCircDx</a>
+                    <div id="menu-container">
+                        <a href="{{ url_for('pages', page='home') }}">
+                            <script src="{{ url_for('static', filename = 'gameicon.js') }}"></script>
+                            <lord-icon src="{{ url_for('static', filename = 'gameicon.json') }}" trigger="hover"
+                                colors="primary:#000000,secondary:#000000,tertiary:#000000"
+                                style="width:50px;height:50px">
+                            </lord-icon>
+                        </a>
+                        <div class="icons" id="icon-menu">
+                            <i class="icon-menu"><span></span></i>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <ul class="menu">
+
+                        <li class="menu-link">
+                            <img src="https://static.igem.wiki/teams/4636/wiki/homeicon.gif" class="homeicon"><a
+                                href="{{ url_for('pages', page='hometext') }}" class="text-item">Home</a>
+                        </li>
+                        <li class="menu-link sub">
+                            <img src="https://static.igem.wiki/teams/4636/wiki/teamicon.gif" class="homeicon">
+                            <a href="#0" class="text-item">Team<span class="icon"></span></a>
+                            <ul class="submenu">
+                                <li class="sub-item"><a href="{{ url_for('pages', page='team') }}"
+                                        class="text-subitem">Team</a></li>
+                                <li class="sub-item"><a href="{{ url_for('pages', page='attributions') }}"
+                                        class="text-subitem">Attributions</a></li>
+                                <li class="sub-item"><a href="{{ url_for('pages', page='notebook') }}"
+                                        class="text-subitem">Notebook</a></li>
+                                <li class="sub-item"><a href="{{ url_for('pages', page='award') }}"
+                                        class="text-subitem">Award</a></li>
+                            </ul>
+                        </li>
+                        <li class="menu-link sub">
+                            <img src="https://static.igem.wiki/teams/4636/wiki/projecticon.gif" class="homeicon">
+                            <a href="#0" class="text-item">Project<span class="icon"></span></a>
+                            <ul class="submenu">
+                                <ul class="submenu-left">
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='description') }}"
+                                            class="text-subitem">Description</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='design') }}"
+                                            class="text-subitem">Design</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='results') }}"
+                                            class="text-subitem">Results</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='experiments') }}"
+                                            class="text-subitem">Experiments</a>
+                                    </li>
+
+
+                                </ul>
+                                <ul class="submenu-right">
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='engineering') }}"
+                                            class="text-subitem">Engineering</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='proofofconcept') }}"
+                                            class="text-subitem">Proof of Concept</a></li>
+                                    <li class="sub-item"><a
+                                            href="{{ url_for('pages', page='proposed-implementation') }}"
+                                            class="text-subitem">Proposed Implementation</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='parts') }}"
+                                            class="text-subitem">Parts</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='contribution') }}"
+                                            class="text-subitem">Contribution</a>
+                                    </li>
+
+                                </ul>
+                            </ul>
+                        </li>
+                        <li class="menu-link sub">
+                            <img src="https://static.igem.wiki/teams/4636/wiki/drylabicon.gif" class="homeicon">
+                            <a href="#0" class="text-item" style="white-space: nowrap;">Dry Lab<span
+                                    class="icon"></span></a>
+                            <ul class="submenu">
+                                <li class="sub-item"><a href="{{ url_for('pages', page='model') }}"
+                                        class="text-subitem">Model</a></li>
+                                <li class="sub-item"><a href="{{ url_for('pages', page='hardware') }}"
+                                        class="text-subitem">Hardware</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="menu-link sub">
+                            <img src="https://static.igem.wiki/teams/4636/wiki/publicengagementicon.gif"
+                                class="homeicon">
+                            <a href="#0" class="text-item">Human Practices<span class="icon"></span></a>
+                            <ul class="submenu" style="padding-bottom: 50px;">
+                                <ul class="submenu-left">
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='human-practices') }}"
+                                            class="text-subitem">(Integrated) Human Practices</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='education') }}"
+                                            class="text-subitem">Education & Communication</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='entrepreneurship') }}"
+                                            class="text-subitem">Entrepreneurship</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='sustainable') }}"
+                                            class="text-subitem">Sustainable Development Impact</a></li>
+                                </ul>
+                                <ul class="submenu-right" style="margin-left: 450px;">
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='partnership') }}"
+                                            class="text-subitem">Partnership</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='collaborations') }}"
+                                            class="text-subitem">Collaborations</a></li>
+                                    <li class="sub-item"><a href="{{ url_for('pages', page='inclusivity') }}"
+                                            class="text-subitem">Diversity & Inclusion</a></li>
+                                </ul>
+                            </ul>
+                        </li>
+
+                        <li class="menu-link"><img src="https://static.igem.wiki/teams/4636/wiki/safetyicon.gif"
+                                class="homeicon"><a href="{{ url_for('pages', page='safety') }}"
+                                class="text-item">Safety</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <script>
+            window.onscroll = function () {
+                updateProgressBar();
+                toggleNavbar();
+            };
+
+            function updateProgressBar() {
+                let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                let scrolled = (winScroll / height) * 100;
+                document.getElementById("progress-bar").style.width = scrolled + "%";
+            }
+
+            function toggleNavbar() {
+                let prevScrollpos = window.pageYOffset;
+                let navbar = document.querySelector("#body-nav");
+
+                let progressBarContainer = document.querySelector("#progress-container");
+                let progressBar = document.querySelector("#progress-bar");
+
+                window.addEventListener("scroll", function () {
+                    let currentScrollPos = window.pageYOffset;
+                    if (prevScrollpos > currentScrollPos || currentScrollPos < 50 || menu.classList.contains("open")) {
+                        navbar.classList.remove("hide");
+                        progressBarContainer.style.top = 74 + "px";
+                        progressBar.style.top = 74 + "px";
+                    } else {
+                        navbar.classList.add("hide");
+                        progressBarContainer.style.top = 0 + "px";
+                        progressBar.style.top = 0 + "px";
+                    }
+                    prevScrollpos = currentScrollPos;
+                });
+            }
+
+            /*
+            
+                        // 获取菜单按钮和页面元素
+                        const menuButton = document.getElementById("icon-menu");
+                        const contentElement = document.getElementById("content");
+            
+                        // 添加点击事件监听器
+                        menuButton.addEventListener("click", toggleDarkOverlay);
+            
+                        // 切换暗覆盖层的可见性和模糊效果
+                        function toggleDarkOverlay() {
+                            if (contentElement.classList.contains("dark-overlay")) {
+                                contentElement.classList.remove("dark-overlay");
+            
+                            } else {
+                                contentElement.classList.add("dark-overlay");
+            
+                            }
+                        }
+            */
+            /*
+                        window.addEventListener("scroll", function TN() {
+                            let navbar = document.querySelector("#body-nav");
+                            let progressBarContainer = document.querySelector("#progress-container");
+                            let progressBar = document.querySelector("#progress-bar");
+                            let navbarHeight = navbar.offsetHeight;
+                            let navbarTop = navbar.getBoundingClientRect().top;
+                            let progressBarTop = navbarHeight + navbarTop;
+                            progressBarContainer.style.top = progressBarTop + "px";
+                            progressBar.style.top = progressBarTop + "px";
+                        });
+            */
+
+            var iconMenu = document.querySelector(".icon-menu"),
+                menu = document.querySelector(".menu"),
+                menuLink = document.querySelectorAll(".menu-link.sub");
+
+            iconMenu.addEventListener("click", openMenu);
+
+            menuLink.forEach(function (el) {
+                el.addEventListener("click", openSubmenu);
+            });
+
+            function openMenu() {
+                if (menu.classList.contains("open")) {
+                    menu.classList.add("close");
+                    iconMenu.classList.remove("icon-closed");
+
+
+
+                    setTimeout(function () {
+                        menu.classList.remove("open");
+                    }, 100);
+                } else {
+                    menu.classList.remove("close");
+                    menu.classList.add("open");
+                    iconMenu.classList.add("icon-closed");
+
+                }
+            }
+
+            function openSubmenu(event) {
+                if (event.currentTarget.classList.contains("active")) {
+                    event.currentTarget.classList.remove("active");
+                } else {
+                    event.currentTarget.classList.add("active");
+                }
+            }
+
+        </script>
+    </div>
+</body>
+
+
+
+<script>
+    var myStuff = {
+        "Birthplace0": { city: "NTHU_Taiwan", state: "National Tsing Hua University, Hsinchu City Taiwan", btn1: "<a href='https://www.facebook.com/NTHU.iGEM'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igem_nthu/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:50%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/logo2023.jpg'>", description: "Our project is called 'NanoCircDx: circRNA Detection.'The theme focuses on the technology for cancer detection and diagnosis, targeting colorectal cancer.<br>NanoCircDx is an accurate, fast, and convenient detection method for detecting Circular RNA (circRNA) that is highly expressed in colorectal cancer. It offers distinct advantages over current clinical approaches for detecting colorectal cancer. With our method, only a single blood sample is required to assess the possibility of colorectal cancer. The advantages include:<br>1. Higher acceptance among the general population.<br>2. Utilization of two circRNAs that ensure a higher rate of accurate and rapid screening.<br>3. Non-invasive.<br>If you're curious about our topic, you can click on the URL to our wikipage where you'll find the complete details of our research!<br>", "coord": [120.98977407351599, 24.789268257725144] },
+        "Birthplace1": { city: "iGEM Patras", state: "Patras University, Greece Patras", btn1: "<a href='https://www.facebook.com/igempatras/'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://instagram.com/igem.patras?igshid=OGQ5ZDc2ODk2ZA=='><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/patras.png'>", description: "Hi! We are iGEM Patras. This year our team is focused on cancer, a disease that affects a vast majority of the population worldwide. The title of the project “Hyperion” is derived from Hyperion, one of the Titans in Greek mythology. The name Hyperion literally means one who rides above the earth and refers to a divine power that sets in motion the planets, the sun, the moon, the stars and the seasons caused by an orchestrator of space. Thus, the iGEM Patras 2023 project aims to turn cancer into a mere constellation. The goal of this year's project is valid and timely diagnosis, for the most effective treatment of the disease, which is achieved through the use of a biosensor.<br>", "coord": [21.796158, 38.293246] },
+        "Birthplace2": { city: "PHAse Out", state: "Leiden University, The Netherlands", btn1: "<a href='https://www.facebook.com/igemleiden/events'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igemleiden/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/phase-out.jpeg'>", description: "Dear esteemed readers,I am Polyhydroxyalkanoate (PHA), and I am at the heart of a remarkable endeavor led by the esteemed iGEM team. Together, we are focused on the genetic engineering of Methylobacterium Extorquens AM1 to enhance the cost-efficient production of PHA.Our collective efforts will lead to several significant advancements. The introduction of the phaC plasmid has been instrumental in amplifying PHA production, allowing it to flourish as a prominent biopolymer.Furthermore, through careful carbon resource allocation, we will successfully reduce carotenoid production. This strategic adjustment directs more carbon towards PHA synthesis, enhancing its prominence within the biopolymer realm.In our pursuit of streamlined downstream processing, we are developing an inducible endolysis mechanism. This mechanism simplifies the release of PHA, facilitating its extraction and subsequent utilization.Our ultimate objective is to revolutionize the cost-efficient extraction of PHA from the surrounding medium. By optimizing extraction methods, we strive to create a more sustainable and economically viable production process.Witness the transformative strides we are making as we propel PHA to the forefront of biotechnological innovation.With kind regards,PHA.<br>", "coord": [4.485506397286812, 52.15702548367451] },
+        "Birthplace3": { city: "iGEM Nantes", state: "Nantes University, Nantes France", btn1: "<a href='https://www.facebook.com/iGEMNantes/events/?paipv=0&eav=AfaEE-sPktRAxlKh-A5h7aUTZILATGBbnH3vmiTYR_ArCltZVDzo94g-GURio_TWZyY&_rdr'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igemnantes/?igshid=MzRlODBiNWFlZA%3D%3D'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/nantes.jpg'>", description: "Hello, I am capsaicin, the fiery and spicy molecule found in chili peppers. But did you know that within me lie precious virtues for combating diabetes? Indeed, I regulate your blood sugar by stimulating insulin, the guardian angel of glucose. For type 2 diabetes, I can be an ally in maintaining stable sugar levels. By accelerating your metabolism, I also promote weight loss and improve insulin sensitivity. However, chili pepper cultivation involves environmentally unfriendly processes. That is why I will be biologically synthesized to create a dietary supplement that can prevent diabetes!<br>", "coord": [-1.5559529710352848, 47.209623149183514] },
+        "Birthplace4": { city: "MSP-iGEM", state: "Maastricht University, Maastricht Netherlands", btn1: "<a href='https://www.facebook.com/MSPIGEM?paipv=0&eav=Afb3SHStBgAqUvggPtHJiV3gKIyX_0CUiapuQrYbDFHkfIy8WpHJlToMJFRDUhHptBA'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/msp_igem/channel/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/msp.jpeg'>", description: "Hi! We are the SublimeStone team from Maastricht. This year our project consists in engineering bacteria capable of filling cracks in limestone to restore buildings. We will employ DNA origami that can self assemble into complex nanostructure through complementary base pairing and serve as a nucleation site for calcite fixation.<br>", "coord": [5.687974799079866, 50.84696984067209] },
+        "Birthplace5": { city: "UTPrimers", state: "Universidade Tecnológica Federal do Paraná, Ponta Grossa Paraná Brazil", btn1: "<a href='https://www.facebook.com/UTPrimers?mibextid=ZbWKwL'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/utprimers/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/utprimers.png'>", description: "Fumonisin B1 (FB1) is a mycotoxin produced by fungi of the genus Fusarium that is very present in crops such as corn, rice and wheat, foods that are globally traded and consumed in human food and in the production of animal feed, causing various pathologies for the affected organisms. from oxidative stress, apoptosis and autophagy, also having carcinogenic potential.  In addition to impacts on food safety, the contamination of crops by fumonisin generates great losses in productivity and agricultural economy globally and it is of great interest to affected sectors to create practical methods for detecting and controlling the presence of this toxin in grains, food and rations.<br>The Fusaritox project aims to bring, through synthetic biology, a quick and easy way of detecting Fumonisin from a genetic circuit capable of generating a signal, according to the toxin concentration, by producing reporter proteins.  This circuit will be regulated by a riboswitch under development by UTPrimers and will compose a cell free system.  Thus, the food and feed industry, in addition to storage systems and producers of grains and animals that consume potentially contaminated food, will be able to benefit from a safer and higher quality process with the control of this problem.<br>", "coord": [-50.13192920419964, -25.051785070334535] },
+        "Birthplace6": { city: "NCHU_Taichung", state: "National Chung Hsing University, Taichung City Taiwan", btn1: "<a href='https://www.facebook.com/NCHU.iGEM?mibextid=LQQJ4d'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igem_nchu_taichung/?igshid=OGQ5ZDc2ODk2ZA%3D%3D'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/nchu-taichung.jpg'>", description: "Hello! We are 2023NCHU_Taichung. This year, our project focuses on the pollination crisis caused by environmental climate change in global agriculture. We hope to improve the memory and flight ability of important pollinators: bees. Therefore, we plan to use Bacillus subtilis to perform a genetic transformation, making it produces Pyrroloquinoline Quinone, which is beneficial to memory and has proven to increase the number of rats' mitochondria. Furthermore, we are looking forward to developing a unique feed formula that contributes to agriculture!<br>", "coord": [120.6753237069536, 24.123554016807354] },
+        "Birthplace7": { city: "iGEM Athens", state: "National and Kapodistrian University of Athens, the National Technical University of Athens, the University of West Attica and the University of Piraeus<br>Athens Greece", btn1: "<a href='https://www.facebook.com/iGEM.Athens'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igemathens/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/igem-athens.png'>", description: "Hello everyone! I am a bacteriophage. But not just a typical phage. I am the bacteriophage M13! A long inovirus phage. I am so beautiful with all those proteins like jewelry on my surface, especially pVIII which I got about 2,700 times. iGEM Athens team will genetically modify and make pVIII even better, and longer! This is how I will be able to detect some specific VOCs (volatile organic compounds) that are early biomarkers for Parkinson's Disease. Those VOCs are in the sebum of humans in different concentrations and when my “advanced” proteins interact with them, I puff up with pride and change my color! This is how in the end hopefully, there will be a kit that I will be sitting on, with different modifications of my protein, and depending on the VOC concentration of the sample, it will become so colorful, like a rainbow! After that I will pose in front of the camera of a phone and an application will show exactly my color and will understand the concentration of the sample because of it. Well, yes! I am the hero that will diagnose Parkinson's Disease years before the symptoms take place! Something like a fortune teller!<br>", "coord": [23.778686459581614, 37.96820574939024] },
+        "Birthplace8": { city: "Patras-Med iGEM 2023", state: "University of Patras, Greece", btn1: "<a href='https://www.facebook.com/profile.php?id=100087780947843'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/patras.med/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/patras-med-igem-2023.png'>", description: "Hi everyone! I'm pancreatic cancer and as we all know I'm one of the deadliest types of cancer, with just a 12% survival rate and a high mortality rate, that remains irremediable. So, that signaled Patras-Med's vision; to develop a new therapeutic approach against me, with the assistance of Synthetic Biology. You may call it “Herophilus”, as they aim to propose the novel approach for my immunotherapy, utilizing NK-Cells with Chimeric Antigen Receptors (CAR-NK Cells) and induced pluripotent stem cells (iPSCs), derived from somatic cells of healthy donors. Breaking the barriers against me -although that hurts me- patients have a better hope of living a better life by improving its quality!<br>", "coord": [21.785367287216324, 38.2892348964438] },
+        "Birthplace9": { city: "REC-CHENNAI", state: "Rajalakshmi Engineering College, Chennai Tamil Nadu", btn1: "<a href='https://www.facebook.com/profile.php?id=100082105402521'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igem_rec/?hl=en'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/rec-chennai.png'>", description: "Hi, I'm E.coli, and I play a vital role in the 'RECOVER' project. As part of our streamlined hardware device, I reside in the bioreactor, where I perform the important process of CO2 fixation and biofuel conversion. By engineering my metabolic pathway to express and utilize key enzymes from the Calvin cycle ,I efficiently convert captured CO2 into biofuel, all while combating Ocean Acidification. Our integrated solution offers a practical approach to reduce OA and generate renewable energy, and I'm proud to be a part of this innovative project.<br>", "coord": [80.00346782822916, 13.008537946478974] },
+        "Birthplace10": { city: "GEMS-Taiwan", state: "GEMS Academy, Taipei Taiwan", btn1: "<a href='https://www.facebook.com/p/GEMS-Academy-100083182389754/'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/gems_taiwan/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/gems-taiwan.png'>", description: "Recent studies have discovered the benefits of probiotics on restoring coral health, including strengthening corals and curing coral diseases. Unfortunately, despite their potential, there is currently a lack of efficient and sustainable probiotic delivery mechanisms. Presently, plastic wrappings, which increase probiotic retention through trapping the probiotics in an enclosed environment, are being used as a means of delivering probiotics, but they are neither effective nor environmentally sustainable.<br>To address this problem, we are developing an efficient probiotic delivery mechanism utilizing the adhesive properties of biofilm. These biofilms would be combined with the probiotic solution to create a living cell bioadhesive that can be directly applied to corals. This approach offers a scalable and efficient solution for probiotic delivery while also reducing its environmental impact. <br>", "coord": [121.59070371776438, 25.081208316569015] },
+        "Birthplace11": { city: "iGEM Guelph", state: "University of Guelph, Guelph Ontario Canada", btn1: "<a href='https://www.facebook.com/igemguelph/'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igem.guelph/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/igem-guelph.jpg'>", description: "Hi there! I'm Escherichia coli Nissle 1917, but all my friends call me EcN, and you can too! I'm an old fella, but I love helping others. This year iGEM Guelph will be using my expertise to help tackle vitamin B9 and B12 deficiencies. I'll be joining the hard-working bacteria in the human digestive tract to help fight these vitamin deficiencies with my B12 gene cluster and intrinsic factor gene (which is kind of like super strength that increases vitamin absorption). I'm ready for my new job, and I can't wait to get to work! Let's work together to create a healthier future!<br>", "coord": [-80.22617973285415, 43.532726532485235] },
+        "Birthplace12": { city: "Puiching-Macau", state: "Macau Pui Ching Middle School, Macau China", btn1: "<a href='https://www.facebook.com/igemPuiChingMacau/'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igem_puiching/?igshid=MmIzYWVlNDQ5Yg%3D%3D'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/puiching-macau.jpeg'>", description: "I am DNA, the genetic code of all organisms on earth. Think of me as a recipe book that contains all the instructions for making proteins that make and operate a living organism. However, this book of me is not invincible. Spills and stains known as carcinogens muddle the pages in the book, making the instructions unclear. As a result the food, or products, made using my instructions are problematic.<br>Fortunately, a team of expert chefs are always available to keep the book in top condition. These chefs are proteins a part of the “DNA damage response”, and detecting me is what they do best. These chefs group together to resolve this issue. And this year we are using FRET pairs to work on DNA damage.<br>By measuring the degree of energy transfer, the degree of DNA damage caused by the carcinogens can be measured.<br>", "coord": [113.54823305794004, 22.201558224426638] },
+        "Birthplace13": { city: "ABOA", state: "University of Turku, Åbo Akademi University and Turku University of Applied Sciences, Turku Finland", btn1: "<a href='https://www.facebook.com/teamaboa/'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igem.aboa/?utm_medium=copy_link'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/aboa.png'>", description: "Hello! I'm Synechocystis sp. PCC 6803 but just Synechocystis for friends. This year the ABOA team helps me to fight methylmercury by giving me two genes: merA and merB. With my new genes I can produce enzymes that modify this evil methylmercury into less toxic elemental form. Then the ABOA team handles the collection of elemental mercury so that it doesn't return to nature and harm organisms, ecosystems and biodiversity. Fun fact about me: I can use sunlight as my energy source which makes me a sustainable and scalable solution!<br>", "coord": [22.295599584490922, 60.4491525653727] },
+        "Birthplace14": { city: "Chalmers-Gothenburg", state: "Chalmers Technical University, Gothenburg Sweden", btn1: "<a href='https://www.facebook.com/igemchalmers'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igem_chalmers/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/chalmers-gothenburg.png'>", description: "Hi! We are the iGEM team of Chalmers-Gothenburg! We call our selfs SoDoVi. With our main objectives being a healthier world and an aid to end malnutrition, we chose to focus on the essential vitamins B12 and A for our sourdough. Besides being essential vitamins, these vitamins also have in common that they are commonly ingested through animal products. With animal husbandry representing 80% of the food sector's emissions, removing our need to eat animal based for our essential vitamins opens up the possibilities for what we eat. Our hope is to create a sourdough starter which can produce the vitamins A and B12 and easily be incorporated into people's everyday life. This would mean that besides creating a dietary option to replace supplements and specific food items, we'll have created something which you can grow at home and share with your neighbours, no matter where you live.<br>", "coord": [11.977259907144832, 57.69078981073262] },
+        "Birthplace15": { city: "Aix-Marseille (Terralgi)", state: "Aix-Marseille University, Marseille France", btn1: "<a href='https://www.facebook.com/iGEM.AMU'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igemaixmarseille/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/aboa.png'>", description: "Hello! I am alginate, a natural polysaccharide found in brown seaweed and certain bacteria. I've captured the interest of the Terralgi team due to my exceptional water-holding capacity. With drought becoming a concerning climate issue, they aim to tackle this problem, and I'm here to help! When combined with calcium, I form a hydrogel that can absorb and retain large amounts of water. After being overproduced by an improved Pseudomonas putida, they'll introduce me to the soil in this hydrogel form. This way, I can enhance water retention and reduce water usage during heat waves. Terralgi's innovative approach promises a sustainable solution to address water scarcity and support agriculture.<br>", "coord": [5.359124732176879, 43.29221072505867] },
+        "Birthplace16": { city: "YiYe-China", state: "YiYe Academy, Wuhan China", btn1: "<a href=''><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/igem_yiye_china/?igshid=MzRlODBiNWFlZA%3D%3D'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/yiye-china.jpg'>", description: "Cervical cancer accounts for 80% of malignant tumors of the female reproductive system. Currently, the diagnosis relies onthe subjective morphological assessment of cervical epithelialcells, hence diagnosis can be easily missed. lnc RNA MALAT1 is highly expressed in cervical cancer tissues and has binding sites with miRNAs. They form the effector complex RISC whichcontains Argonaute protein that degrades MALAT1 expression. RISC can be traced by Pepper 620 fluorescent. Therefore, we aim to develop a cervical cancerscreening 'receptor' that can quantitatively respond to the disease progression based on the fluorescence changes of thecomplex to support the screening of cervical cancer.<br>", "coord": [114.387706253073, 30.62709909494608] },
+        "Birthplace17": { city: "iGEM Japan-United", state: "Japan", btn1: "<a href='https://twitter.com/iGEM_Ninjas'><img style='border-radius:10px;background-color:#000000;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-twitter.svg'></a>", btn2: "<a href='https://www.instagram.com/crimsonninjas_jp/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/igem-japan-united.png'>", description: "Our team is engaged in research activities aimed at producing Saffron-derived components in E. coli, which have been shown to be effective against depression. Depression is a major social problem in Japan and around the world, and since low-risk treatments have not yet been established, the production of low-cost, stable antidepressant ingredients is expected to make a significant contribution to the treatment of depression.<br>We are also working toward the goal of enabling people to self-control their depression.<br>", "coord": [139.76711319783695, 35.681234401922154] },
+        "Birthplace18": { city: "MIT-MAHE", state: "Manipal Institute of Technology & Manipal Academy of Higher Education, Manipal Karnataka India", btn1: "<a href='https://www.linkedin.com/company/manipal-biomachines/'><img style='border-radius:10px;background-color:#000000;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-linkedin.svg'></a>", btn2: "<a href='https://instagram.com/manipalbiomachines?igshid=MzRlODBiNWFlZA=='><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/mit-mahe.jpeg'>", description: "Hello there! I am CarbanEl! This year, I aim to degrade triclocarban (TCC) and its toxic byproducts by using multiple enzymes in tandem to form non-toxic daughter compounds which enter the TCA metabolic cycle. This way I will effectively lower the impact of TCC on our environment and in the affected sectors of aquaculture, agriculture and human health! I plan to carry forward this degradation from the aeration tanks of wastewater treatment plants!<br>", "coord": [74.79282224381666, 13.352539219918777] },
+        "Birthplace19": { city: "NYU Abu Dhabi", state: "New York University Abu Dhabi, Abu Dhabi United Arab Emirates", btn1: "<a href='https://www.facebook.com/iGEMNYUAD/'><img style='border-radius:20px;background-color:#0165E1;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg'></a>", btn2: "<a href='https://www.instagram.com/nyuad.igem/'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/nyu.png'>", description: "Hi there! I'm Collagenie, your friendly purple genie! This year, my NYUAD iGEM team and I are on a mission to revolutionize tissue engineering and regenerative medicine. You know collagen, right? It's that amazing stuff that makes up your skin, bones, and even your eyes. But getting it from animals has its issues. So, we're using a bit of magic called Gene Code Expansion to make bacteria produce collagen-like protein, just the way we want it. This means we can create better, more sustainable solutions for bone defects, cornea issues, and more. Join us in weaving a future where science truly works wonders! 🧞‍♀️🔬🌟<br>", "coord": [54.43455729409914, 24.52390637329673] },
+        "Birthplace20": { city: "YarroWCO", state: "KU Leuven, Leuven Belgium", btn1: "<a href='linktr.ee/igemkuleuven'><img style='border-radius:10px;background-color:#000000;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-linkedin.svg'></a>", btn2: "<a href='https://www.instagram.com/igemkuleuven/='><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/yarrowco.jpg'>", description: "The KU Leuven iGEM team is striving to tackle two issues:<br>1) Belgium fries are a well-known delicacy, however waste cooking oil obtained from their frying has become an issue in Belgium and Europe. 1,100,000 tons of waste cooking oil produced in the EU in 2019 alone. 2) Steroidal drugs are complex molecules which are difficult to synthesize from scratch, but they compose a large market and have many applications. Metabolizing intermediates such as campesterol mediates this process, however the current methods are not efficient.<br>To this end, our team is modifying Yarrowia Lipolytica, a fungi which can use waste cooking oil as a carbon source to synthesize campesterol with high yield, and to maximize the availability of the carbon source we will also modify a chassis for biosurfactant production. This way we are making medicine out of the waste cooking oil from our beloved Belgian fries.<br>", "coord": [4.6997068400257485, 50.878104220312444] },
+        "Birthplace21": { city: "CJUH-JLU-China", state: "Jilin University, Changchun City Jilin Province China", btn1: "<a href=''><img style='border-radius:10px;background-color:#000000;width:10%;' src='https://static.igem.wiki/teams/4118/wiki/icon-linkedin.svg'></a>", btn2: "<a href='https://space.bilibili.com/3493294191413810?spm_id_from=333.337.search-card.all.click'><img style='border-radius:20px;background-color:#C13584;width:10%;' src='https://static.igem.wiki/teams/4636/wiki/bilibili-logo-blue.svg'></a>", img: "<img style='width:70%;text-align: justify; display: block;' src='https://static.igem.wiki/teams/4636/wiki/cjuh-jlu-china.jpg'>", description: "(｡･∀･)ﾉﾞHi, I'm Breddy, a breast cancer detection kit that fights against breast cancer. Through bioinformatics analysis, our iGEM team finds that hsa-miR-21-5p is highly expressed in breast cancer patients, and my partner CRISPR/Cas13a is helpful for detecting RNA. My friend Cas13a/crRNA complex is able to test for hsa-miR-21-5p, and then tell me the answer. I'll reveal the result on my tummy to let you (human) know whether you're at risk of breast cancer! In this way, I help you (human) early screen for breast cancer, so that everyone can stay away from breast cancer and lead a healthy life!<br>", "coord": [125.2850186993209, 43.82572166077949] },
+    }
+
+    for (var key in myStuff) {
+        if (myStuff.hasOwnProperty(key)) {
+            myStuff[key]["city"] = "<span style='font-size: 20px;color:#815bc2;'>" + myStuff[key]["city"] + "</span>";
+            myStuff[key]["description"] = "<span style='text-align: justify; display: block;font-size:12px'>" + myStuff[key]["description"] + "</span>";
+        }
+    }
+
+    var Main;
+
+    require(
+        [
+            "esri/Map",
+            "esri/Graphic",
+            "esri/layers/GraphicsLayer",
+            "esri/layers/ElevationLayer",
+            "esri/views/SceneView"
+        ],
+        function (
+            Map, Graphic, GraphicsLayer, ElevationLayer, SceneView
+        ) {
+            $(document).ready(function () {
+                Main = (function () {
+                    let layer = new ElevationLayer({
+                        url: "http://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"
+                    });
+                    var map = new Map({
+                        basemap: "hybrid",
+                        ground: {
+                            layers: [layer]
+                        },
+                    });
+
+                    var view = new SceneView({
+                        container: "map",
+                        viewingMode: "global",
+                        map: map,
+                        camera: {
+                            position: {
+                                x: -105.503,
+                                y: 44.270,
+                                z: 20000000,
+                                spatialReference: {
+                                    wkid: 4326
+
+                                }
+                            },
+                            heading: 0,
+                            tilt: 0
+                        },
+                        popup: {
+                            dockEnabled: true,
+                            dockOptions: {
+                                breakpoint: false
+                            }
+                        },
+                        // enable shadows to be cast from the features
+                        environment: {
+                            lighting: {
+                                directShadowsEnabled: false
+                            }
+                        }
+                    })
+                    const initMap = function () {
+
+
+                        // var graphicsLayer = new GraphicsLayer()
+                        const graphicsLayer = new GraphicsLayer();
+                        map.add(graphicsLayer);
+                        var screenPoint;
+
+
+                        for (const [key, value] of Object.entries(myStuff)) {
+                            //console.log(key, value)
+                            const point = {
+                                type: "point",
+                                x: value.coord[0],
+                                y: value.coord[1],
+                                z: 10000
+                            };
+
+                            const markerSymbol = {
+                                type: "simple-marker",
+                                color: [226, 0, 40],
+                                outline: {
+                                    // autocasts as new SimpleLineSymbol()
+                                    color: [255, 255, 255],
+                                    width: 2
+                                }
+                            };
+
+                            const pointGraphic = new Graphic({
+                                geometry: point,
+                                symbol: markerSymbol,
+                                popupTemplate: {
+                                    title: value.city + "<br>" + value.state + "<br><br>" + value.description + value.img + "<br>" + value.btn1 + value.btn2
+                                }
+                            });
+                            graphicsLayer.add(pointGraphic);
+
+                        }
+
+                        view.on("click", function (e) {
+                            //console.log(e)
+                            screenPoint = {
+                                x: e.x,
+                                y: e.y
+                            };
+                            view.hitTest(screenPoint).then(function (r) {
+                                if (r.results.length) {
+                                    console.log(r)
+                                    var graphic = r.results.filter(function (result) {
+                                        // check if the graphic belongs to the layer of interest
+                                        return result.graphic.layer === graphicsLayer;
+                                    })[0].graphic;
+                                    // do something with the result graphic
+                                    //console.log(graphic.attributes);
+                                    view.goTo({
+                                        center: [graphic.geometry.x, graphic.geometry.y], zoom: 10,
+                                        tilt: 45
+                                    })
+                                }
+                                else {
+                                    console.log("abd")
+                                }
+                            })
+                        })
+
+                    }
+                    initMap()
+                    return {
+
+                    };
+
+                })();
+            })
+
+        });
+
+</script>
+
+<footer>
+
+    <nav class="navbar navbar-expand-lg  fixed-botton">
+        <img src="NTHULOGO.png" alt="logo" width="400">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" id="footer-nav-toggle">
+            <span class="navbar-toggler-icon"><a class="navbar-brand"><img src="白閃電.png"></a></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a href="https://www.facebook.com/NTHU.iGEM" class="ms-3 nav-link"><img
+                            src="https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg" alt="在臉書上關注我們"
+                            width="31"></a>
+                </li>
+                <li class="nav-item active">
+                    <a href="https://www.instagram.com/igem_nthu/" class="ms-3 nav-link"><img
+                            src="https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg" alt="在 Instagram 上關注我們"
+                            width="30"></a>
+                </li>
+                <li class="nav-item active">
+                    <a href="https://twitter.com/IgemMed" class="ms-3 nav-link"><img
+                            src="https://static.igem.wiki/teams/4118/wiki/icon-twitter.svg" alt="在推特上關注我們"
+                            width="30"></a>
+                </li>
+                <li class="nav-item active">
+                    <a href="https://gr.linkedin.com/company/igem-patras-medicine" class="ms-3 nav-link"><img
+                            src="https://static.igem.wiki/teams/4118/wiki/icon-linkedin.svg" alt="在領英上關注我們"
+                            width="27"></a>
+                </li>
+                <li class="nav-item active">
+                    <a href="https://open.spotify.com/show/3uL0UutbwkTXckC3YIxaqv?si=7b80e181b9e3448a"
+                        class="ms-3 nav-link"><img src="https://static.igem.wiki/teams/4118/wiki/icon-spotify.svg"
+                            alt="收聽我們的播客" width="30"></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <ul class="sponsor">
+        <li><a href="https://igem.org/"><img
+                    src="https://static.igem.org/websites/common/2022/logos/igem-logo-light.svg"></a></li>
+        <li><a href="https://international.neb.com/"><img src="biolab_logo.png"></a></li>
+        <li><a href="https://www.genomics.com.tw/"><img src="genomics_logo.png"></a></li>
+        <li><a href="https://www.snapgene.com/"><img src="SnapGene_Logo.png"></a></li>
+        <li><a href="https://findit.org.tw/twCompanyInfo.aspx?strId=3978"><img src="源點生技.png"></a></li>
+        <li><a href="https://sg.idtdna.com/pages"><img src="idt_logo.png" style="width: 180px;"></a></li>
+    </ul>
+
+
+
+
+    <script>
+        $('.sponsor').slick({
+            dots: true,
+            slidesToShow: 5,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+            centerMode: true,
+            variableWidth: true,
+            pauseOnHover: true
+        });
+        $(document).ready(function () {
+            $('.sponsor li').mouseover(function () {
+                $(this).css({
+                    'filter': 'brightness(100000%)',
+                    'transform': 'cale(3) !important'
+                });
+            }).mouseout(function () {
+                $(this).css({
+                    'filter': 'brightness(100%)',
+                    'transform': 'cale(0.33)'
+                });
+            });
+        });
+    </script>
+
+    <hr style="border: 1px solid rgba(255, 255, 255, 0.108); width: 100%;">
+    <div class="col">
+        <p class="mb-0"><small>© 2023 - Content on this site is licensed under a <a class="subfoot"
+                    href="https://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0
+                    International license</a>.</small></p>
+        <p><small>The repository used to create this website is available at <a
+                    href="https://gitlab.igem.org/2023/nthu-taiwan">gitlab.igem.org/2023/nthu-taiwan</a>.</small></p>
+    </div>
+
+</footer>
+
+<div id="scroll-to-top-btn"><span class="icon-position icon-style"></span></div>
+
+
+<script>
+    const scrollToTopBtn = document.querySelector("#scroll-to-top-btn");
+
+    window.addEventListener("scroll", () => {
+        if (window.pageYOffset > 100) {
+            scrollToTopBtn.classList.add("show");
+        } else {
+            scrollToTopBtn.classList.remove("show");
+        }
+    });
+
+    scrollToTopBtn.addEventListener("click", () => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }); 
+</script>
+
+<!--
+<script src="JS/fade.js"></script>
+
+-->
+<script src="static/fade.js"></script>
+
+
+</html>

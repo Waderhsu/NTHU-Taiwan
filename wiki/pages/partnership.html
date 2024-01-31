@@ -1,0 +1,516 @@
+{% extends "layout.html" %}
+
+{% block title %}Partnership{% endblock %}
+
+{% block page_content %}
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/partnership.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/partnership.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Partnership', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                        <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                        <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                    </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                        ${firstLetter}
+                    </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [{ text: "In union, there is strength." , color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container">
+            Partnership
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#Problem" class="sidebaritem">Overview</a></li>
+                    <li><a href="#Inspiration" class="sidebaritem">January | Experimental Workshop</a></li>
+                    <li><a href="#Our Goal" class="sidebaritem">June | 1st Online Meeting & Establishing partnership</a></li>
+                    <li><a href="#Solution" class="sidebaritem">July | Lab Meeting </a></li>
+                    <li><a href="#Advantages and innovations" class="sidebaritem">August | 2nd Online Meeting & Podcast Collaboration</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton1" style="left: 10px;"></button>
+                    <div id="sidebaritem_item1" class="sidebaritem_item-container">
+                        <ul>
+                            <li class="sidebaritem_item"><a href="#2nd Online Meeting - Discussing the arrangement of Mock Competition">2nd Online Meeting</a></li>
+                            <li class="sidebaritem_item"><a href="#Podcast collaboration">Podcast collaboration</a></li>
+                        </ul>
+                    </div>
+                    <li><a href="#Reference" class="sidebaritem">September | Mock competition & Barbie Lab Collaboration</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton2" style="left: 10px;"></button>
+                    <div id="sidebaritem_item2" class="sidebaritem_item-container">
+                        <ul>
+                            <li class="sidebaritem_item"><a href="#Mock Competition - Rehearsal and Participate in the physical report simulation together">Mock Competition</a></li>
+                            <li class="sidebaritem_item"><a href="#Barbie Lab Collaboration">Barbie Lab Collaboration</a></li>
+                        </ul>
+                    </div>
+                    <script>
+                        const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                        const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+            
+                        sideexpandbutton1.addEventListener("click", function () {
+                            if (sidebaritem_item1.style.display == "none") {
+                                sidebaritem_item1.style.display = "block";
+                                sideexpandbutton1.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item1.style.display = "none";
+                                sideexpandbutton1.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                        const sideexpandbutton2 = document.getElementById("sideexpandbutton2");
+                        const sidebaritem_item2 = document.getElementById("sidebaritem_item2");
+            
+                        sideexpandbutton2.addEventListener("click", function () {
+                            if (sidebaritem_item2.style.display == "none") {
+                                sidebaritem_item2.style.display = "block";
+                                sideexpandbutton2.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item2.style.display = "none";
+                                sideexpandbutton2.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                    </script>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Problem">Overview</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+                <p class="des-paragraph fade_from_right">
+                    As the saying goes, "Together, we
+                    are stronger." Having a reliable partner is crucial for the long journey, especially in the iGEM
+                    competition. So, we teamed up with NYCU_Formosa and worked together for ten months. We
+                    collaborated on human engagement, experimental and model technique sharing and more. These close
+                    and necessary partnerships helped improve both of our projects.
+                </p>
+            </div>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Inspiration">Jan. | Experimental Workshop</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <h1 class="des-heading3 fade_from_left" >Experimental Workshop - Learning the basic experimental skills with each other</h1>
+                <p class="des-paragraph fade_from_right">
+                    From January 10th to January 12th,
+                    2023, our 8th NTHU_Taiwan team had the opportunity to participate in a basic laboratory course
+                    hosted by the 2022 NYCU_Formosa team with the members of 2023 NYCU_Formosa team. The objective
+                    of this course was to cultivate our fundamental laboratory skills. During this experiment, we
+                    engaged in a series of procedures, including sterilization, culturing, gel extraction, colony
+                    PCR, and more. Through these experiments, we not only familiarized ourselves with the laboratory
+                    environment but also prepared ourselves for future experimental work.
+                </p>
+
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Our Goal" style="font-size: 38px;">Jun. | 1st Online Meeting & Establishing partnership</h1>
+                <button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3">
+                <h1 class="des-heading3 fade_from_left" >
+                    1st Online Meeting - Discussing the Lab meeting related
+                    arrangement & Establishing partnership
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    Over the past five months, we have
+                    been consistently engaging in discussions with NYCU_Formosa regarding questions related to the
+                    iGEM competition. However, due to the course workload increasing through the semester, these
+                    interactions have been limited to online communication.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Following the completion of final
+                    exam, on June 19, 2023, we had a discussion with the Human Practice team members of NYCU_Formosa
+                    about how to further collaborate. During this meeting, we decided the date and procedures for
+                    our exchange meeting between two teams. This event aims to facilitate mutual acquaintance,
+                    project sharing, and the potential for collaborative experiments between the two iGEM teams from
+                    our respective schools. Besides, it's this online meeting that we established the partnership
+                    between NTHU_Taiwan & NYCU_Formosa .
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Solution">July | Lab Meeting</h1>
+                <button class="expandbutton" id="expandbutton4"></button>
+            </div>
+            <div id="article4">
+                <h1 class="des-heading3 fade_from_left" id="Selection of circRNA">
+                    Lab Meeting - Exchange project idea
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    This exchange meeting marked the
+                    first time NTHU_Taiwan and NYCU_Formosa met in person. In addition to getting to know each
+                    other, during the exchange, we first shared the current progress of both teams' projects and
+                    then provided suggestions to each other, aiming to contribute to the smooth advancement of our
+                    respective projects.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Subsequently, the teams from both
+                    schools, including WL (Wet Lab), HP (Human Practice), and DL (Dry Lab), engaged in in-depth
+                    discussions and knowledge sharing.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Through this exchange, we hope to
+                    offer substantial assistance to each other's projects. In the WL aspect, we recommended them not
+                    to use E. coli for synthesizing the anticipated proteins, as it cannot undergo
+                    post-transcriptional and post-translational modifications. In return, they advised us to
+                    understand the principles and reasons for using circRNA as a biomarker, such as why we chose
+                    circRNA as a biomarker and how it increases expression in the context of colorectal cancer.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In the HP aspect, we provided ideas
+                    regarding multimedia collaboration, while they reminded us to be aware of changes in competition
+                    rules, enabling us to make timely adjustments to our competition preparations.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    We are very grateful to
+                    NYCU_Formosa for sharing ideas with us this time, which made us notice the details that we
+                    didn't figure out before the iGEM Taiwan Seminar.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/partnership/partnership.png">
+                </div>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Advantages and innovations">Aug. | 2nd Online Meeting & Podcast Collaboration</h1>
+                <button class="expandbutton" id="expandbutton5"></button>
+            </div>
+            <div id="article5">
+                <h1 class="des-heading3 fade_from_left" id="2nd Online Meeting - Discussing the arrangement of Mock Competition">
+                    2nd Online Meeting - Discussing the arrangement of Mock Competition
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    For this exchange, in order to
+                    ensure both teams are well-prepared for the competition, we
+                    have decided to organize a mock competition and also invite senior peers from previous
+                    editions to be the audience, providing us with feedback. Additionally, we discuss key points
+                    and techniques for iGEM presentations together, with the goal of both teams delivering
+                    outstanding performances during the actual competition.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/partnership/partnershipfig2.png">
+                </div>
+                <h1 class="des-heading3 fade_from_left" id="Podcast collaboration">Podcast collaboration</h1>
+                <p class="des-paragraph fade_from_right">
+                    We collaborated with NYCU_Formosa
+                    for a podcast, where we shared our project and not only
+                    brought synthetic biology knowledge but also hoped to provide a better understanding of what
+                    the iGEM competition is and how it works to the general public. If you get interested,
+                    please click the start button below!
+                    NYCU Formosa Youtube link: <a href="https://www.youtube.com/watch?v=iwBSoX5krIE">https://www.youtube.com/watch?v=iwBSoX5krIE</a>
+                </p>
+                <div class="containerfig">
+                    <iframe title="NTHU-Taiwan: NTHU_podcast 1 (2023) [English]" width="560" height="315"
+                        src="https://video.igem.org/videos/embed/c43cc8a9-9e56-464c-a660-7390ba4d5238" frameborder="0"
+                        allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+                </div>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Reference">Sep. | Mock competition & Barbie Lab Collaboration</h1>
+                <button class="expandbutton" id="expandbutton6"></button>
+            </div>
+            <div id="article6">
+                <h1 class="des-heading3 fade_from_left" id="Mock Competition - Rehearsal and Participate in the physical report simulation together">
+                    Mock Competition - Rehearsal and Participate in the physical report simulation together
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    On September 16th, we organized a
+                    mock competition and invited senior peers and professors to be
+                    our audience, providing us with valuable feedback.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    During this mock competition, we
+                    practiced two different presentation formats: a 15-minute
+                    report followed by a 5-minute Q&A session and a 5-minute report followed by a 15-minute Q&A
+                    session. This was our first attempt at a theatrical-style performance, and although there is
+                    still room for improvement, through this practice session, we received valuable feedback from
+                    NYCU_Formosa, our senior peers, and the professors, like the etiquette in responding, the proper
+                    way to handle a microphone, and other minor details. This feedback will help us present our
+                    reports in a more comprehensive, engaging and interesting way to the audience.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/partnership/partnershipfig3.jpeg" style="width: 48%; height: auto;">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/partnership/partnershipfig4.png" style="width: 48%; height: auto;">
+                </div>
+                <h1 class="des-heading3 fade_from_left" id="Barbie Lab Collaboration">
+                    Barbie Lab Collaboration
+                </h1>
+                <p class="des-paragraph fade_from_right">
+                    In August, we NTHU_Taiwan hopped on
+                    the trend of the Barbie movie, creating our very own Barbie lab.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Apart from showcasing our daily
+                    laboratory activities, we also aim to convey that research is not always dull and boring, and we
+                    want to bring the fun side of iGEM to the public.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In September, NYCU_Formosa also
+                    recorded a reel, joining the Barbie lab series!
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    If you're interested, you can
+                    follow us on Instagram (igem_nthu) to stay updated!
+                </p>
+                <div class="containerfig">
+                    <iframe title="NTHU-Taiwan: Hibarbie (2023) [English]" width="560" height="315"
+                    src="https://video.igem.org/videos/embed/3864e8ff-13b9-4398-a775-6ceb8c5c7d2a" frameborder="0"
+                    allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+                </div>
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename = 'expand-button.js') }}"></script>
+    </section>
+</div>
+{% endblock %}

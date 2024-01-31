@@ -1,0 +1,201 @@
+<div id="progress-container">
+    <div id="progress-bar"></div>
+</div>
+<nav id="body-nav">
+    <div>
+        <div class="menubar navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <a href="{{ url_for('pages', page='hometext') }}" style="height: 100%;"><img src="https://static.igem.wiki/teams/4636/wiki/logo/transparent-logo.png" alt="logo" style="width: auto; max-height: 100%;"></a>
+            <a href="{{ url_for('pages', page='hometext') }}" class="home">NanoCircDx</a>
+            <div id="menu-container">
+                <a href="{{ url_for('pages', page='home') }}">
+                    <script src="{{ url_for('static', filename = 'gameicon.js') }}"></script>
+                    <lord-icon src="{{ url_for('static', filename = 'gameicon.json') }}" trigger="hover"
+                        colors="primary:#000000,secondary:#000000,tertiary:#000000" style="width:50px;height:50px">
+                    </lord-icon>
+                </a>
+                <div class="icons" id="icon-menu">
+                    <i class="icon-menu"><span></span></i>
+                </div>
+            </div>
+        </div>
+        <div>
+            <ul class="menu">
+
+                <li class="menu-link">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/homeicon.gif" class="homeicon"><a
+                        href="{{ url_for('pages', page='hometext') }}" class="text-item">Home</a>
+                </li>
+                <li class="menu-link sub">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/teamicon.gif" class="homeicon">
+                    <a href="#0" class="text-item">Team<span class="icon"></span></a>
+                    <ul class="submenu">
+                        <li class="sub-item"><a href="{{ url_for('pages', page='team') }}" class="text-subitem">Team</a></li>
+                        <li class="sub-item"><a href="{{ url_for('pages', page='attributions') }}" class="text-subitem">Attributions</a></li>
+                        <li class="sub-item"><a href="{{ url_for('pages', page='notebook') }}" class="text-subitem">Notebook</a></li>
+                        <li class="sub-item"><a href="{{ url_for('pages', page='award') }}" class="text-subitem">Awards</a></li>
+                    </ul>
+                </li>
+                <li class="menu-link sub">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/projecticon.gif" class="homeicon">
+                    <a href="#0" class="text-item">Project<span class="icon"></span></a>
+                    <ul class="submenu">
+                        <ul class="submenu-left">
+                            <li class="sub-item"><a href="{{ url_for('pages', page='description') }}" class="text-subitem">Description</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='design') }}" class="text-subitem">Design</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='results') }}" class="text-subitem">Results</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='experiments') }}" class="text-subitem">Experiments</a>
+                            </li>
+
+
+                        </ul>
+                        <ul class="submenu-right">
+                            <li class="sub-item"><a href="{{ url_for('pages', page='engineering') }}" class="text-subitem">Engineering</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='proofofconcept') }}" class="text-subitem">Proof of Concept</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='proposed-implementation') }}" class="text-subitem">Proposed Implementation</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='parts') }}" class="text-subitem">Parts</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='contribution') }}" class="text-subitem">Contribution</a>
+                            </li>
+
+                        </ul>
+                    </ul>
+                </li>
+                <li class="menu-link sub">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/drylabicon.gif" class="homeicon">
+                    <a href="#0" class="text-item" style="white-space: nowrap;">Dry Lab<span class="icon"></span></a>
+                    <ul class="submenu">
+                        <li class="sub-item"><a href="{{ url_for('pages', page='model') }}" class="text-subitem">Model</a></li>
+                        <li class="sub-item"><a href="{{ url_for('pages', page='hardware') }}" class="text-subitem">Hardware</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-link sub">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/publicengagementicon.gif" class="homeicon">
+                    <a href="#0" class="text-item">Human Practices<span class="icon"></span></a>
+                    <ul class="submenu" style="padding-bottom: 50px;">
+                        <ul class="submenu-left">
+                            <li class="sub-item"><a href="{{ url_for('pages', page='human-practices') }}" class="text-subitem">(Integrated) Human Practices</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='education') }}" class="text-subitem">Education & Communication</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='entrepreneurship') }}" class="text-subitem">Entrepreneurship</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='sustainable') }}" class="text-subitem">Sustainable Development Impact</a></li>
+                        </ul>
+                        <ul class="submenu-right" style="margin-left: 450px;">
+                            <li class="sub-item"><a href="{{ url_for('pages', page='partnership') }}" class="text-subitem">Partnership</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='collaborations') }}" class="text-subitem">Collaborations</a></li>
+                            <li class="sub-item"><a href="{{ url_for('pages', page='inclusivity') }}" class="text-subitem">Diversity & Inclusion</a></li>
+                        </ul>
+                    </ul>
+                </li>
+
+                <li class="menu-link"><img src="https://static.igem.wiki/teams/4636/wiki/safetyicon.gif"
+                        class="homeicon"><a href="{{ url_for('pages', page='safety') }}" class="text-item">Safety</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<script>
+    window.onscroll = function () {
+        updateProgressBar();
+        toggleNavbar();
+    };
+
+    function updateProgressBar() {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+        document.getElementById("progress-bar").style.width = scrolled + "%";
+    }
+
+    function toggleNavbar() {
+        let prevScrollpos = window.pageYOffset;
+        let navbar = document.querySelector("#body-nav");
+
+        let progressBarContainer = document.querySelector("#progress-container");
+        let progressBar = document.querySelector("#progress-bar");
+
+        window.addEventListener("scroll", function () {
+            let currentScrollPos = window.pageYOffset;
+            if (prevScrollpos > currentScrollPos || currentScrollPos < 50 || menu.classList.contains("open")) {
+                navbar.classList.remove("hide");
+                progressBarContainer.style.top = 74 + "px";
+                progressBar.style.top = 74 + "px";
+            } else {
+                navbar.classList.add("hide");
+                progressBarContainer.style.top = 0 + "px";
+                progressBar.style.top = 0 + "px";
+            }
+            prevScrollpos = currentScrollPos;
+        });
+    }
+
+    /*
+    
+                // 获取菜单按钮和页面元素
+                const menuButton = document.getElementById("icon-menu");
+                const contentElement = document.getElementById("content");
+    
+                // 添加点击事件监听器
+                menuButton.addEventListener("click", toggleDarkOverlay);
+    
+                // 切换暗覆盖层的可见性和模糊效果
+                function toggleDarkOverlay() {
+                    if (contentElement.classList.contains("dark-overlay")) {
+                        contentElement.classList.remove("dark-overlay");
+    
+                    } else {
+                        contentElement.classList.add("dark-overlay");
+    
+                    }
+                }
+    */
+    /*
+                window.addEventListener("scroll", function TN() {
+                    let navbar = document.querySelector("#body-nav");
+                    let progressBarContainer = document.querySelector("#progress-container");
+                    let progressBar = document.querySelector("#progress-bar");
+                    let navbarHeight = navbar.offsetHeight;
+                    let navbarTop = navbar.getBoundingClientRect().top;
+                    let progressBarTop = navbarHeight + navbarTop;
+                    progressBarContainer.style.top = progressBarTop + "px";
+                    progressBar.style.top = progressBarTop + "px";
+                });
+    */
+
+    var iconMenu = document.querySelector(".icon-menu"),
+        menu = document.querySelector(".menu"),
+        menuLink = document.querySelectorAll(".menu-link.sub");
+
+    iconMenu.addEventListener("click", openMenu);
+
+    menuLink.forEach(function (el) {
+        el.addEventListener("click", openSubmenu);
+    });
+
+    function openMenu() {
+        if (menu.classList.contains("open")) {
+            menu.classList.add("close");
+            iconMenu.classList.remove("icon-closed");
+
+
+
+            setTimeout(function () {
+                menu.classList.remove("open");
+            }, 100);
+        } else {
+            menu.classList.remove("close");
+            menu.classList.add("open");
+            iconMenu.classList.add("icon-closed");
+
+        }
+    }
+
+    function openSubmenu(event) {
+        if (event.currentTarget.classList.contains("active")) {
+            event.currentTarget.classList.remove("active");
+        } else {
+            event.currentTarget.classList.add("active");
+        }
+    }
+
+</script>

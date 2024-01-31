@@ -1,0 +1,166 @@
+<footer>
+    <nav class="navbar navbar-expand-lg  fixed-botton">
+        <img src="https://static.igem.wiki/teams/4636/wiki/nthulogo.png" alt="logo" width="400">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" id="footer-nav-toggle">
+            <span class="navbar-toggler-icon"><a class="navbar-brand"><img src="https://static.igem.wiki/teams/4636/wiki/white-lighting.png"></a></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a href="https://www.facebook.com/NTHU.iGEM" class="ms-3 nav-link"><img
+                            src="https://static.igem.wiki/teams/4118/wiki/icon-facebook.svg" alt="在臉書上關注我們"
+                            width="31"></a>
+                </li>
+                <li class="nav-item active">
+                    <a href="https://www.instagram.com/igem_nthu/" class="ms-3 nav-link"><img
+                            src="https://static.igem.wiki/teams/4118/wiki/icon-instagram.svg" alt="在 Instagram 上關注我們"
+                            width="30"></a>
+                </li>
+                <li class="nav-item active">
+                    <a href="https://twitter.com/IgemMed" class="ms-3 nav-link"><img
+                            src="https://static.igem.wiki/teams/4118/wiki/icon-twitter.svg" alt="在推特上關注我們"
+                            width="30"></a>
+                </li>
+                <li class="nav-item active">
+                    <a href="https://gr.linkedin.com/company/igem-patras-medicine" class="ms-3 nav-link"><img
+                            src="https://static.igem.wiki/teams/4118/wiki/icon-linkedin.svg" alt="在領英上關注我們"
+                            width="27"></a>
+                </li>
+                <li class="nav-item active">
+                    <a href="https://open.spotify.com/show/3uL0UutbwkTXckC3YIxaqv?si=7b80e181b9e3448a"
+                        class="ms-3 nav-link"><img src="https://static.igem.wiki/teams/4118/wiki/icon-spotify.svg"
+                            alt="收聽我們的播客" width="30"></a>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+    <ul class="sponsor">
+        <li><a href="https://igem.org/"><img
+                    src="https://static.igem.org/websites/common/2022/logos/igem-logo-light.svg"></a></li>
+        <li><a href="https://international.neb.com/"><img src="https://static.igem.wiki/teams/4636/wiki/biolab-logo.png"></a></li>
+        <li><a href="https://www.genomics.com.tw/"><img src="https://static.igem.wiki/teams/4636/wiki/genomics-logo.png"></a></li>
+        <li><a href="https://www.snapgene.com/"><img src="https://static.igem.wiki/teams/4636/wiki/snapgene-logo.png"></a></li>
+        <li><a href="https://findit.org.tw/twCompanyInfo.aspx?strId=3978"><img src="https://static.igem.wiki/teams/4636/wiki/.png"></a></li>
+        <li><a href="https://sg.idtdna.com/pages"><img src="https://static.igem.wiki/teams/4636/wiki/idt-logo.png" style="width: 180px;"></a></li>
+        <li><a href="https://alumni.site.nthu.edu.tw/p/412-1346-11837.php?Lang=zh-tw"><img src="https://static.igem.wiki/teams/4636/wiki/schoolmeet.png" style="width: 85px;"></a></li>
+    </ul>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="{{ url_for('static', filename = 'slick.min.js') }}"></script>
+
+
+    <script>
+        $('.sponsor').slick({
+            dots: true,
+            slidesToShow: 5,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+            centerMode: true,
+            variableWidth: true,
+            pauseOnHover: true
+        });
+        $(document).ready(function () {
+            $('.sponsor li').mouseover(function () {
+                $(this).css({
+                    'filter': 'brightness(100000%)',
+                    'transform': 'cale(3) !important'
+                });
+            }).mouseout(function () {
+                $(this).css({
+                    'filter': 'brightness(100%)',
+                    'transform': 'cale(0.33)'
+                });
+            });
+        });
+    </script>
+    <hr style="border: 1px solid rgba(255, 255, 255, 0.108); width: 100%;">
+    <div class="row mt-4">
+        <div class="col">
+            <p class="mb-0"><small>© 2023 - Content on this site is licensed under a <a class="subfoot"
+                        href="https://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution
+                        4.0 International license</a>.</small></p>
+            <p><small>The repository used to create this website is available at <a
+                        href="https://gitlab.igem.org/2023/nthu-taiwan">gitlab.igem.org/2023/nthu-taiwan</a>.</small>
+            </p>
+        </div>
+    </div>
+</footer>
+<!--
+<style>
+    footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    background-color: #333;
+    color: #fff;
+    padding: 80px;
+}
+
+footer .navbar-toggler {
+    background-color: #333;
+    border-color: #ffffff3d;
+}
+
+.navbar {
+    box-shadow: 0 0 0;
+    border-bottom: 2px solid #ffffff1a;
+}
+
+.navbar-toggler-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.navbar-toggler-icon img {
+    width: 30px;
+    height: 30px;
+    margin-left: 15px;
+}
+
+a.email {
+    text-align: left;
+    color: #ffffff52;
+}
+
+.navbar-nav a {
+    text-align: center;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-family: cursive;
+}
+
+
+footer a {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.sponsor {
+    width: 100%;
+    margin: 2% auto;
+    padding: 0;
+}
+
+.sponsor img {
+    margin: 0px;
+    height: 60PX;
+    align-items: center;
+    margin-right: 0px;
+    filter: brightness(100%);
+}
+
+.sponsor li {
+    display: inline-block;
+    align-items: center;
+    margin-right: 30px;
+}
+
+</style>
+-->

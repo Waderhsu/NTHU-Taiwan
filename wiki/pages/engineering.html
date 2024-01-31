@@ -1,0 +1,1176 @@
+{% extends "layout.html" %}
+
+{% block title %}Engineering{% endblock %}
+
+{% block page_content %}
+
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/engineering.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/engineering.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Engineering', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "In the middle of difficulty lies opportunity.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+          color: aliceblue;
+          /* font-style: unset; */
+          font-size: xx-large;
+          font-weight: 800;
+          letter-spacing: 8px;
+          font-size: 140px;
+          font-family: inherit;">
+            Engineering
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+        </div>
+        <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#Introduction" class="sidebaritem">Introduction</a></li>
+                    <li><a href="#Section 1" class="sidebaritem">Section 1</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+                    <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a id="" href="#Cycle 1">Cycle 1</a></li>
+                            <li class="sidebaritem_item"><a id="" href="#Cycle 2">Cycle 2</a></li>
+                        </ul>
+                    </div>
+                    <li><a href="#Section 2" class="sidebaritem">Section 2</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton2"></button>
+                    <div id="sidebaritem_item2" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a id="" href="#Section 2Cycle 1">Cycle 1</a></li>
+                            <li class="sidebaritem_item"><a id="" href="#Section 2Cycle 2">Cycle 2</a></li>
+                        </ul>
+                    </div>
+                    <li><a href="#Section 3" class="sidebaritem">Section 3</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton3"></button>
+
+                    <div id="sidebaritem_item3" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a id="" href="#Section 3Cycle 1">Cycle 1</a></li>
+                            <li class="sidebaritem_item"><a id="" href="#Section 3Cycle 2">Cycle 2</a></li>
+                        </ul>
+                    </div>
+                    <li><a href="#Section 4" class="sidebaritem">Section 4: model</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton4"></button>
+                    <div id="sidebaritem_item4" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a id="" href="#Section 4Cycle : Difussion">Cycle: Difussion</a></li>
+                        </ul>
+                    </div>
+                    <li><a href="#Section 5" class="sidebaritem">Section 5: model</a></li>
+                    <button class="sideexpandbutton" id="sideexpandbutton5"></button>
+                    <div id="sidebaritem_item5" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+                        <ul>
+                            <li class="sidebaritem_item"><a id="" href="#Section 5Cycle : Amplification">Cycle: Amplification</a></li>
+                        </ul>
+                    </div>
+                    <li><a href="#Reference" class="sidebaritem">Reference</a></li>
+                    <script>
+                        const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+                        const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+                        sideexpandbutton1.addEventListener("click", function () {
+                            if (sidebaritem_item1.style.display == "none") {
+                                sidebaritem_item1.style.display = "block";
+                                sideexpandbutton1.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item1.style.display = "none";
+                                sideexpandbutton1.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                        const sideexpandbutton2 = document.getElementById("sideexpandbutton2");
+                        const sidebaritem_item2 = document.getElementById("sidebaritem_item2");
+
+                        sideexpandbutton2.addEventListener("click", function () {
+                            if (sidebaritem_item2.style.display == "none") {
+                                sidebaritem_item2.style.display = "block";
+                                sideexpandbutton2.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item2.style.display = "none";
+                                sideexpandbutton2.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                        const sideexpandbutton3 = document.getElementById("sideexpandbutton3");
+                        const sidebaritem_item3 = document.getElementById("sidebaritem_item3");
+
+                        sideexpandbutton3.addEventListener("click", function () {
+                            if (sidebaritem_item3.style.display == "none") {
+                                sidebaritem_item3.style.display = "block";
+                                sideexpandbutton3.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item3.style.display = "none";
+                                sideexpandbutton3.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                        const sideexpandbutton4 = document.getElementById("sideexpandbutton4");
+                        const sidebaritem_item4 = document.getElementById("sidebaritem_item4");
+
+                        sideexpandbutton4.addEventListener("click", function () {
+                            if (sidebaritem_item4.style.display == "none") {
+                                sidebaritem_item4.style.display = "block";
+                                sideexpandbutton4.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item4.style.display = "none";
+                                sideexpandbutton4.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                        const sideexpandbutton5 = document.getElementById("sideexpandbutton5");
+                        const sidebaritem_item5 = document.getElementById("sidebaritem_item5");
+
+                        sideexpandbutton5.addEventListener("click", function () {
+                            if (sidebaritem_item5.style.display == "none") {
+                                sidebaritem_item5.style.display = "block";
+                                sideexpandbutton5.style.transform = "rotate(-180deg)";
+                            } else {
+                                sidebaritem_item5.style.display = "none";
+                                sideexpandbutton5.style.transform = "rotate(-360deg)";
+                            }
+                        });
+                    </script>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Introduction">Introduction</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+
+                <p class="des-paragraph fade_from_right">
+                    When it comes to synthetic biology,
+                    it is important to ensure that the results of our project align with our expectations. However,
+                    before we successfully achieve our desired goals, there is a long way to go due to the
+                    unpredictability of the results. For this situation, we introduce an important principle: the
+                    engineering cycle, often abbreviated as the DBTL (Design, Build, Test, and Learn) cycle, to
+                    divide the entire experiment into four sections. The DBTL cycle helps us pinpoint where
+                    potential issues may arise more easily. When it goes wrong, we can redesign and rebuild a cycle
+                    to lead our biological system in the right direction and finally reach its destination. Beyond
+                    the four stages in the DBTL cycle, we include a 'recap' section after the learning stage to
+                    summarize actions for enhancing our experiment.
+                </p>
+                <div class="containerfig">
+                    <img
+                        src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-1.jpg" style="width: 40%;">
+                </div>
+                <p class="des-figure">
+                    Figure 1. Engineering cycle.
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Section 1">
+                    Section 1: Enhancing the yields of circular RNA (circRNA).</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <h1 class="des-heading2" id="Cycle 1">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cycle 1
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Design:</h1>
+                <p class="des-paragraph fade_from_right">
+                    In the attempt to
+                    circularizing linear RNA, we designed a DNA oligo, known as splint. The splint has a
+                    complementary sequence to the linear RNA. With this characteristic, it enhances the
+                    circularization ability of our RNA, by forming a double-stranded RNA (Figure 2) to circularize
+                    RNA. After the ligation process is done, the splint will be degraded by treating with DNase I.
+                    (See <a href="{{ url_for('pages', page='design') }}" class="home"">page design</a> for the design of circularization). <a href="#[1]">[1]</a>
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-2.png">
+
+                </div>
+                <p class="des-figure">
+                    Figure 2. A diagram shows how
+                    splint helps the formation of circular RNA.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    In the very beginning, we only
+                    noticed the basic principle of splinting. Such a splint needs to be a complementary sequence to
+                    linear RNA that acts as a platform that can ligate the ends of RNA, helping it to form
+                    the covalently-closed loop structure. Initially, we thought that the longer a complementary
+                    splint, the better its ligation ability, so we designed splint sequences ranging from 12 to 30
+                    base pairs long. However, there would be too many candidates (10 exactly) if we designed and
+                    produced all the splints, which means a higher cost would be required, and this was not
+                    possible. Thus, we took a previous study <a href="#[2]">[2]</a> into account. The paper mentions a method for
+                    circularizing DNA from its linear form. However, this is the closest idea aligning with our
+                    project, so we had no option but to take their previous experience and parameters into
+                    consideration. In this study, it said that the best circularization efficiency is at 12 bp,
+                    nevertheless, the Tm value of our splint with 12bp was too low for the reaction. As a result, we
+                    mimicked their experiment and decided to design a 14 bp splint, Splint_1802_14 (BBa_K4636015)
+                    and Splint_4771_14 (BBa_K4636018) for circularizing RNA. (See <a href="{{ url_for('pages', page='parts') }}" class="home"">page parts</a> for detail
+                    information)
+                </p>
+                <h1 class="des-heading3 fade_from_left">Test:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Here only shows the result of
+                    circularization using Splint_1802_14. To make sure the products of each step in synthesizing
+                    circRNA (See <a href="{{ url_for('pages', page='design') }}" class="home"">page design</a> for details) were produced as expected, we decided to sequentially
+                    verify the effectiveness of each step and conduct E-Gel EX gel electrophoresis tests. Firstly,
+                    the presence of a band at lane 1 indicated a successful in vitro transcription (IVT) process, as
+                    we treated the reagent with DNase I. Secondly, we added XRN-1, a chemical capable of degrading
+                    monophosphorylated RNA <a href="#[3]">[3]</a> (lane 2: Without XRN-1, lane 3: With XRN-1 added). Lastly, given the
+                    circular form of RNA's resistance to RNA exonuclease activity, we could verify the yields in the
+                    back-splicing experiment by treating them with RNase R <a href="#[4]">[4]</a>. Similarly, we also treated the
+                    back-splicing product with XRN-1 in an attempt to degrade monophosphorylated linear RNA for
+                    further validation. (Lane 4: Without RNase R; lane 5: With RNase R added; lane 6: With XRN-1
+                    added).
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-3.jpg" style="width: 30%;">
+                </div>
+                <p class="des-figure">
+                    Figure 3. Lane 1: IVT product, Lane
+                    2: Monophosphorylation product, Lane 3: Monophosphorylation product + XRN-1, Lane 4:
+                    Circularization product, Lane 5: Circularization product + RNase R, Lane 6: Circularization
+                    product + XRN-1
+                </p>
+                
+                <h1 class="des-heading3 fade_from_left">Learn:</h1>
+                <p class="des-paragraph fade_from_right">
+                    From the result of E-Gel EX
+                    electrophoresis, lane 1, 2, and 3 displayed the outcomes we anticipated. In other words, in
+                    vitro transcription and monophosphorylation were confirmed to be successful. However, lanes 4,
+                    5, and 6 exhibited such shallow bands that they were almost imperceptible. This indicated a low
+                    yield in our back splicing procedure.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Recap:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Knowing that the failure came from
+                    circularization, we then tried to search for more resources to explore any detail we might have
+                    ignored before.
+                </p>
+                <h1 class="des-heading2" id="Cycle 2">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cycle 2
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Design:</h1>
+                <p class="des-paragraph fade_from_right">
+                    After looking through papers and
+                    experiments done by previous people, we realized that the ligation efficacy of circular RNA
+                    depends on the CG content, the structure, the Tm value, and the entropy value. <a href="#[5]">[5]</a> Besides, we
+                    also noticed that the Tm value is a cofactor that affects the ligation ability. Splint's Tm
+                    value should be more than 25°C, so that it would be able to combine with the DNA more firmly.
+                    Last but not least, we thought of testing our designed splint sequence to predict entropy value
+                    and structure by running through a website <a href="#[6]">[6]</a>. We consider that the reason why our previous
+                    circularization experiment with 14 base pair splint didn't succeed in circularizing RNA lies in
+                    two main reasons: Tm value and GC content.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    For the 14bp splint (For linear RNA
+                    of Insert_0101802, BBa_K4636040), the Tm value was lower than the 16bp splint, which means it
+                    may not correctly bind to our target RNA since the Tm of the splint should be higher than 25 °C
+                    to make it anneal with the DNA more firmly.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    While for GC content, 14bp splints
+                    are 50% and 16bp splint are 43.8%. Since the higher GC%, the more difficult it will be to
+                    unscrew the double helix, the 14bp splint may have relatively poor ability compared with the
+                    16bp splint.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    The reason mentioned above and the
+                    previous 14bp experiment failure made us want to try a longer splint length, so we designed two
+                    more splint lengths, which were 16 and 18 base pairs long.
+                </p>
+
+
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    We finally build our splint
+                    sequence through filter criteria mentioned above, like CG content, avoiding secondary structure,
+                    splint Tm, and entropy values. This also included conducting the previous paper, so we designed
+                    two more different lengths, which were 16 (Splint_1802_16 ,BBa_K4636014) and 18
+                    (Splint_1802_18, BBa_K4636013) base pairs long.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Test:</h1>
+                <p class="des-paragraph fade_from_right">
+                    To prove the success of our new
+                    design, circularization product (With RNase R added) using Splint_1802_14 (BBa_K4636015)
+                    , Splint_1802_16 (BBa_K4636014) and Splint_1802_18 (BBa_K4636013) were tested together using
+                    agarose gel electrophoresis.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-4.png" style="width: 40%;">
+
+                </div>
+                <p class="des-figure">
+                    Figure 4. Lane 1: low range ssRNA ladder. Lane 2: Negative control. Lane 3: Back-splicing
+                    product using Splint_1802_14. Lane 4: Back-splicing product Splint_1802_16. Lane 5:
+                    Back-splicing product Splint_1802_18.
+                </p>
+                
+                <h1 class="des-heading3 fade_from_left">Learn:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Based on the result of agarose gel
+                    electrophoresis (Figure 4), we could identify that the splint with 16bp and 18bp have higher
+                    back-splicing efficiency than 14bp as we expected.
+                </p>
+
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Section 2">Section 2: Identify
+                    the optimal conditions for RCA
+                </h1>
+                <button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3">
+                <h1 class="des-heading2" id="Section 2Cycle 1">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cycle 1
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Design:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Since both the circular RNA we
+                    selected present low concentration in the human serum, we choose to amplify them through an
+                    isothermal amplification method called rolling circle amplification (RCA) (see <a href="{{ url_for('pages', page='design') }}" class="home"">page design</a> for
+                    details).
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-5.jpg">
+
+                </div>
+                <p class="des-figure">
+                    Figure 5. A diagram shows how RCA amplify circRNA by producing long repeated single-stranded
+                    complementary DNA.
+                </p>
+
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Followed by paper studying, the
+                    Protoscript II reverse transcriptase (New England BioLabs) seems to be the the most commonly
+                    used enzyme when conducting RCA using circRNA as template <a href="#[7]">[7]</a>. Therefore, we decided to use
+                    Protoscript II reverse transcriptase to amplify our target biomarkers and conducted agarose gel
+                    electrophoresis to present the result.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Test:</h1>
+                <p class="des-paragraph fade_from_right">
+                    In theory, reverse transcriptase
+                    can repetitively amplify the circRNA to produce a long-repeated single-stranded DNA (ssDNA)
+                    (Figure 5). Conversely, the linear RNA can only be reverse transcribed into complementary DNA
+                    (cDNA) with a length identical to that of the RNA template. Consequently, we conducted RCA using
+                    both linear and circular RNA to evaluate the effectiveness of RCA.
+                </p>
+                <div class="containerfig">
+                    <img
+                        src="https://static.igem.wiki/teams/4636/wiki/engineering-rtrpa/engineering-6.png" style="width: 30%;">
+                </div>
+                <p class="des-figure">
+                    Figure 6. Lane1: ssRNA ladder. Lane
+                    2: RCA product using circularized RNA as template. Lane 3: RCA product using linear RNA as
+                    template.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Learn:</h1>
+                <p class="des-paragraph fade_from_right">
+                    From the result of agarose gel
+                    electrophoresis (Figure 6), though the single-stranded cDNA was successfully synthesized, the
+                    length remained the same as the linear form of RNA even though the reaction time was extended.
+                    In this case, we assumed that there might be some inherent limitations to protoscript II reverse
+                    transcriptase.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Recap:</h1>
+                <p class="des-paragraph fade_from_right">
+                    To deal with the question we
+                    hypothesized, all of us spared no effort to collect and integrate related literatures.
+                </p>
+                <h1 class="des-heading2" id="Section 2Cycle 2">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cycle 2
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Design:</h1>
+                <p class="des-paragraph fade_from_right">
+                    After extensive data querying, we
+                    found that the amplification ability of Protoscript II reverse transcriptase is limited to
+                    around 500 base pairs. On the other hand, we also discovered a promising reverse transcriptase
+                    called Induro® Reverse Transcriptase (New England BioLabs)with an amplification ability of
+                    around 12,000 base pairs <a href="#[8]">[8]</a>.
+                </p>
+
+
+
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    We followed the protocol provided
+                    by the manufacturer. Since the manufacturer suggested a reaction time between 15-30 minutes, we
+                    conducted the reaction with durations of 15 and 30 minutes respectively to determine the optimal
+                    condition.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Test:</h1>
+                <p class="des-paragraph fade_from_right">
+                    We used a ssRNA ladder (New England
+                    BioLabs) (lane 1) to recognize the length of our reaction product. To determine the optimal
+                    reaction time, we loaded RCA products using circular RNA (circRNA) as a template with reaction
+                    times of approximately 15 minutes (lane 2) and 30 minutes (lane 3), respectively. RCA products
+                    using linear RNA with the RNA concentration remaining the same as in lane 2 and 3 were used as
+                    templates. Both reaction times of 15 minutes (lane 4) and 30 minutes (lane 5) were tested. For
+                    lane 6 and lane 7, the components were essentially the same as in lane 4 and lane 5, with the
+                    only difference being that the RNA concentration was 10 times higher. (Figure 7)
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-7.png" style="width: 40%;">
+
+                </div>
+                <p class="des-figure">
+                    Figure 7. Lane 1: ssRNA ladder. Lane 2: CircRNA as template with reaction time of 15mins. Lane3:
+                    CircRNA as template with reaction time of 30 mins. Lane 4: Linear RNA with the concentration
+                    identical to lane 2 and lane 3 as template and the reaction time of 15mins. Lane 5: Linear RNA
+                    with the concentration identical to lane 2 and lane 3 as template and the reaction time of
+                    30 mins. Lane 6: Linear form RNA with concentration 10 times higher and the reaction time of
+                    15mins. Lane 7: Linear form RNA with concentration 10 times higher and the reaction time of
+                    30 mins.
+                </p>
+
+                <h1 class="des-heading3 fade_from_left">Learn:</h1>
+                <p class="des-paragraph fade_from_right">
+                    According to the results (Figure
+                    7), we observed that lane 2 and lane 3 displayed significantly larger RCA products
+                    (approximately 1000 to 2000 nt) compared to lane 4 to lane 7 (approximately 450 nt). This
+                    indicated that the Induro reverse transcriptase successfully amplified the RNA signal when
+                    circRNA was used as the template.
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Section 3">Section 3:
+                    Adjusting condition for probe-AuNPs
+                </h1><button class="expandbutton" id="expandbutton4"></button>
+            </div>
+            <div id="article4">
+                <h1 class="des-heading2" id="Section 3Cycle 1">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cycle 1
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Design:</h1>
+                <p class="des-paragraph fade_from_right">
+                     For the colorimetric assay, we
+                    need to attach DNA probes with sequence complementary to our RCA products on the surface of gold
+                    nanoparticles (see page <a href="{{ url_for('pages', page='description') }}" class="home">description</a> for details of gold nanoparticle based-colorimetric assay) <a href="#[9]">[9]</a>.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-8.jpg" style="width: 60%;">
+                </div>
+                <p class="des-figure">
+                    Figure 8. A diagram shows the
+                    mechanism of gold nanoparticle based-colorimetric assay.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    According to the literature, there
+                    will be a redshift in wavelength when probes are attached <a href="#[10]">[10]</a>. Therefore, in this section, our
+                    aim is to explore suitable experimental method to synthesize probe-conjugated gold nanoparticles
+                    with red shift in wavelength.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    We referred to the protocol
+                    provided in the literature and labeled it as Option 1 (see <a href="{{ url_for('pages', page='experiments') }}" class="home">page experiment</a> for protocols) <a href="#[9]">[9]</a>..
+                    Subsequently, we determined the redshift in wavelength using the nanodrop technique.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Test:</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-9.jpg" style="width: 70%;">
+                </div>
+                <p class="des-figure">
+                    Figure 9. The comparison of wavelengths between the pure gold nanoparticle solution and solution after processing Option 1.
+                </p>
+
+                <h1 class="des-heading3 fade_from_left">Learn:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Based on Figure 9, we can observe
+                    that there was no red shift in wavelength, which indicated we failed to attach probes on the
+                    surface of gold nanoparticles.
+                <h1 class="des-heading3 fade_from_left">Recap:</h1>
+                <p class="des-paragraph fade_from_right">
+                    We hypothesized the failure of our
+                    attempt to synthesis probe-conjugated gold nanoparticles was a result of unsuitable experimental
+                    conditions. Consequently, we tried to find an alternative method to produce the complex.
+                </p>
+                <h1 class="des-heading2" id="Section 3Cycle 2">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cycle 2
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Design:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Learned from the cycle 1, our
+                    adviser suggested us to study the references <a href="#[11]">[11]</a> provided by the previous paper to figure out if
+                    there were other solution to synthesize the probe-conjugated gold nanoparticles we desired.
+                </p>
+
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Fortunately, we had found out
+                    another protocol, named it Option 2 (see <a href="{{ url_for('pages', page='experiments') }}" class="home">page experiment</a> for protocols) <a href="#[11]">[11]</a>, for conjugating
+                    probes and gold nanoparticles. As mentioned in the cycle one, we could determined the red shift
+                    in wavelength using the nanodrop technique after completing the synthesis procedure.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Test:</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/figure-10.png">
+                </div>
+                <p class="des-figure">
+                    Figure 10. The comparison of wavelengths between the pure gold nanoparticle solution and solution after processing Option 2.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Fortunately, we had found out
+                    another protocol, named it Option 2 (see page experiment for protocols) <a href="#[11]">[11]</a>, for conjugating
+                    probes and gold nanoparticles. As mentioned in the cycle one, we could determined the red shift
+                    in wavelength using the nanodrop technique after completing the synthesis procedure.
+                </p>
+
+
+                <h1 class="des-heading3 fade_from_left">Learn:</h1>
+                <p class="des-paragraph fade_from_right">
+                    According to Figure 10, they show
+                    significant red shift in wavelength. In the other word, we successfully attached probes on the
+                    surface of gold nanoparticles.
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Section 4">Section 4: Model</h1>
+                <button class="expandbutton" id="expandbutton5"></button>
+            </div>
+            <div id="article5">
+                <h1 class="des-heading2" id="Section 4Cycle : Difussion">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cycle : Difussion
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Purpose:</h1>
+                <p class="des-paragraph fade_from_right">
+                    According to scientific research,
+                    we
+                    know that the segregation of the gold nanoparticles may influence the observed color of the
+                    solution. Therefore, in order to predict the color of the solution, we need to investigate the
+                    diffusion process of the gold nanoparticles beforehand.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Design:</h1>
+                <p class="des-paragraph fade_from_right">
+                    We use the function and the
+                    geometric
+                    factors of the container to simulate the diffusion of the particles. After getting the
+                    equilibrium
+                    condition of the diffusion result, we then try to comprehend the distribution of every particle
+                    to
+                    further derive the wavelength shift of the liquid.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Redesign:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Initially, we assume the velocity inlet to be constant, the result is show in Figure 11:
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/engineeringfig11.png"  style="width: 30%;">
+                </div>
+                <p class="des-figure">
+                    Figure 11. Diffusion under constant velocity
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    We then use the Gaussian
+                    distribution
+                    to fit with Figure 11 to see the distribution extent. At first, we use the variances of 1, 5 and
+                    20
+                    then choose the most similar case to fit with Figure11 The results are given as follows:
+                </p>
+
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    However, the constant descending
+                    velocity does not fit the actual condition since the velocity may decrease along the descending
+                    process. Then we change descending velocity into a time-depending function to more explictly
+                    simulate the real condition. The diffusion result can be shown as:
+                </p>
+                <h1 class="des-heading3 fade_from_left">Test:</h1>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/engineeringfig12.png">
+                </div>
+                <p class="des-figure">
+                    Figure 12. Gaussian distribution of variance 1, 5 and 20
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    However, even with the most familiar in
+                    those three cases, there is still a significant difference between the simulation and the result. In
+                    order to retrieve the most familiar variance, we use the following code to compare the pixel between
+                    distribution under different variances and Figure 11 Hence, the variance can be elaborated as follows:
+                </p>
+
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/engineeringfig13.png" style="width: 60%;">
+                </div>
+                <p class="des-figure">
+                    Figure 13. Difference of pictures under different variances
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Worth mentioning, when the variance is
+                    greater than 1 then the segregation area will be much smaller than Figure 1. Therefore, we choose the
+                    lowest point in the graph to do the distance calculation. The comparison between the most familiar
+                    variance and Figure 1 are shown as follows:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/engineeringfig14.png" style="width: 60%;">
+                </div>
+                <p class="des-figure">
+                    Figure 14. Comparison between the most familiar variance and Figure 11
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Moreover, we also retrieve the value directly from the Simscale:
+                </p>
+
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/engineeringfig15.png" style="width: 80%;">
+                </div>
+                <p class="des-figure">
+                    Figure 15. Turbulent kinetic energy of every particle
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In order to calculate the distance
+                    between particles, we assume that the particle in the container is homogenous and distribute
+                    uniformly, therefore the kinetic energy is proportional to the number of particles. The result
+                    is given as:
+                </p>
+
+                <table>
+                    <tr>
+                        <th>Volume (m<sup>3</sup>)</th>
+                        <th>Moles (mol)</th>
+                        <th>Max distance (m)</th>
+                        <th>Min distance (m)</th>
+                    </tr>
+                    <tr>
+                        <td>7.5×10<sup>-8</sup></td>
+                        <td>9.75×10<sup>-13</sup></td>
+                        <td>5.04×10<sup>-7</sup></td>
+                        <td>5.03×10<sup>-7</sup></td>
+                    </tr>
+                </table>
+
+                <p class="des-figure">
+                    Sheet 1. Calculation of distance between particles in every region
+                </p>
+
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    However, the constant descending
+                    velocity does not fit the actual condition since the velocity may decrease along the descending
+                    process. Then we change descending velocity into a time-depending function to more explictly
+                    simulate the real condition. The diffusion result can be shown as:
+                </p>
+
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-success/engineeringfig16.png" style="width: 40%;">
+                </div>
+                <p class="des-figure">
+                    Figure 16. Diffusion under time-depending velocity
+                </p>
+
+
+                <h1 class="des-heading3 fade_from_left">Learn:</h1>
+                <p class="des-paragraph fade_from_right">
+                    After determinating that diffusion are
+                    mainly cause by the velocity inlet and the osmotic pressure which caused by the difference of the
+                    concentration, we know can further derive the relationship as follows:
+                </p>
+                <div class="containerfig">
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mi>π</mi>
+                        <mo>=</mo>
+                        <mi>i</mi>
+                        <mi>c</mi>
+                        <mi>R</mi>
+                        <mi>T</mi>
+                    </math>
+                    <br>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mrow>
+                            <mfrac linethickness="0">
+                                <mi>F</mi>
+                                <mo>/</mo>
+                                <mi>A</mi>
+                            </mfrac>
+                            <mo>=</mo>
+                            <mi>i</mi>
+                            <mi>c</mi>
+                            <mi>R</mi>
+                            <mi>T</mi>
+                        </mrow>
+                    </math>
+                    <br>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mfrac>
+                            <mn>1</mn>
+                            <mi>A</mi>
+                        </mfrac>
+                        <mo>×</mo>
+                        <mfrac>
+                            <mn>m</mn>
+    
+                            <mi>t</mi>
+                        </mfrac>
+                        <mi>v</mi>
+                        <mo>=</mo>
+                        <mi>i</mi>
+                        <mi>c</mi>
+                        <mi>R</mi>
+                        <mi>T</mi>
+                    </math>
+                    <br>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mi>v</mi>
+                        <mo>=</mo>
+                        <mfrac>
+                            <mi>A</mi>
+                            <mi>i</mi>
+                            <mi>R</mi>
+                            <mi>T</mi>
+                            <mi>c</mi>
+                            <mi>t</mi>
+                        </mfrac>
+                        <mo>/</mo>
+                        <mi>m</mi>
+    
+                    </math>
+                    <br>
+                    <math xmlns="http://www.w3.org/1998/Math/MathML">
+                        <mi>v</mi>
+                        <mo stretchy="false">(t)</mo>
+                        <mo>=</mo>
+                        <mi>K</mi>
+                        <mo>⋅</mo>
+                        <mi>t</mi>
+                        <mo>/</mo>
+                        <mi>M</mi>
+                        <mo>+</mo>
+                        <mi>constant</mi>
+                    </math>
+                </div>
+                <p class="des-figure">
+                    Figure 17. Derivation of the velocity relationship
+                </p>
+                <style>
+                    math {
+                        color: black;
+                    }
+                </style>
+                <h1 class="des-heading3 fade_from_left">Redesign:</h1>
+                <p class="des-paragraph fade_from_right">
+                    After knowing the velocity
+                    relationship, we apply it back to the simulation to understand the influence of different
+                    concentration. The simulation results are given in the model page.
+                </p>
+            </div>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Section 5">
+                    Section 5: Model (RT-RPA)</h1><button class="expandbutton" id="expandbutton6"></button>
+            </div>
+            <div id="article6">
+                <h1 class="des-heading2" id="Section 5Cycle : Amplification">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Cycle : Amplification
+                </h1>
+                <h1 class="des-heading3 fade_from_left">Purpose:</h1>
+                <p class="des-paragraph fade_from_right">
+                    The establishment of RT-RPA model
+                    is to assist Wetlab in determining whether the current experimental design can yield the
+                    expected results through simulation before the actual experiment.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Design:</h1>
+                <p class="des-paragraph fade_from_right">
+                    We first select the crucial reactions of RT-RPA and converted these reactions into differential equations. Then, we use SimBiology to execute these differential equations.
+                </p>
+                <h1 class="des-heading3 fade_from_left">Build:</h1>
+                <p class="des-paragraph fade_from_right">
+                    At the beginning, we intended to
+                    directly utilize the differential equations from the paper and incorporate them with the
+                    differential equations for reverse transcriptase. However, after running simulations, we found
+                    that we were unable to obtain results consistent with the paper.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-rtrpa/engineering-1.jpg" style="width: 40%;">
+
+                </div>
+                <p class="des-figure">
+                    Figure 18. Simulation Results of cDNA after a 20 minutes RPA Reaction
+                </p>
+
+                <h1 class="des-heading3 fade_from_left">Learn:</h1>
+                <p class="des-paragraph fade_from_right">
+                    After referring to the modeling approach of previous iGEM teams, we decided to independently select the crucial reactions of RT-RPA and input them into SimBiology for simulating these reactions.
+                <h1 class="des-heading3 fade_from_left">Redesign:</h1>
+                <p class="des-paragraph fade_from_right">
+                    After determining the new approach to constructing the model, we referred to the relevant paper and selected the crucial reactions of RT-RPA. We then inputted these reactions into SimBiology to establish the model.
+                </p>
+                <p style="color: black;text-align: center;">G + F ⇌ FG (1)</p>
+                <p style="color: black;text-align: center;">FG + R ⇌ FGR' (2a)</p>
+                <p style="color: black;text-align: center;">FGR' → FGRi + G (2b)</p>
+                <p style="color: black;text-align: center;">FGRi + R ⇌ FGRc (2c)</p>
+                <p style="color: black;text-align: center;">FGRc → FRc + G (2d)</p>
+                <p style="color: black;text-align: center;">FRc + D ⇌ FRcD (3)</p>
+                <p style="color: black;text-align: center;">FRcD + ATP → FD + R + AMP + PPi (4a)
+                </p>
+                <p style="color: black;text-align: center;">FRcD + ATP → FD + ADP + H3PO4 (4b)</p>
+                <p style="color: black;text-align: center;">FD + P ⇌ PFD (5)</p>
+                <p style="color: black;text-align: center;">PFD + dNTPs → P + PPi + D (6)</p>
+                <p class="des-paragraph fade_from_right">
+                    This is what the complete RT-RPA
+                    model look like in simbiology:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-rtrpa/engineering-2.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 19. RT-RPA reaction pathway in MATLAB Simbiology
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    After identifying those crucial
+                    reactions of RT-RPA, we referred to relevant paper to obtain the required parameters and initial
+                    values. In addition, we also obtained initial values for some key reactants from Wetlab.
+                    Ultimately, we successfully get the simulation results we expected.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-rtrpa/engineering-3.jpg" style="width: 40%;">
+                </div>
+                <p class="des-figure">
+                    Figure 20. Simulation Results of cDNA after a 20 minutes RPA Reaction
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    After obtaining the simulated
+                    results we expected, we aim to apply the model in practical scenarios. We decided to use this
+                    RT-RPA model to validate Wetlab's proposition that the quantity of the forward primer influences
+                    the lower limit of the initial values of cDNA. The simulation results showed that the primer
+                    quantity does influence the lower limit of the initial value of cDNA. This not only confirmed
+                    our proposition but also boosted our confidence in the RT-RPA model.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-rtrpa/engineering-4.jpg" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 21. simulation results of cDNA after a 40 minutes RPA reaction when the forward primer quantity is 4.8e-7
+                </p>
+                
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/engineering-rtrpa/engineering-5.jpg" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 22. simulation results of cDNA after a 40 minutes RPA reaction when the forward primer quantity is 4.8e-8
+                </p>  
+            </div>
+            <div>
+                <h1 class="des-ref-heading fade_from_top" id="Reference">Reference</h1>
+                <p class="des-ref-paragraph">[1] Chen, H., Cheng, K., Liu, X., An, R.,
+                    Komiyama, M., & Liang, X. (2020). Preferential production of RNA rings by T4 RNA ligase 2
+                    without any splint through rational design of precursor strand. <i>Nucleic acids research</i>,
+                    <b>48</b>(9), e54. <a id="[1]" href="https://doi.org/10.1093/nar/gkaa181">https://doi.org/10.1093/nar/gkaa181</a>
+                </p>
+                <p class="des-ref-paragraph">[2] An, R., Li, Q., Fan, Y., Li, J., Pan,
+                    X., Komiyama, M., & Liang, X. (2017). Highly efficient preparation of single-stranded DNA rings
+                    by T4 ligase at abnormally low Mg(II) concentration. <i>Nucleic acids research</i>,
+                    <b>45</b>(15), e139. <a
+                    id="[2]" href="https://doi.org/10.1093/nar/gkx553">https://doi.org/10.1093/nar/gkx553</a>
+                </p>
+                <p class="des-ref-paragraph">[3] Jinek, M., Coyle, S. M., & Doudna, J.
+                    A. (2011). Coupled 5' nucleotide recognition and processivity in Xrn1-mediated mRNA decay.
+                    <i>Molecular cell</i>, <b>41</b>(5), 600–608. <a
+                    id="[3]" href="https://doi.org/10.1016/j.molcel.2011.02.004">https://doi.org/10.1016/j.molcel.2011.02.004</a>
+                </p>
+                <p class="des-ref-paragraph">[4] Boss, M., & Arenz, C. (2020). A Fast
+                    and Easy Method for Specific Detection of Circular RNA by Rolling-Circle Amplification.
+                    <i>Chembiochem : a European journal of chemical biology</i>, <b>21</b>(6), 793–796. <a
+                    id="[4]" href="https://doi.org/10.1002/cbic.201900514">https://doi.org/10.1002/cbic.201900514</a>
+                </p>
+                <p class="des-ref-paragraph">[5] Cui, Y., Han, X., An, R., Zhou, G.,
+                    Komiyama, M., & Liang, X. (2018). Cyclization of secondarily structured oligonucleotides to
+                    single-stranded rings by using <i>Taq</i> DNA ligase at high temperatures. <i>RSC advances</i>,
+                    <b>8</b>(34), 18972–18979. <a
+                    id="[5]" href="https://doi.org/10.1039/c8ra02804d">https://doi.org/10.1039/c8ra02804d</a>
+                </p>
+                <p class="des-ref-paragraph">[6] <a
+                    id="[6]" href="http://rna.tbi.univie.ac.at//cgi-bin/RNAWebSuite/RNAfold.cgi?PAGE=3&ID=zcRAvdofnB&r=65">http://rna.tbi.univie.ac.at//cgi-bin/RNAWebSuite/RNAfold.cgi?PAGE=3&ID=zcRAvdofnB&r=65</a>
+                </p>
+                <p class="des-ref-paragraph">[7] Boss, M., & Arenz, C. (2020). A Fast
+                    and Easy Method for Specific Detection of Circular RNA by Rolling-Circle Amplification.
+                    <i>Chembiochem : a European journal of chemical biology</i>, <b>21</b>(6), 793–796. <a
+                    id="[7]" href="https://doi.org/10.1002/cbic.201900514">https://doi.org/10.1002/cbic.201900514</a>
+                </p>
+                <p class="des-ref-paragraph">[8] Maguire, S., & Guan, S. (2022). Rolling
+                    circle reverse transcription enables high fidelity nanopore sequencing of small RNA. <i>PloS
+                        one</i>, <b>17</b>(10), e0275471. <a
+                        id="[8]" href="https://doi.org/10.1371/journal.pone.0275471">https://doi.org/10.1371/journal.pone.0275471</a>
+                </p>
+                <p class="des-ref-paragraph">[9] Ali, M. M., Kanda, P., Aguirre, S. D.,
+                    & Li, Y. (2011). Modulation of DNA-modified gold-nanoparticle stability in salt with
+                    concatemeric single-stranded DNAs for colorimetric bioassay development. <i>Chemistry (Weinheim
+                        an der Bergstrasse, Germany)</i>, <b>17</b>(7), 2052-2056. <a
+                        id="[9]" href="https://doi.org/10.1002/chem.201002677">https://doi.org/10.1002/chem.201002677</a></p>
+                <p class="des-ref-paragraph">[10] Li, F., Zhang, H., Dever, B., Li, X.
+                    F., & Le, X. C. (2013). Thermal stability of DNA functionalized gold nanoparticles.
+                    <i>Bioconjugate chemistry</i>, <b>24</b>(11), 1790-1797. <a
+                    id="[10]"  href="https://doi.org/10.1021/bc300687z">https://doi.org/10.1021/bc300687z</a>
+                </p>
+                <p class="des-ref-paragraph">[11] Liu, J., & Lu, Y. (2006). Preparation
+                    of aptamer-linked gold nanoparticle purple aggregates for colorimetric sensing of analytes.
+                    <i>Nature protocols</i>, <b>1</b>(1), 246-252. <a
+                    id="[11]" href="https://doi.org/10.1038/nprot.2006.38">https://doi.org/10.1038/nprot.2006.38</a>
+                </p>
+                <p class="des-ref-paragraph" id="[12]">[12] R. Tsekov, P. Georgiev, S. Simeonova and K. Balashev (2017), Quantifying the Blue Shift in the Light Absorption of Small Gold Nanoparticles <a href="https://arxiv.org/ftp/arxiv/papers/1702/1702.04513.pdf">https://arxiv.org/ftp/arxiv/papers/1702/1702.04513.pdf</a></p>
+                <p class="des-ref-paragraph" id="[13]">[13] Perez-Juste J, Liz- Marzán LM, Carnie S, Chan DYC, Mulvaney P (2004) Electric-field-directed growth of gold nanorods in aqueous surfactant solutions <a href="https://doi.org/10.1002/adfm.200305068">https://doi.org/10.1002/adfm.200305068</a></p>
+                <p class="des-ref-paragraph" id="[14]">[14] Morris AM, Watzky MA, Finke RG (2009) Protein aggregation kinetics, mechanism, and curve-fitting: a review of the literature <a href="10.1016/j.bbapap.2008.10.016">10.1016/j.bbapap.2008.10.016</a></p>
+                <p class="des-ref-paragraph" id="[15]">[15] Lewis GN (1908). The Osmotic Pressure of Concentrated Solutions and the Laws of the Perfect Solution. Journal of the American Chemical Society. <a href="https://pubs.acs.org/doi/abs/10.1021/ja01947a002">https://pubs.acs.org/doi/abs/10.1021/ja01947a002</a></p>
+                <p class="des-ref-paragraph" id="[18]">[16] Liu, Jie ; Berger, Christopher L ; Morrical, Scott W (2013). Kinetics of Presynaptic Filament Assembly in the Presence of Single-Stranded DNA Binding Protein and Recombination Mediator Protein. Biochemistry (Easton), 2013, Vol.52 (45), p.7878-7889 <a href="https://pubs.acs.org/doi/full/10.1021/bi401060p">https://pubs.acs.org/doi/full/10.1021/bi401060p</a></p>
+                <p class="des-ref-paragraph" id="[19]">[17] Moody, Clint ; Newell, Heather ; Viljoen, Hendrik (2016). A mathematical model of recombinase polymerase amplification under continuously stirred conditions. Biochemical engineering journal, 2016, Vol.112, p.193-201 <a href="https://www.sciencedirect.com/science/article/pii/S1369703X16301152?casa_token=nv3pO9UHxvYAAAAA:9kA9Wc27RzRSbEKsF5uC_q44f_6Z-g4MGT-T63K7gns8uvCOv2T9ttnD-UmuxCmZKDGIWak_roM#bib0090">https://www.sciencedirect.com/science/article/pii/S1369703X16301152?casa_token=nv3pO9UHxvYAAAAA:9kA9Wc27RzRSbEKsF5uC_q44f_6Z-g4MGT-T63K7gns8uvCOv2T9ttnD-UmuxCmZKDGIWak_roM#bib0090</a></p>
+                <p class="des-ref-paragraph" id="[20]">[18] Farb, Joshua N. ; Morrical, Scott W. (2009). Role of Allosteric Switch Residue Histidine 195 in Maintaining Active-Site Asymmetry in Presynaptic Filaments of Bacteriophage T4 UvsX Recombinase. Journal of molecular biology, 2009, Vol.385 (2), p.393-404 <a href="https://www.sciencedirect.com/science/article/pii/S0022283608014125">https://www.sciencedirect.com/science/article/pii/S0022283608014125</a></p>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

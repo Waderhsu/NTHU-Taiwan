@@ -1,0 +1,1573 @@
+{% extends "layout.html" %}
+
+{% block title %}Model{% endblock %}
+
+{% block page_content %}
+</script>
+<style>
+    .slide--1__darkbg {
+        left: 0%;
+        background: url("https://static.igem.wiki/teams/4636/wiki/design.jpg") center center no-repeat;
+        background-size: cover;
+        background-position: 0px center, 0px center;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    .slide--1__letter {
+        background: url("https://static.igem.wiki/teams/4636/wiki/design.jpg") center center no-repeat;
+        background-position: 0px center, 0px center;
+        background-size: cover;
+    }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        const $cont = $('.cont');
+        const $slider = $('.slider');
+        const $nav = $('.nav');
+        const winW = $(window).width();
+        const animSpd = 750; // Change also in CSS
+        const distOfLetGo = winW * 0.2;
+        let curSlide = 1;
+        let animation = false;
+        let autoScrollVar = false;
+        let diff = 0;
+
+        // Generating slides
+        let arrCities = ['Model', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+        let numOfCities = arrCities.length;
+        let arrCitiesDivided = [];
+
+        arrCities.map((city) => {
+            let length = city.length;
+            let letters = Math.floor(length / 4);
+            let exp = new RegExp(".{1," + letters + "}", "g");
+
+            arrCitiesDivided.push(city.match(exp));
+        });
+
+        let generateSlide = function (city) {
+            let frag1 = $(document.createDocumentFragment());
+            let frag2 = $(document.createDocumentFragment());
+            const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+            const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+            const $slide =
+                $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                    <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                    <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                </div>`);
+
+            const letter =
+                $(`<div class="slide__letter slide--${numSlide}__letter">
+                    ${firstLetter}
+                </div>`);
+            /*
+                            for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                                const text =
+                                    $(`<div class="slide__text slide__text--${i + 1}">
+                                        ${arrCitiesDivided[city][i]}
+                                    </div>`);
+                                frag1.append(text);
+                            }
+            */
+            const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+            frag2.append(navSlide);
+            $nav.append(frag2);
+
+            $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+            $slider.append($slide);
+
+            if (arrCities[city].length <= 4) {
+                $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+            }
+        };
+
+        for (let i = 0, length = numOfCities; i < length; i++) {
+            generateSlide(i);
+        }
+
+        $('.nav__slide--1').addClass('nav-active');
+
+        // Navigation
+        function bullets(dir) {
+            $('.nav__slide--' + curSlide).removeClass('nav-active');
+            $('.nav__slide--' + dir).addClass('nav-active');
+        }
+
+        function timeout() {
+            animation = true;
+        }
+
+        function pagination(direction) {
+            animation = true;
+            diff = 0;
+            $slider.addClass('animation');
+            $slider.css({
+                'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__darkbg').css({
+                'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+            });
+
+            $slider.find('.slide__letter').css({
+                'transform': 'translate3d(0, 0, 0)',
+            });
+
+            $slider.find('.slide__text').css({
+                'transform': 'translate3d(0, 0, 0)'
+            });
+        }
+
+        function navigateRight() {
+            if (!autoScrollVar) return;
+            if (curSlide >= numOfCities) return;
+            pagination(0);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide + 1);
+            curSlide++;
+        }
+
+        function navigateLeft() {
+            if (curSlide <= 1) return;
+            pagination(2);
+            setTimeout(timeout, animSpd);
+            bullets(curSlide - 1);
+            curSlide--;
+        }
+
+        function toDefault() {
+            pagination(1);
+            setTimeout(timeout, animSpd);
+        }
+
+
+
+        $(document).on('mouseup touchend', function (e) {
+            $(document).off('mousemove touchmove');
+
+            if (animation) return;
+
+            if (diff >= distOfLetGo) {
+                toDefault();
+            } else if (diff <= -distOfLetGo) {
+                toDefault();
+            } else {
+                toDefault();
+            }
+        });
+
+        $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+            let target = +$(this).attr('data-target');
+            bullets(target);
+            curSlide = target;
+            pagination(1);
+        });
+
+        $(document).on('click', '.side-nav', function () {
+            let target = $(this).attr('data-target');
+
+            if (target === 'right') navigateRight();
+            if (target === 'left') navigateLeft();
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 39) navigateRight();
+            if (e.which === 37) navigateLeft();
+        });
+
+        $(document).on('mousewheel DOMMouseScroll', function (e) {
+            if (animation) return;
+            let delta = e.originalEvent.wheelDelta;
+
+            if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+            if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+    const carouselText = [
+        { text: "In simulation, we shape the future we envision.", color: "rgba(255, 255, 255, 0.679)" },
+
+    ]
+
+    $(document).ready(async function () {
+        carousel(carouselText, "#feature-text")
+    });
+
+    async function typeSentence(sentence, eleRef, delay = 100) {
+        const letters = sentence.split("");
+        let i = 0;
+        while (i < letters.length) {
+            await waitForMs(delay);
+            $(eleRef).append(letters[i]);
+            i++;
+        }
+    }
+
+
+    async function deleteSentence(eleRef) {
+        const sentence = $(eleRef).html();
+        const letters = sentence.split("");
+        let i = 0;
+        while (letters.length > 0) {
+            await waitForMs(1000000);
+            letters.pop();
+            $(eleRef).html(letters.join(""));
+        }
+    }
+
+    async function carousel(carouselList, eleRef) {
+        var i = 0;
+        while (true) {
+            updateFontColor(eleRef, carouselList[i].color)
+            await typeSentence(carouselList[i].text, eleRef);
+            await waitForMs(1500);
+            await deleteSentence(eleRef);
+            await waitForMs(500);
+            i++
+            if (i >= carouselList.length) { i = 0; }
+        }
+    }
+
+    function updateFontColor(eleRef, color) {
+        $(eleRef).css('color', color);
+    }
+
+    function waitForMs(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+</script>
+<script>
+    $(function () {
+        $('.scroll-down').click(function () {
+            $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+            return false;
+        });
+    });
+</script>
+
+<div id="content">
+    <section class="banner-container">
+        <div class="cont">
+            <div class="slider"></div>
+        </div>
+        <div class="typing-container" style="margin-top: -250px;
+        color: aliceblue;
+        /* font-style: unset; */
+        font-size: xx-large;
+        font-weight: 800;
+        letter-spacing: 8px;
+        font-size: 140px;
+        font-family: inherit;">
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+            <span class="input-cursor"></span>
+        </div>
+        <div class="typing-container">
+            Model
+            <span id="sentence" class="sentence"></span>
+            <span id="feature-text"
+                style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+        </div>
+        <a href="#" class="scroll-down" address="true"></a>
+    </section>
+    <section class="content">
+        <div class="main-left">
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#Introduction" class="sidebaritem">Introduction</a></li>
+                    <li><a href="#Stability" class="sidebaritem">Stability</a></li>
+                    <li><a href="#RT-RPA" class="sidebaritem">RT-RPA</a></li>
+                    <li><a href="#RCA" class="sidebaritem">RCA</a></li>
+                    <li><a href="#Color prediction" class="sidebaritem">Color prediction</a></li>
+                    <li><a href="#Diffusion" class="sidebaritem">Diffusion</a></li>
+                    <li><a href="#PCRD" class="sidebaritem">PCRD</a></li>
+                    <li><a href="#Reference" class="sidebaritem">Reference</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-right" id="effort">
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Introduction">Introduction</h1>
+                <button class="expandbutton" id="expandbutton"></button>
+            </div>
+            <div id="article1">
+                <p class="des-paragraph fade_from_right">
+                    We are dedicated to develop a model
+                    specific to our project, allowing the wet lab to adjust experimental conditions based on
+                    predictions generated by the model. Our model primarily consists of two main components, each
+                    further divided into four parts: RT-RPA, RCA, PCRD, and the gold nanoparticle diffusion
+                    model. We are concurrently developing all four models and will subsequently combine the RT-RPA
+                    model with the PCRD model and the RCA model with the gold nanoparticle diffusion model,
+                    resulting in the comprehensive models.
+                </p>
+            </div>
+            <script>
+                const expandbutton = document.getElementById("expandbutton");
+                const article = document.getElementById("article1");
+
+                expandbutton.addEventListener("click", function () {
+                    if (article.style.display == "block") {
+                        article.style.display = "none";
+                        expandbutton.style.transform = "rotate(-180deg)";
+                    } else {
+                        article.style.display = "block";
+                        expandbutton.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Stability">Stability</h1>
+                <button class="expandbutton" id="expandbutton2"></button>
+            </div>
+            <div id="article2">
+                <p class="des-paragraph fade_from_right">
+                    Before entering the model part, we
+                    first need to analyze the stability of linear and circular structure by diving in the free
+                    energy aspect.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Purposes</h1>
+                <p class="des-paragraph fade_from_right">
+                    By comparing the free energy of
+                    linear and circular RNA, we can know the stability of two different structures. Furthermore, we
+                    can know the most ideal target to build up the further investigation.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Methods</h1>
+                <p class="des-paragraph fade_from_right">
+                    We use the RNAeval Webserver in the
+                    Vienna RNA to estimate the free energy from the known sequences. In addition, we also separate
+                    the linear and the circular structure by using the advanced options in it. We list out the
+                    result as follows:
+                </p>
+                <table>
+                    <tr>
+                        <th colspan="2"> </th>
+                        <th>hsa_circ_0101802</th>
+                        <th>hsa_circ_0004771</th>
+                    </tr>
+                    <tr>
+                        <td>Linear</td>
+                        <td>Circular</td>
+                        <td>Linear</td>
+                        <td>Circular</td>
+                    </tr>
+                    <tr>
+                        <td>-51.4</td>
+                        <td>-43.3</td>
+                        <td>-42.6</td>
+                        <td>-37.2</td>
+                    </tr>
+                </table>
+                <p class="des-figure">
+                    Sheet 1. Free energy of different sequences and structures (Units: kcal/mol)
+                </p>
+                <h1 class="des-heading2" id="Detection system for circRNA">
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>In addition, the structure of each is given as follows:
+                </h1>
+                <table>
+                    <tr>
+                        <th rowspan="2">hsa_circ_0101802</th>
+                        <th>Linear</th>
+                        <th>Circular</th>
+                    </tr>
+                    <tr>
+                        <td><img src="https://static.igem.wiki/teams/4636/wiki/model/sheet-2-0101802-linear.png" style="width: 70%;">
+                        </td>
+                        <td><img src="https://static.igem.wiki/teams/4636/wiki/model/sheet-2-0101802-circular.png" style="width: 70%;">
+                        </td>
+                    </tr>
+                </table>
+                <p class="des-paragraph fade_from_right">
+                    We have designed two methods for
+                    detecting the target cicRNAs: “Gold nanoparticle-based colorimetric assay” and “lateral flow
+                    rapid screening assay”.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/description/figure-1.jpg">
+                </div>
+                <p class="des-figure">
+                    Sheet 2. The structure of hsa_circ_0101802
+                </p>
+                <table>
+                    <tr>
+                        <th rowspan="2">hsa_circ_0004771</th>
+                        <th>Linear</th>
+                        <th>Circular</th>
+                    </tr>
+                    <tr>
+                        <td><img src="https://static.igem.wiki/teams/4636/wiki/model/sheet-3-0004771-linear.png" style="width: 70%;">
+                        </td>
+                        <td><img src="https://static.igem.wiki/teams/4636/wiki/model/sheet-3-0004771-circular.png" style="width: 70%;">
+                        </td>
+                    </tr>
+                </table>
+                <p class="des-figure">
+                    Sheet 3. The structure of hsa_circ_0004771
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Results</h1>
+                <p class="des-paragraph fade_from_right">
+                    Based on the aforementioned, we can
+                    know that the free energy of two different structures do not have significant difference, which
+                    mean they are both stable in the free energy aspect. By taking the features of the 3 end and the
+                    5 end will not easily be separated in the circular form, we choose circular RNA as our target to
+                    use in the following investigation.
+                </p>
+            </div>
+            <script>
+                const expandbutton2 = document.getElementById("expandbutton2");
+                const article2 = document.getElementById("article2");
+
+                expandbutton2.addEventListener("click", function () {
+                    if (article2.style.display == "block") {
+                        article2.style.display = "none";
+                        expandbutton2.style.transform = "rotate(-180deg)";
+                    } else {
+                        article2.style.display = "block";
+                        expandbutton2.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="RT-RPA">RT-RPA</h1>
+                <button class="expandbutton" id="expandbutton3"></button>
+            </div>
+            <div id="article3">
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Purpose</h1>
+                <p class="des-paragraph fade_from_right">
+                    The establishment of the RT-RPA
+                    model is to assist Wetlab in determining whether the current experimental design can yield the
+                    expected results through simulation before the actual experiment.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Assumptions</h1>
+                <p class="des-paragraph fade_from_right">
+                    <b>a.</b> UvsY forms a stable hexamer and binds to UvsX prior to the start of the test.<br>
+                    <b>b.</b> Gp32 binding must proceed with recombinase binding.<br>
+                    <b>c.</b> all primers exist as this complex at t= 0s with negligible error.<br>
+                    <b>d.</b> perfect symmetry between the reactions involving forward and reverse primers.<br>
+                    <b>e.</b> fluid is well mixed and all reactions are kinetically controlled.<br>
+                    <b>f.</b> RPA is a 50 ul reaction
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Equation</h1>
+                <p class="des-paragraph fade_from_right">
+                    We use SimBiology to construct the
+                    RT-RPA model. Therefore, we need to make equations for the crucial reactions in RT-RPA and input
+                    them into SimBiology. In order to construct the model more effectively, we divide the RT-RPA
+                    process into several steps. Firstly, we need to make an equation for the binding of the forward
+                    primer (F) and the Single-stranded binding protein (Gp32), here represented by G.
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b>G + F ⇆ FG (1) </b>
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    Next, the recombinase complex (UvsX.UvsY complex), here represented by R. Displacing Gp32 from
+                    the primer in a four-step process:
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> FG + R ⇆ FGR ' (2a) </b>
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> FGR ' → FGRi + G (2b) </b>
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> FGRi + R ⇆ FGRc (2c) </b>
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> FGRc → FRc + G (2d) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Once recombinase has bound a
+                    primer, it seeks out homology in the DNA template. It then inserts
+                    the primer into the DNA and dissociates from both by hydrolyzing ATP.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In Reaction (3), the recombinase
+                    filament escorts the primer to the region of homology in the DNA template, here represented by
+                    D.
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> FRc + D ⇆ FRcD (3) </b>
+                </p>
+
+                <p class="des-paragraph fade_from_right">
+                    Next, hydrolysis of ATP drives the
+                    dissociation of the recombinase from the primer/DNA complex, FD. According to the paper, we find
+                    that UvsX has two modes of ATP hydrolysis. It can hydrolyze ATP to either AMP or ADP. So we use two
+                    equations for two modes of ATP hydrolysis.
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> FRcD + ATP -> FD + R + AMP + PPi (4a) </b>
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> FRcD + ATP -> FD + ADP + H3PO4 (4b) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    After the yielding of the
+                    primer/DNA complex, the Polymerase can bind reversibly to the DNA primer complexes.
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> FD + P ⇆ PFD (5) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Once the tertiary complex has been
+                    formed polymerase can extend the primer to form a new strand of DNA using nucleotides (dNTPs).
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> PFD + dNTPs → P + PPi + D (6) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Up to this point, we have
+                    demonstrated how we constructed the RPA model. Now, by incorporating the step of using reverse
+                    transcriptase to reverse transcribe circRNA into DNA templates, we can further refine it into
+                    the RT-RPA model.
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> CircRNA + E → D (7) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    This is what the complete RT-RPA model looks like in simbiology:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/rt-rpa-model/rt-rpa-model/rtpra-1.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 1. RT-RPA reaction pathway in MATLAB Simbiology
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Parameter</h1>
+                <table>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Reaction</th>
+                        <th>Value</th>
+                        <th>Unit</th>
+                    </tr>
+                    <tr>
+                        <td>k1f</td>
+                        <td>Forward rate constant for (1)</td>
+                        <td>500,000,000</td>
+                        <td>1/(molarity*second)</td>
+                    </tr>
+                    <tr>
+                        <td>k1r</td>
+                        <td>Reverse rate constant for (1)</td>
+                        <td>5,000</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>keq2af</td>
+                        <td>Forward rate constant for (2a)</td>
+                        <td>60,460,000</td>
+                        <td>1/(molarity*second)</td>
+                    </tr>
+                    <tr>
+                        <td>keq2ar</td>
+                        <td>Reverse rate constant for (2a)</td>
+                        <td>1.47</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>k2b</td>
+                        <td>Rate constant for (2b)</td>
+                        <td>0.047</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>keq2cf</td>
+                        <td>Forward rate constant for (2c)</td>
+                        <td>60,460,000</td>
+                        <td>1/(molarity*second)</td>
+                    </tr>
+                    <tr>
+                        <td>keq2cr</td>
+                        <td>Reverse rate constant for (2c)</td>
+                        <td>33</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>k2d</td>
+                        <td>Rate constant for (2d)</td>
+                        <td>0.0046</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>k3f</td>
+                        <td>Forward rate constant for (3)</td>
+                        <td>60,460,000</td>
+                        <td>1/(molarity*second)</td>
+                    </tr>
+                    <tr>
+                        <td>k3r</td>
+                        <td>Reverse rate constant for (3)</td>
+                        <td>59.37</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>k4acat</td>
+                        <td>Forward rate constant for (4a)</td>
+                        <td>4.22</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>k4bcat</td>
+                        <td>Forward rate constant for (4b)</td>
+                        <td>8.32</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>k5f</td>
+                        <td>Forward rate constant for (5)</td>
+                        <td>12,000,000</td>
+                        <td>1/(molarity*second)</td>
+                    </tr>
+                    <tr>
+                        <td>k5r</td>
+                        <td>Reverse rate constant for (5)</td>
+                        <td>0.06</td>
+                        <td>1/second</td>
+                    </tr>
+                    <tr>
+                        <td>k6f</td>
+                        <td>Forward rate constant for (6)</td>
+                        <td>87</td>
+                        <td>1/second</td>
+                    </tr>
+                </table>
+                <p class="des-figure">
+                    Sheet 4. the parameter of RT-RPA model
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Initial Values of Species</h1>
+                <table>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Species</th>
+                        <th>Value</th>
+                        <th>Unit</th>
+                    </tr>
+                    <tr>
+                        <td>R</td>
+                        <td>Recombinase complex (UvsX.6*UvsY)</td>
+                        <td>5.9e-6</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>F</td>
+                        <td>Forward primer</td>
+                        <td>4.8e-7</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>G</td>
+                        <td>Single stranded DNA binding protein (Gp32)</td>
+                        <td>9.4e-7</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>FG</td>
+                        <td>Forward primer/Gp32 complex</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>FGR'</td>
+                        <td>Unstable Forward primer/Gp32/ Recombinase complex</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>FGRi</td>
+                        <td>Forward primer/Gp32/ isolated Recombinase complex</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>FGRc</td>
+                        <td>Forward primer/Gp32/ cluster Recombinase complex</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>FRc</td>
+                        <td>Forward primer/ cluster Recombinase complex</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>FRcD</td>
+                        <td>Forward primer/ cluster Recombinase/DNA template complex</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>D</td>
+                        <td>DNA template</td>
+                        <td>1.7391e-8</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>FD</td>
+                        <td>Forward primer/DNA complex</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>PFD</td>
+                        <td>Polymerase/forward primer/DNA complex</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>PPi</td>
+                        <td>Pyrophosphate</td>
+                        <td>0</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>P</td>
+                        <td>Polymerase</td>
+                        <td>1.34e-6</td>
+                        <td>molarity</td>
+                    </tr>
+                    <tr>
+                        <td>dNTPs</td>
+                        <td>Nucleotides</td>
+                        <td>2.00e-4</td>
+                        <td>molarity</td>
+                    </tr>
+                </table>
+                <p class="des-figure">
+                    Sheet 5. the initial value of RT-RPA model
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Result</h1>
+                <p class="des-paragraph fade_from_right">
+                    Due to the lack of reaction
+                    constants for reverse transcriptase, we are currently only able to
+                    simulate a portion of the RPA in the RT-RPA model. We use the initial values provided by Wetlab
+                    for simulation and set the reaction time to 20 minutes. The simulation results show the quantity
+                    of cDNA rapidly increases in the early stages and levels off in the later stages of the
+                    reaction, which is consistent with the result in the paper. Therefore, we proceed to conduct
+                    further simulations.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/rt-rpa-model/rt-rpa-model/rtrpa-2.jpg" style="width: 40%;">
+                </div>
+                <p class="des-figure">
+                    Figure 2. Simulation Results of cDNA after a 20 minutes RPA Reaction
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    According to the paper, similar
+                    concentrations should be reached at the same reaction time, even
+                    if the initial values of cDNA are different. Therefore, we set the quantity of cDNA to 1/10 and
+                    1/100 of the original for simulations. The simulation results indicate that, even with different
+                    initial cDNA amounts, similar concentrations are reached after 20 minutes of reaction. This not
+                    only reaffirms the result in the paper but also instills our confidence in the accuracy of this
+                    model.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/rt-rpa-model/rt-rpa-model/rtrpa-3.jpg" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 3. Simulation Results of different initial values of cDNA after a 20 minutes RPA
+                    Reaction
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    After gaining confidence in this
+                    model, we want to apply this model in practical scenarios.
+                    Wetlab suggests that the quantity of the forward primer may influence the lower limit of the
+                    initial values of cDNA. Therefore, we decided to use this model to verify this proposition,
+                    setting the quantity of the forward primer to 1/10 and the reaction time to 40 minutes for
+                    simulations. The simulation results indicate that when the quantity of the forward primer is
+                    reduced to 1/10 of the original, the lower limit of the initial values of cDNA changes from
+                    10^-33 to 10^-15, confirming our proposition.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/rt-rpa-model/rt-rpa-model/rtrpa-4.jpg" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 4. simulation results of cDNA after a 40 minutes RPA reaction when the forward primer
+                    quantity is 4.8e-7
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/rt-rpa-model/rt-rpa-model/rtrpa-5.jpg" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 5. simulation results of cDNA after a 40 minutes RPA reaction when the forward primer
+                    quantity is 4.8e-8
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Conclusion</h1>
+                <p class="des-paragraph fade_from_right">
+                    Although the lack of reaction
+                    constants for reverse transcriptase restricts our simulations to only a portion of the RPA in
+                    the RT-RPA model, through the three simulations mentioned above, we have gained considerable
+                    confidence in the RT-RPA model. In the future, we are committed to obtaining the reaction
+                    constants for reverse transcriptase through experiments to complete the RT-RPA model. After
+                    confirming its accuracy, we will integrate it with the PCRD model.
+                </p>
+                
+            </div>
+            <script>
+                const expandbutton3 = document.getElementById("expandbutton3");
+                const article3 = document.getElementById("article3");
+
+                expandbutton3.addEventListener("click", function () {
+                    if (article3.style.display == "block") {
+                        article3.style.display = "none";
+                        expandbutton3.style.transform = "rotate(-180deg)";
+                    } else {
+                        article3.style.display = "block";
+                        expandbutton3.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="RCA">RCA</h1>
+                <button class="expandbutton" id="expandbutton4"></button>
+            </div>
+            <div id="article4">
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Purpose</h1>
+                <p class="des-paragraph fade_from_right">
+                    The establishment of the RCA
+                    model is to assist Wetlab in determining whether the current experimental design can yield the
+                    expected results through simulation before the actual experiment.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Assumptions</h1>
+                <p class="des-paragraph fade_from_right">
+                    a. The degradation rate of cDNA is negligible.
+                    b. Once the probe binds to cDNA, it won 't dissociate.
+                    c. The ratio of inner binding sites to outer binding sites is 1:1
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    We use SimBiology to construct the RCA model. Therefore,
+                    we need to make equations for the crucial reactions in RCA and input them into SimBiology. In
+                    order to construct the model more effectively, we divide the RCA process into several steps.
+                    First, We need to make an equation for the reverse transcription of circRNA (C) to cDNA (D) for
+                    Protoscript II(E).
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> C+E→D (1) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Next, the ssDNA probe(D) on the
+                    gold nanoparticles binds to the binding sites on cDNA. According to the paper, we have
+                    determined that the hybridization of ssDNA is a second-order reaction. Therefore, we can
+                    construct the following equation:
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> P+D→H (2) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    However upon further investigation
+                    of other papers, we discovered that the hybridization of ssDNA is influenced by steric
+                    hindrance, and the reaction constants can vary up to 42 times. Therefore, we have divided
+                    equation (2) into (2a) and (2b) to distinguish between outer binding sites and inner binding
+                    sites.
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> Probe+D(o) →H (2a) </b>
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> Probe+D(i) →H (2b) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Finally, we need to consider the
+                    dissociation of cDNA and circRNA, leading to the following equation:
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> C→degradation (3) </b>
+                </p>
+                <p class="des-paragraph fade_from_right" style="text-align: center;">
+                    <b> D→degradation (4) </b>
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    This is what the complete RCA model look like in simbiology:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/rt-rpa-model/rtrca-model/rtrca-1.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 6. RCA reaction pathway in MATLAB Simbiology
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Result</h1>
+                <p class="des-paragraph fade_from_right">
+                    Due to a lack of crucial parameters
+                    and initial value for some reactants, we can only present our ordinary differential equations
+                    (ODEs) at this point. However, once we collect the relevant data and parameters we need in the
+                    future, we will execute our model and complement it with experiments to validate its accuracy.
+
+                </p>
+                <p class="des-paragraph fade_from_right">The ODEs of RCA:</p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/model/11111.png" style="width: 50%;">
+                </div>
+                
+            </div>
+            <script>
+                const expandbutton4 = document.getElementById("expandbutton4");
+                const article4 = document.getElementById("article4");
+
+                expandbutton4.addEventListener("click", function () {
+                    if (article4.style.display == "block") {
+                        article4.style.display = "none";
+                        expandbutton4.style.transform = "rotate(-180deg)";
+                    } else {
+                        article4.style.display = "block";
+                        expandbutton4.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Color prediction">Color prediction</h1>
+                <button class="expandbutton" id="expandbutton5"></button>
+            </div>
+            <div id="article5">
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Purposes</h1>
+                <p class="des-paragraph fade_from_right">
+                    As to predict the color and further diagnosis the symptoms, we have to analyze the reason of
+                    changing color and to quantify the changing extent.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Assumptions</h1>
+                <p class="des-paragraph fade_from_right">
+                    a. Every particle is a sphere
+                    <br>b. Every particle has same magnitude against each other
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Working principles</h1>
+                <p class="des-paragraph fade_from_right">
+                    The extent of changing color is determined by coupling
+                    intensity between particles, which can be quantified as:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/model/color-change-equation.png" style="width: 20%;">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                    where the schematic diagram can be given as:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-7-schematic-diagram-of-nano-gold-particles.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 7. Schematic diagram of nano gold particles
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Results</h1>
+                <p class="des-paragraph fade_from_right">
+                    Before calculation, based on the refer study, the given
+                    equation only applied when the radius of the particle is 2 to 27nm. Since that the diameter of
+                    the nano gold particle is 13nm and the absorption wavelength is 520nm, we can know that the
+                    possible color change is:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-8-changing-color-range.png" alt="Fig2"
+                        id="Fig2">
+                </div>
+                <p class="des-figure">
+                    Figure 8. Changing color range
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    However, the connection of cDNA will increase the magnitude
+                    of the particle, which also change the absorption wavelength, the more it connects the more the
+                    wavelength will increase. Hence, there may be some deviation between the prediction and the
+                    actual condition.
+                </p>
+            </div>
+            <script>
+                const expandbutton5 = document.getElementById("expandbutton5");
+                const article5 = document.getElementById("article5");
+
+                expandbutton5.addEventListener("click", function () {
+                    if (article5.style.display == "block") {
+                        article5.style.display = "none";
+                        expandbutton5.style.transform = "rotate(-180deg)";
+                    } else {
+                        article5.style.display = "block";
+                        expandbutton5.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="Diffusion">Diffusion</h1>
+                <button class="expandbutton" id="expandbutton6"></button>
+            </div>
+            <div id="article6">
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Purposes</h1>
+                <p class="des-paragraph fade_from_right">
+                    In order to simulate the diffusion of nano gold complexes
+                    or even further predict the color change, we use the method below to observe how does the
+                    particles diffuse , change under different concentration and the whole diffusion process, etc.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Assumptions</h1>
+                <p class="des-paragraph fade_from_right">
+                    a. Particles are placed in the middle of Eppendorf <br>
+                    b. No pressure difference in both ends<br>
+                    c. Each particle occupy same volume <br>
+                    d. cDNA will 100% connect to particles<br>
+                    e. Turbulent kinetic energy is proportional to the amount of particles
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Method</h1>
+                <p class="des-paragraph fade_from_right">
+                    We use the function in Simscale to simulate the particles
+                    diffusion in the liquid under equilibrium flow condition. To have a precise simulation, we first
+                    draw the geometric characteristics in CAD to show that the diffusion only happen in a small
+                    portion of Eppendorf since the liquid volume is quite small.
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-9-geometric-illustration-of-small-portion-of-eppendorf.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 9. Geometric illustration of small portion of Eppendorf
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    We then input the necessary physics variables to retrieve
+                    the simulation results, the variables are listed as follows:
+                </p>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Notation</th>
+                        <th>Value</th>
+                        <th>Units</th>
+                    </tr>
+                    <tr>
+                        <td>Kinematic viscosity</td>
+                        <td>v</td>
+                        <td>9.338 × 10<sup>-7</sup></td>
+                        <td>m<sup>2</sup>/s</td>
+                    </tr>
+                    <tr>
+                        <td>Density</td>
+                        <td>ρ</td>
+                        <td>1.0</td>
+                        <td>kg/m<sup>3</sup></td>
+                    </tr>
+                    <tr>
+                        <td>Velocity inlet</td>
+                        <td>Vz</td>
+                        <td>-0.01t + 0.01</td>
+                        <td>m/s</td>
+                    </tr>
+                    <tr>
+                        <td>Velocity outlet</td>
+                        <td>Uz</td>
+                        <td>0</td>
+                        <td>m/s</td>
+                    </tr>
+                    <tr>
+                        <td>Pressure inlet</td>
+                        <td>P</td>
+                        <td>1.013 × 10<sup>5</sup></td>
+                        <td>Pa</td>
+                    </tr>
+                </table>
+                <p class="des-figure">
+                    Sheet 6. Physics variables in Simscale simulation
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Since the concentration difference of the two ends may lead
+                    to the diffusion be influenced by osmotic pressure, therefore we take that into consideration
+                    and have the further derivation:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/model/osmotic-pressure.png" style="width: 30%;">
+                </div>
+                <p class="des-paragraph fade_from_right">
+                    From the given equations, we can know that the relationship
+                    between velocity is proportional to the coefficient of time. Base on the input value and the
+                    geometric characteristics, we can run the simulation of diffusion as follows:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/simscale-diffusion.gif">
+                </div>
+                <p class="des-figure">
+                    Animation 1. Diffusion process of the particles
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In addition, we can list out the change of value along with time:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-10-physics-value-change-along-with-time.jpeg" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 10. Physics value change along with time
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    From the animation above, we can take a closer look at the cutting plane to analyze the
+                    distribution of the particles by the extent of turbulent kinetic energy. The graph is given as:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-11-diffusion-under-time-depending-velocity.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 11. Diffusion under time-depending velocity
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    For the distance calculation, we assume that every particle is homogeneously distributed in the
+                    liquid, thus occupy for the same volume of the liquid. On the other hand, since the turbulent
+                    kinetic energy is proportional to the amount of particles, we then use the turbulent energy of
+                    each data to represent the amount of particles account for every part of the area. Furthermore,
+                    we can also calculate the volume of the area by using the amount of particles. In the end, we
+                    assume that every area is a cubic, which the volume is side length cubed.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    From the previous description, we can set up the maximum and minimum distance of the particles
+                    under different concentration in the below graph:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-12-the-trend-of-distance-under-different-concentration.png" style="width: 80%;">
+                </div>
+                <p class="des-figure">
+                    Figure 12. The trend of distance under different concentration
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    From Figure 10., we can know that when the concentration increase, then the amount of bonding
+                    cDNA will increase. Therefore, we can know that when the particles connect to more cDNA, the
+                    distance between particles will increase, which makes the particles in the liquid become
+                    relatively not segregated. Overall, it further indicates that when the amount of virus increase,
+                    base on the condition of relatively not segregated, the color will become red. The result fit
+                    with the experiment, vice versa.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Moreover, the difference between the given concentration are given as the below animations:
+                </p>
+                <table>
+                    <tr>
+                        <td>0.1</td>
+                        <td>1</td>
+                        <td>10</td>
+                        <td>100</td>
+                    </tr>
+                    <tr>
+                        <td><img src="https://static.igem.wiki/teams/4636/wiki/model/0-1t-cut.gif" alt=""
+                                style="width: 100%;"></td>
+                        <td><img src="https://static.igem.wiki/teams/4636/wiki/model/1t-cut.gif" alt="" style="width:100%;">
+                        </td>
+                        <td><img src="https://static.igem.wiki/teams/4636/wiki/model/10t-cut.gif" alt=""
+                                style="width: 100%;"></td>
+                        <td><img src="https://static.igem.wiki/teams/4636/wiki/model/10t-cut.gif" alt=""
+                                style="width: 100%;"></td>
+                    </tr>
+                </table>
+                <p class="des-figure">
+                    Animation 2. Diffusion under different concentration
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Discussion</h1>
+                <p class="des-paragraph fade_from_right">
+                    The reason why the distance is not 27nm can be contributed to the following reasons:
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    1. Simscale can only one diffusion repeatedly, which differs from the actual condition that the
+                    diffuse last for a period of time.
+                    <br>2. We only simulate one fluid which cannot consider the other that also contributed to the
+                    diffusion condition.
+                    <br>3. The gravity is neglected, which may influence the diffusion along y axis.
+                    <br>4. The area is not fully occupied by the particles.
+                    <br>5. The boundary condition of the fluid will influence the particles that near the boundary.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Improvement</h1>
+                <p class="des-paragraph fade_from_right">
+                    In order to make the diffusion model able to determine which part of the fluid may have color
+                    after diffusion, we may use the solid-fluid interaction module in Comsol to simulate the whole
+                    procedure and further determine the distance between particles.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Geometric characteristics:
+                </p>
+                <table>
+                    <tr>
+                        <th>Shape</th>
+                        <th>Upper radius (m)</th>
+                        <th>Lower radius (m)</th>
+                        <th>Height (m)</th>
+                    </tr>
+                    <tr>
+                        <td>Cone</td>
+                        <td>0.025</td>
+                        <td>0.005</td>
+                        <td>0.0279</td>
+                    </tr>
+                </table>
+                <p class="des-figure">
+                    Sheet 7. Geometric characteristics of modeling
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Afterward, we input the above information into Comsol we can know that:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-13-modeling-of-fluid-part-in-the-container.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 13. Modeling of fluid part in the container
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    In the end, we need to input the characteristics of both fluid and the solid to simulate the
+                    diffusion result to attain the distance between every particle.
+                </p>
+            </div>
+            <script>
+                const expandbutton6 = document.getElementById("expandbutton6");
+                const article6 = document.getElementById("article6");
+
+                expandbutton6.addEventListener("click", function () {
+                    if (article6.style.display == "block") {
+                        article6.style.display = "none";
+                        expandbutton6.style.transform = "rotate(-180deg)";
+                    } else {
+                        article6.style.display = "block";
+                        expandbutton6.style.transform = "rotate(-360deg)";
+                    }
+                });
+            </script>
+
+            <div class="headingbox">
+                <h1 class="des-heading1" id="PCRD">PCRD</h1>
+                <button class="expandbutton" id="expandbutton7"></button>
+            </div>
+            <div id="article7">
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Purposes</h1>
+                <p class="des-paragraph fade_from_right">
+                    To understand how each parameter affects the signal at the test line and further optimize the
+                    design computationally, we design a Later Flow Assay model. This model is used in iGEM team
+                    Rochester(2020), which adapted from the model created by Liu et al (2017). In addition, since we
+                    have two test lines and several different ingredients in our experiment, we add a factor of the
+                    composition of the buffer to determine the following procedures. We also add the RT-RPA model
+                    and combine it with PCRD model which generated in Symbiology to make it more workable. More
+                    assumptions are elaborated on as follows:
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Assumptions</h1>
+                <p class="des-paragraph fade_from_right">
+                    a. Analytes and detectors do not react before entering the test line.
+                    <br> b. Kinetic rate constant are constant with concentration, which do not alter with binding.
+                    <br> c. No loss of analytes and detectors during the process.
+                    <br> d. The solution contain analytes, detectors and receptors are well-mixed.
+                    <br> e. One analyte can only be captured by one detector.
+                    <br> f. Two complexes will not influence each other.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Glossary</h1>
+                <table>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Definition</th>
+                        <th>Units</th>
+                    </tr>
+                    <tr>
+                        <td>𝐴_𝐷</td>
+                        <td>Free analyte (DIG) concentration</td>
+                        <td>nM</td>
+                    </tr>
+                    <tr>
+                        <td>𝐴_𝐷0</td>
+                        <td>Initial analyte concentration (DIG) in sample</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>𝐴_𝐹</td>
+                        <td>Free analyte (FAM) concentration</td>
+                        <td>nM</td>
+                    </tr>
+                    <tr>
+                        <td>𝐴_𝐹0</td>
+                        <td>Initial analyte concentration (FAM) in sample</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>𝑃</td>
+                        <td>Free detector concentration</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>𝑃_0</td>
+                        <td>Initial free detector concentration</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>𝑅</td>
+                        <td>Free receptor concentration</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>𝑅_0</td>
+                        <td>Initial free receptor concentration</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>〖𝐷_𝐴〗_𝐷</td>
+                        <td>Analyte (DIG) diffusivity</td>
+                        <td>mm²/s</td>
+                    </tr>
+                    <tr>
+                        <td>〖𝐷_𝐴〗_𝐹</td>
+                        <td>Analyte (FAM) diffusivity</td>
+                        <td>mm²/s</td>
+                    </tr>
+                    <tr>
+                        <td>𝐷_𝑃</td>
+                        <td>Detector diffusivity</td>
+                        <td>mm²/s</td>
+                    </tr>
+                    <tr>
+                        <td>𝑈</td>
+                        <td>Flow rate</td>
+                        <td>mm/s</td>
+                    </tr>
+                    <tr>
+                        <td>𝐿</td>
+                        <td>Length of test strip</td>
+                        <td>mm</td>
+                    </tr>
+                    <tr>
+                        <td>𝑥</td>
+                        <td>Position on test strip</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>𝑡_1</td>
+                        <td>Time since sample entered test line 1</td>
+                        <td>s</td>
+                    </tr>
+                    <tr>
+                        <td>𝑡_2</td>
+                        <td>Time since sample entered test line 2</td>
+                        <td>s</td>
+                    </tr>
+                    <tr>
+                        <td>𝐾_(𝑎_𝐷1 )</td>
+                        <td>Detector-analyte (DIG) association constant</td>
+                        <td>nM⁻¹s⁻¹</td>
+                    </tr>
+                    <tr>
+                        <td>𝐾_(𝑑_𝐷1 )</td>
+                        <td>Detector-analyte (DIG) dissociation constant</td>
+                        <td>s⁻¹</td>
+                    </tr>
+                    <tr>
+                        <td>𝐾_(𝑎_𝐹1 )</td>
+                        <td>Detector-analyte (FAM) association constant</td>
+                        <td>nM⁻¹s⁻¹</td>
+                    </tr>
+                    <tr>
+                        <td>𝐾_(𝑑_𝐹1 )</td>
+                        <td>Detector-analyte (FAM) dissociation constant</td>
+                        <td>s⁻¹</td>
+                    </tr>
+                    <tr>
+                        <td>𝐾_(𝑎_𝐷2 )</td>
+                        <td>Receptor-analyte (DIG) association constant</td>
+                        <td>nM⁻¹s⁻¹</td>
+                    </tr>
+                    <tr>
+                        <td>𝐾_(𝑑_𝐷2 )</td>
+                        <td>Receptor-analyte (DIG) dissociation constant</td>
+                        <td>s⁻¹</td>
+                    </tr>
+                    <tr>
+                        <td>𝐾_(𝑎_𝐹2 )</td>
+                        <td>Receptor-analyte (FAM) association constant</td>
+                        <td>nM⁻¹s⁻¹</td>
+                    </tr>
+                    <tr>
+                        <td>𝐾_(𝑑_𝐹2 )</td>
+                        <td>Receptor-analyte (FAM) dissociation constant</td>
+                        <td>s⁻¹</td>
+                    </tr>
+
+                </table>
+                <p class="des-figure">
+                    Sheet 8. Correspondence of symbol
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Analysis:</h1>
+                <p class="des-paragraph fade_from_right">
+                    Unfortunately, since most of the value cannot be found in any given information, we refer to the
+                    numeric value from the igem 2020 Rochester team. Due to the reason of the related value is
+                    similar to the refer study, we assume that the error range is 10X~0.1X. Then we use this
+                    assumption to do the following sensitivity analysis:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-14-sensitivity-analysis-of-parameters.png">
+                </div>
+                <p class="des-figure">
+                    Figure 14. Sensitivity analysis of parameters
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    To be more specific, the comparison between two major
+                    factors-the forward reaction rate and the backward reaction rate can be elaborated as:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-15-sensitivity-comparison-between-forward-and-backward-reaction-rate.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 15. Sensitivity comparison between forward and backward reaction rate
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Based on the result shows in Figure 15, we can know that the most influential factor in the PCRD
+                    analysis is the forward reaction rate. Hence, we change forward reaction rate and lists below:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-16-rpa-under-different-forward-reaction-rate-no-backward-reaction-rate.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 16. RPA under different forward reaction rate (no backward reaction rate)
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    From the graph we can clearly observe the significant influence of how forward reaction rate
+                    change the RPA along with time. It is clear that the larger the forward reaction rate, the
+                    faster the RPA will increase, which make the target concentration increase and further affect
+                    the whole experiment. Then, we take backward reaction rate into consideration:
+                </p>
+                <div class="containerfig">
+                    <img src="https://static.igem.wiki/teams/4636/wiki/model/figure-17-rpa-under-different-forward-reaction-rate.png" style="width: 50%;">
+                </div>
+                <p class="des-figure">
+                    Figure 17. RPA under different forward reaction rate
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    From the graph we can see that the backward reaction rate has a relatively larger influence on
+                    the case which has smaller forward reaction rate. This is because when the magnitude of two
+                    major factors are close, then it is hard to produce a net reaction which help the experiment can
+                    proceed. Worth mentioning, after reaching the peak value of the RPA, the backward reaction rate
+                    will also decrease the concentration.
+                </p>
+                <h1 class="des-heading2" id="Selection of circRNA"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Analysis:</h1>
+                <p class="des-paragraph fade_from_right">
+                    In order to calculate the concentration of different components along with time, we have to
+                    write out the overall equations as follows. Worth mentioning, the reaction is different than the
+                    normal PCRD model since we have 2 test lines. Therefore, we have to calculate the reactions
+                    twice and assume that the reactants will not react with each other during the flow.
+                </p>
+                <p class="des-note fade_from_right">
+                    *Note: Ka1& Kd1 correspond to the reaction that “+P” ; whereas Ka2& Kd2 correspond to the
+                    reaction that “+R”
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    Similarly, the rate of formation of each is the association of the molecules minus the
+                    dissociation of complexes. Still, we consider two different kinds of conditions since we have 2
+                    test lines.
+                </p>
+                <p class="des-paragraph fade_from_right">
+                    By taking the advection and the diffusion into consideration, the listed partial differentiation
+                    equations can help us to simulate the concentration of each component along with the time
+                    change:
+                </p>
+                <p class="des-note fade_from_right">
+                    **Note: The “A” below include A_D & A_F</p>
+                <p class="des-paragraph fade_from_right">
+                    In conclusion, the 2 test lines will influence each other result. Therefore, during the
+                    calculation we need to add some items in the functions(as the above has shown) to get the final
+                    result. By taking the influence of 2 kinds of component, we can predict the parameters that we
+                    want.
+                </p>
+            </div>
+
+            <div id="Reference">
+                <h1 class="des-ref-heading">Reference</h1>
+                <p class="des-ref-paragraph">
+                    [1] Liu, Jie ; Berger, Christopher L ; Morrical, Scott W (2013). Kinetics of Presynaptic
+                    Filament Assembly in the Presence of Single-Stranded DNA Binding Protein and Recombination
+                    Mediator Protein. Biochemistry (Easton), 2013, Vol.52 (45),
+                    p.7878-7889 
+                    <a href="https://pubs.acs.org/doi/full/10.1021/bi401060p">https://pubs.acs.org/doi/full/10.1021/bi401060p</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [2] Moody, Clint ; Newell, Heather ; Viljoen, Hendrik (2016). A mathematical model of
+                    recombinase polymerase amplification under continuously stirred conditions. Biochemical
+                    engineering journal, 2016, Vol.112,
+                    p.193-201 
+                    <a href="https://www.sciencedirect.com/science/article/abs/pii/S1369703X16301152?casa_token=nv3pO9UHxvYAAAAA:9kA9Wc27RzRSbEKsF5uC_q44f_6Z-g4MGT-T63K7gns8uvCOv2T9ttnD-UmuxCmZKDGIWak_roM#bib0090"></a>https://www.sciencedirect.com/science/article/abs/pii/S1369703X16301152?casa_token=nv3pO9UHxvYAAAAA:9kA9Wc27RzRSbEKsF5uC_q44f_6Z-g4MGT-T63K7gns8uvCOv2T9ttnD-UmuxCmZKDGIWak_roM#bib0090
+                    </a>
+                <p class="des-ref-paragraph">
+                    [3] Farb, Joshua N. ; Morrical, Scott W. (2009). Role of Allosteric Switch Residue Histidine 195
+                    in Maintaining Active-Site Asymmetry in Presynaptic Filaments of Bacteriophage T4 UvsX
+                    Recombinase. Journal of molecular biology, 2009, Vol.385 (2),
+                    p.393-404 
+                    <a href="https://www.sciencedirect.com/science/article/pii/S0022283608014125">https://www.sciencedirect.com/science/article/pii/S0022283608014125</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [4] Takeda, Yoshihiro ; Kondow, Tamotsu ; Mafuné, Fumitaka (2008). Hybridization of ssDNA with a
+                    Complementary DNA Probe Tethered to a Gold NanoparticleEffect of Steric Hindrance Caused by
+                    Conformation. Journal of physical chemistry. C, 2008, Vol.112 (1),
+                    p.89-94 
+                    <a href="https://pubs.acs.org/doi/10.1021/jp0665980">https://pubs.acs.org/doi/10.1021/jp0665980</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [5] Xu, Jun ; Craig, Stephen L (2005). Thermodynamics of DNA Hybridization on Gold
+                    Nanoparticles. Journal of the American Chemical Society, 2005, Vol.127 (38),
+                    p.13227-13231 
+                    <a href="https://pubs.acs.org/doi/full/10.1021/ja052352h">https://pubs.acs.org/doi/full/10.1021/ja052352h</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [6] Chen, Chunlai ; Wang, Wenjuan ; Ge, Jing ; Zhao, Xin Sheng (2009). Kinetics and
+                    thermodynamics of DNA hybridization on gold nanoparticles. Nucleic acids research, 2009, Vol.37
+                    (11), p.3756-3765 
+                    <a href="https://academic.oup.com/nar/article/37/11/3756/1087825?login=false">https://academic.oup.com/nar/article/37/11/3756/1087825?login=false</a>
+                </p>
+
+                <p class="des-ref-paragraph">
+                    [7] Prashant K. Jain, Wenyu Huang, and Mostafa A. El-Sayed (2007). On the Universal Scaling
+                    Behavior of the Distance Decay of Plasmon Coupling in Metal Nanoparticle Pairs: A Plasmon Ruler
+                    Equation. Nano Letters. Vol. 7, No. 7 2080~2088. 
+                    <a href="https://pubs.acs.org/doi/10.1021/nl071008a">https://pubs.acs.org/doi/10.1021/nl071008a</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [8] R. Tsekov, P. Georgiev, S. Simeonova and K. Balashev (2017). Quantifying the Blue Shift in
+                    the Light Absorption of Small Gold Nanoparticles. Sci. 70 (2017) 1237-1246. 
+                    <a href="https://arxiv.org/ftp/arxiv/papers/1702/1702.04513.pdf">https://arxiv.org/ftp/arxiv/papers/1702/1702.04513.pdf</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [9] Wu R, Peng H, Zhu J-J, Jiang L-P and Liu J (2020). Attaching DNA to Gold Nanoparticles With
+                    a Protein Corona. Front. Chem. 8:121. doi: 10.3389/fchem.2020.00121
+                </p>
+                <p class="des-ref-paragraph">
+                    [10] Cheng-Chu Wu (2008). Application of Metal Nanoparticles ( MNPs ) Labeling to DNA Microarray. 
+                    <a href="https://tdr.lib.ntu.edu.tw/bitstream/123456789/8832/1/ntu-98-1.pdf">https://tdr.lib.ntu.edu.tw/bitstream/123456789/8832/1/ntu-98-1.pdf</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [11] Lewis GN (1908). The Osmotic Pressure of Concentrated Solutions and the Laws of the Perfect
+                    Solution. Journal of the American Chemical Society. 
+                    <a href="https://pubs.acs.org/doi/abs/10.1021/ja01947a002">https://pubs.acs.org/doi/abs/10.1021/ja01947a002</a>
+                </p>        
+                <p class="des-ref-paragraph">
+                    [12] Laurence, D. (2002). Applications of Reynolds Averaged Navier Stokes Equations to Industrial
+                    Flows. In van Beeck, J. P. A. J.; Benocci, C. (eds.). Introduction to Turbulence Modelling, Held
+                    March 18-22, 2002 at Von Karman Institute for Fluid Dynamics.
+                </p>    
+                <p class="des-ref-paragraph">
+                    [13] Mott, P. H.; Roland, C. M. (2012). Limits to Poisson's ratio in isotropic materials—general
+                    result for arbitrary deformation. Physica Scripta. Chemistry Division, Naval Research
+                    Laboratory. [doi](https://en.wikipedia.org/wiki/Doi_(identifier)):<a
+                        href="https://doi.org/10.1088/0031-8949/87/05/055404">https://doi.org/10.1088/0031-8949/87/05/055404</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [14] iGEM team Rochester (2020). Available from: 
+                    <a href="https://static.igem.org/mediawiki/2020/3/33/T--Rochester--lfam.pdf">https://static.igem.org/mediawiki/2020/3/33/T--Rochester--lfam.pdf</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [15] Liu, Z., Hu, J., Li, A., Feng, S., Qu, Z., & Xu, F. (2017). The effect of report particle
+                    properties on lateral flow assays: A mathematical model. Sensors and Actuators. B, Chemical, 248,
+                    699-707. 
+                    <a href="doi:10.1016/j.snb.2017.04.024">doi:10.1016/j.snb.2017.04.024</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [16] Berli, C. L. A., & Kler, P. A. (2016). A quantitative model for lateral flow assays.
+                    Microfluidics and Nanofluidics, 20(7), 1-9. 
+                    <a href="doi:10.1007/s10404-016-1771-9">doi:10.1007/s10404-016-1771-9</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [17] Linge S., Langtangen H.P. (2017) Advection-Dominated Equations. In: Finite Difference Computing
+                    with PDEs. Texts in Computational Science and Engineering, vol 16. Springer, Cham. 
+                    <a href="https://doi.org/10.1007/978-3-319-55456-3_4">https://doi.org/10.1007/978-3-319-55456-3_4</a>
+                </p>
+                <p class="des-ref-paragraph">
+                    [18] U.S. Food & Drug Administration (2013). Sylvant Pharmacology Review. Available from: 
+                    <a href="https://www.accessdata.fda.gov/drugsatfda_docs/nda/2014/125496Orig1s000PharmR.pdf">https://www.accessdata.fda.gov/drugsatfda_docs/nda/2014/125496Orig1s000PharmR.pdf</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+</div>
+{% endblock %}

@@ -1,0 +1,663 @@
+{% extends "layout.html" %}
+
+{% block title %}Parts{% endblock %}
+
+{% block page_content %}
+
+<style>
+  .slide--1__darkbg {
+    left: 0%;
+    background: url("https://static.igem.wiki/teams/4636/wiki/parts.jpg") center center no-repeat;
+    background-size: cover;
+    background-position: 0px center, 0px center;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  .slide--1__letter {
+    background: url("https://static.igem.wiki/teams/4636/wiki/parts.jpg") center center no-repeat;
+    background-position: 0px center, 0px center;
+    background-size: cover;
+  }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+  $(document).ready(function () {
+    const $cont = $('.cont');
+    const $slider = $('.slider');
+    const $nav = $('.nav');
+    const winW = $(window).width();
+    const animSpd = 750; // Change also in CSS
+    const distOfLetGo = winW * 0.2;
+    let curSlide = 1;
+    let animation = false;
+    let autoScrollVar = false;
+    let diff = 0;
+
+    // Generating slides
+    let arrCities = [' Parts', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+    let numOfCities = arrCities.length;
+    let arrCitiesDivided = [];
+
+    arrCities.map((city) => {
+      let length = city.length;
+      let letters = Math.floor(length / 4);
+      let exp = new RegExp(".{1," + letters + "}", "g");
+
+      arrCitiesDivided.push(city.match(exp));
+    });
+
+    let generateSlide = function (city) {
+      let frag1 = $(document.createDocumentFragment());
+      let frag2 = $(document.createDocumentFragment());
+      const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+      const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+      const $slide =
+        $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                      <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                      <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                  </div>`);
+
+      const letter =
+        $(`<div class="slide__letter slide--${numSlide}__letter">
+                      ${firstLetter}
+                  </div>`);
+      /*
+                      for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                          const text =
+                              $(`<div class="slide__text slide__text--${i + 1}">
+                                  ${arrCitiesDivided[city][i]}
+                              </div>`);
+                          frag1.append(text);
+                      }
+      */
+      const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+      frag2.append(navSlide);
+      $nav.append(frag2);
+
+      $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+      $slider.append($slide);
+
+      if (arrCities[city].length <= 4) {
+        $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+      }
+    };
+
+    for (let i = 0, length = numOfCities; i < length; i++) {
+      generateSlide(i);
+    }
+
+    $('.nav__slide--1').addClass('nav-active');
+
+    // Navigation
+    function bullets(dir) {
+      $('.nav__slide--' + curSlide).removeClass('nav-active');
+      $('.nav__slide--' + dir).addClass('nav-active');
+    }
+
+    function timeout() {
+      animation = true;
+    }
+
+    function pagination(direction) {
+      animation = true;
+      diff = 0;
+      $slider.addClass('animation');
+      $slider.css({
+        'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__darkbg').css({
+        'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__letter').css({
+        'transform': 'translate3d(0, 0, 0)',
+      });
+
+      $slider.find('.slide__text').css({
+        'transform': 'translate3d(0, 0, 0)'
+      });
+    }
+
+    function navigateRight() {
+      if (!autoScrollVar) return;
+      if (curSlide >= numOfCities) return;
+      pagination(0);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide + 1);
+      curSlide++;
+    }
+
+    function navigateLeft() {
+      if (curSlide <= 1) return;
+      pagination(2);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide - 1);
+      curSlide--;
+    }
+
+    function toDefault() {
+      pagination(1);
+      setTimeout(timeout, animSpd);
+    }
+
+
+
+    $(document).on('mouseup touchend', function (e) {
+      $(document).off('mousemove touchmove');
+
+      if (animation) return;
+
+      if (diff >= distOfLetGo) {
+        toDefault();
+      } else if (diff <= -distOfLetGo) {
+        toDefault();
+      } else {
+        toDefault();
+      }
+    });
+
+    $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+      let target = +$(this).attr('data-target');
+      bullets(target);
+      curSlide = target;
+      pagination(1);
+    });
+
+    $(document).on('click', '.side-nav', function () {
+      let target = $(this).attr('data-target');
+
+      if (target === 'right') navigateRight();
+      if (target === 'left') navigateLeft();
+    });
+
+    $(document).on('keydown', function (e) {
+      if (e.which === 39) navigateRight();
+      if (e.which === 37) navigateLeft();
+    });
+
+    $(document).on('mousewheel DOMMouseScroll', function (e) {
+      if (animation) return;
+      let delta = e.originalEvent.wheelDelta;
+
+      if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+      if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+    });
+  });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+  const carouselText = [
+    { text: "Genes are the sentences; organisms are the stories.", color: "rgba(255, 255, 255, 0.679)" },
+
+  ]
+
+  $(document).ready(async function () {
+    carousel(carouselText, "#feature-text")
+  });
+
+  async function typeSentence(sentence, eleRef, delay = 100) {
+    const letters = sentence.split("");
+    let i = 0;
+    while (i < letters.length) {
+      await waitForMs(delay);
+      $(eleRef).append(letters[i]);
+      i++;
+    }
+  }
+
+
+  async function deleteSentence(eleRef) {
+    const sentence = $(eleRef).html();
+    const letters = sentence.split("");
+    let i = 0;
+    while (letters.length > 0) {
+      await waitForMs(1000000);
+      letters.pop();
+      $(eleRef).html(letters.join(""));
+    }
+  }
+
+  async function carousel(carouselList, eleRef) {
+    var i = 0;
+    while (true) {
+      updateFontColor(eleRef, carouselList[i].color)
+      await typeSentence(carouselList[i].text, eleRef);
+      await waitForMs(1500);
+      await deleteSentence(eleRef);
+      await waitForMs(500);
+      i++
+      if (i >= carouselList.length) { i = 0; }
+    }
+  }
+
+  function updateFontColor(eleRef, color) {
+    $(eleRef).css('color', color);
+  }
+
+  function waitForMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+</script>
+<script>
+  $(function () {
+    $('.scroll-down').click(function () {
+      $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+      return false;
+    });
+  });
+</script>
+
+
+<div id="content">
+  <section class="banner-container">
+    <div class="cont">
+      <div class="slider"></div>
+    </div>
+    <div class="typing-container" style="top: 50px;">
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+      <span class="input-cursor"></span>
+    </div>
+    <div class="typing-container" style="margin-top: -250px;
+    color: aliceblue;
+    /* font-style: unset; */
+    font-size: xx-large;
+    font-weight: 800;
+    letter-spacing: 8px;
+    font-size: 140px;
+    font-family: inherit;">
+      Parts
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+    </div>
+    <a href="#" class="scroll-down" style="margin-bottom: 20px;" address="true"></a>
+  </section>
+  <section class="content">
+    <div class="main-left">
+      <div class="sidebar">
+        <ul>
+          <li><a id="sidebaritem1" href="#Problem" class="sidebaritem">Introduction</a></li>
+          <li><a id="sidebaritem2" href="#Inspiration" class="sidebaritem">Basic parts</a></li>
+          <li><a id="sidebaritem3" href="#Our Goal" class="sidebaritem">Composite parts</a></li>      
+          </li>
+          <style>
+            #sidebaritem1::after {
+              content: "";
+              height: 0%;
+              width: 3px;
+              background-color: rgb(255, 255, 255);
+              opacity: 0.3;
+              position: absolute;
+              top: 0;
+              left: 0;
+              transition: height 0.4s 0.3s ease, width 0.4s ease;
+            }
+
+            #sidebaritem1:hover::after {
+              width: 150%;
+              height: 100%;
+              transition: height 0.4s ease, width 0.4s 0.3s ease;
+            }
+          </style>
+        </ul>
+      </div>
+    </div>
+
+    <div class="main-right" id="effort">
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Problem">Introduction</h1>
+        <button class="expandbutton" id="expandbutton"></button>
+
+      </div>
+      <div id="article1" style="display:block;">
+        
+        <p class="des-paragraph fade_from_right">After extensive research, we have found that information about circRNA is limited. Currently, there is not only a lack of effective methods for detecting circRNA, but also no standard protocol for synthesizing it. Therefore, we are providing a coherent platform for both the synthesis and detection of circRNA. Our platform includes following three sections:</p>
+        <p class="des-paragraph fade_from_right">1. CircRNA synthesis. (Figure 1)
+        </p>
+        <p class="des-paragraph fade_from_right">2. Gold nanoparticle-based colorimetric assay. (Figure 2)
+        </p>
+        <p class="des-paragraph fade_from_right">3. Lateral flow test. (Figure 3)
+        </p>
+
+        <div class="containerfig fade_from_bottom">
+          <img src="https://static.igem.wiki/teams/4636/wiki/part/circrna-synthesis.jpg" alt="CircRNA synthesis">
+        </div>
+        <p class="des-figure fade_from_left">
+          Figure 1. CircRNA synthesis process. We utilize restriction enzymes for traditional cloning (BBa_K4636040, BBa_K4636041), PCR primers (BBa_K4636001 - BBa_K4636006) for amplifying the target (BBa_K4636040, BBa_K4636041), a modified T7 promoter (BBa_K4636000) for efficient transcription of DNA to RNA. Finally, we use a splint (BBa_K4636013 - BBa_K4636018) to assist in the circularization procedure.
+        </p>
+        <div class="containerfig fade_from_bottom">
+          <img src="https://static.igem.wiki/teams/4636/wiki/part/aunp-based-colorimetric-assay.jpg" alt="AuNP-based colorimetric assay" style="width:60%">
+        </div>
+        <p class="des-figure fade_from_left">
+          Figure 2. Process of gold nanoparticle-based colorimetric assay. We use RCA primers (BBa_K4636028 - BBa_K4636035) to conduct the RCA and generate long-repeated ssDNA for further detection using DNA probes (BBa_K4636007 - BBa_K4636012) on gold nanoparticles.
+        </p>
+        <div class="containerfig fade_from_bottom">
+          <img src="https://static.igem.wiki/teams/4636/wiki/part/lateral-flow-test.jpg" alt="Lateral Flow Test" style="width:60%">
+        </div>
+        <p class="des-figure fade_from_left">
+          Figure 3. Process of lateral flow test. We utilize these modified RPA primers (BBa_K4636019 - BBa_K4636027, BBa_K4636042) to conduct RT-RPA, and the resulting amplicon can be detected using PCRD detection.
+        </p>
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Inspiration">Basic parts</h1>
+        <button class="expandbutton" id="expandbutton2"></button>
+      </div>
+      <div id="article2" style="display:block;">
+        <table>
+          <tr>
+            <th>Item</th>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636000">BBa_K4636000</a></td>
+            <td>Modified T7 promoter</td>
+            <td>The modified T7 promoter can be used to transcribe efficiency.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636001">BBa_K4636001</a></td>
+            <td>cDNA of 0101802</td>
+            <td>cDNA of hsa_circ_0101802</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636002">BBa_K4636002</a></td>
+            <td>cDNA of 0004771</td>
+            <td>cDNA of hsa_circ_0004771</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636003">BBa_K4636003</a></td>
+            <td>PCR_0101802fw</td>
+            <td>Insert_0004771 PCR forward primer</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636004">BBa_K4636004</a></td>
+            <td>PCR_0101802rv</td>
+            <td>Insert_0004771 PCR reverse primer</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636005">BBa_K4636005</a></td>
+            <td>PCR_0004771fw</td>
+            <td>Insert_0101802 PCR forward primer</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636006">BBa_K4636006</a></td>
+            <td>PCR_0004771rv</td>
+            <td>Insert_0101802 PCR reverse primer</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636007">BBa_K4636007</a></td>
+            <td>Probe_0101802_bsj</td>
+            <td>Probe recognizes back splicing junction of RCA product</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636008">BBa_K4636008</a></td>
+            <td>Probe_0101802_10</td>
+            <td>Probe for recognizing RCA product</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636009">BBa_K4636009</a></td>
+            <td>Probe_0101802_11</td>
+            <td>Probe for recognizing RCA product</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636010">BBa_K4636010</a></td>
+            <td>Probe_0004771_bsj</td>
+            <td>Probe recognizes back splicing junction of RCA product</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636011">BBa_K4636011</a></td>
+            <td>Probe_0004771_11</td>
+            <td>Probe for recognizing RCA product</td>
+          </tr>
+          <tr>
+            <td>13</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636012">BBa_K4636012</a></td>
+            <td>Probe_0004771_12</td>
+            <td>Probe for recognizing RCA product</td>
+          </tr>
+          <tr>
+            <td>14</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636013">BBa_K4636013</a></td>
+            <td>Splint_1802_18</td>
+            <td>Splint helps the back splicing of linear RNA</td>
+          </tr>
+          <tr>
+            <td>15</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636014">BBa_K4636014</a></td>
+            <td>Splint_1802_16</td>
+            <td>Splint helps the back splicing of linear RNA</td>
+          </tr>
+          <tr>
+            <td>16</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636015">BBa_K4636015</a></td>
+            <td>Splint_1802_14</td>
+            <td>Splint helps the back splicing of linear RNA</td>
+          </tr>
+          <tr>
+            <td>17</td>
+            <td><a href="https://parts.igem.org/Part:BBa_K4636016">BBa_K4636016</a></td>
+            <td>Splint_4771_18</td>
+            <td>Splint helps the back splicing of linear RNA</td>
+          </tr>
+          <tr>
+            <td>18</td>
+            <td><a href="https://parts.igem.org/Part:BBa_K4636017">BBa_K4636017</a></td>
+            <td>Splint_4771_16</td>
+            <td>Splint helps the back splicing of linear RNA</td>
+          </tr>
+          <tr>
+            <td>19</td>
+            <td><a href="https://parts.igem.org/Part:BBa_K4636018">BBa_K4636018</a></td>
+            <td>Splint_4771_14</td>
+            <td>Splint helps the back splicing of linear RNA</td>
+          </tr>
+          <tr>
+            <td>20</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636019">BBa_K4636019</a></td>
+            <td id="36019">RPA_0101802fw_1</td>
+            <td>With biotin modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>21</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636020">BBa_K4636020</a></td>
+            <td>RPA_0101802rv_1</td>
+            <td>With FAM modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>22</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636021">BBa_K4636021</a></td>
+            <td>RPA_0101802fw_2</td>
+            <td>With biotin modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>23</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636022">BBa_K4636022</a></td>
+            <td>RPA_0101802rv_2</td>
+            <td>With FAM modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>24</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636023">BBa_K4636023</a></td>
+            <td>RPA_0004771fw_1</td>
+            <td>With biotin modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>25</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636024">BBa_K4636024</a></td>
+            <td>RPA_0004771rv_1</td>
+            <td>With DIG modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>26</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636025">BBa_K4636025</a></td>
+            <td>RPA_0004771fw_2</td>
+            <td>With biotin modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>27</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636026">BBa_K4636026</a></td>
+            <td>RPA_0004771rv_2</td>
+            <td>With DIG modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>28</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636027">BBa_K4636027</a></td>
+            <td>RPA_0004771fw_3</td>
+            <td>With biotin modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>29</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636042">BBa_K4636042</a></td>
+            <td>RPA_0004771rv_3</td>
+            <td>With DIG modification, it can be used for lateral flow testing after RPA.</td>
+          </tr>
+          <tr>
+            <td>30</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636028">BBa_K4636028</a></td>
+            <td>RCA_indu_1802_1</td>
+            <td>RCA primers initiates the amplification process</td>
+          </tr>
+          <tr>
+            <td>31</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636029">BBa_K4636029</a></td>
+            <td>RCA_indu_1802_2</td>
+            <td>RCA primers initiates the amplification process</td>
+          </tr>
+          <tr>
+            <td>32</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636030">BBa_K4636030</a></td>
+            <td>RCA_indu_4771_1</td>
+            <td>RCA primers initiates the amplification process</td>
+          </tr>
+          <tr>
+            <td>33</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636031">BBa_K4636031</a></td>
+            <td>RCA_indu_4771_2</td>
+            <td>RCA primers initiates the amplification process</td>
+          </tr>
+          <tr>
+            <td>34</td>
+            <td><a href="hhttp://parts.igem.org/Part:BBa_K4636032">BBa_K4636032</a></td>
+            <td>RCA_45_1802_1</td>
+            <td>RCA primers initiates the amplification process</td>
+          </tr>
+          <tr>
+            <td>35</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636033">BBa_K4636033</a></td>
+            <td>RCA_45_1802_2</td>
+            <td>RCA primers initiates the amplification process</td>
+          </tr>
+          <tr>
+            <td>36</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636034">BBa_K4636034</a></td>
+            <td>RCA_45_4771_1</td>
+            <td>RCA primers initiates the amplification process</td>
+          </tr>
+          <tr>
+            <td>37</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636035">BBa_K4636035</a></td>
+            <td>RCA_45_4771_2</td>
+            <td>RCA primers initiates the amplification process</td>
+          </tr>
+          <tr>
+            <td>38</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636036">BBa_K4636036</a></td>
+            <td>PCRforAELA_fw</td>
+            <td>Primer for AELA-PCR preparation</td>
+          </tr>
+          <tr>
+            <td>39</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636037">BBa_K4636037</a></td>
+            <td>PCRforAELA_rv</td>
+            <td>Primer for AELA-PCR preparation</td>
+          </tr>
+          <tr>
+            <td>40</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636038">BBa_K4636038</a></td>
+            <td>AELA_PCR_fw</td>
+            <td>Primer for AELA-PCR</td>
+          </tr>
+          <tr>
+            <td>41</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636039">BBa_K4636039</a></td>
+            <td>AELA_PCR_rv</td>
+            <td>Primer for AELA-PCR</td>
+          </tr>
+        </table>
+
+      </div>
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Our Goal">Composite part</h1>
+        <button class="expandbutton" id="expandbutton3"></button>
+      </div>
+      <div id="article3" style="display:block;">
+        <table>
+          <tr>
+            <th>Item</th>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Composite</th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636040">BBa_K4636040</a></td>
+            <td>Insert_0101802</td>
+            <td>Modified T7 promoter + cDNA of 0101802</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636041">BBa_K4636041</a></td>
+            <td>Insert_0004771</td>
+            <td>Modified T7 promoter + cDNA of 0004771</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636052">BBa_K4636052</a></td>
+            <td>insert_ligation_0101802</td>
+            <td>Insert_0101802 + Insert_0101802</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636053">BBa_K4636053</a></td>
+            <td>insert_ligation_0004771</td>
+            <td>Insert_0004771 + Insert_0004771</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636054">BBa_K4636054</a></td>
+            <td>pUC19_insert_ligation_0101802</td>
+            <td>puc19 vector + insert_ligation_0101802</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><a href="http://parts.igem.org/Part:BBa_K4636055">BBa_K4636055</a></td>
+            <td>pUC19_insert_ligation_0004771</td>
+            <td>puc19 vector + insert_ligation_0004771</td>
+          </tr>
+        </table>
+
+      </div>
+      
+     
+    </div>
+    <script src="{{ url_for('static', filename = 'expand-button.js') }}"></script>
+  </section>
+</div>
+
+{% endblock %}

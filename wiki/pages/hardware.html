@@ -1,0 +1,773 @@
+{% extends "layout.html" %}
+
+{% block title %}Hardware{% endblock %}
+
+{% block page_content %}
+<style>
+  .slide--1__darkbg {
+    left: 0%;
+    background: url("https://static.igem.wiki/teams/4636/wiki/design.jpg") center center no-repeat;
+    background-size: cover;
+    background-position: 0px center, 0px center;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  .slide--1__letter {
+    background: url("https://static.igem.wiki/teams/4636/wiki/design.jpg") center center no-repeat;
+    background-position: 0px center, 0px center;
+    background-size: cover;
+  }
+</style>
+<script src="{{ url_for('static', filename = 'banner-container.js') }}"></script>
+<script>
+  $(document).ready(function () {
+    const $cont = $('.cont');
+    const $slider = $('.slider');
+    const $nav = $('.nav');
+    const winW = $(window).width();
+    const animSpd = 750; // Change also in CSS
+    const distOfLetGo = winW * 0.2;
+    let curSlide = 1;
+    let animation = false;
+    let autoScrollVar = false;
+    let diff = 0;
+
+    // Generating slides
+    let arrCities = ['Hardware', 'Problem', 'Inspiration', 'Our goal', 'Advantages']; // Change number of slides in CSS also
+    let numOfCities = arrCities.length;
+    let arrCitiesDivided = [];
+
+    arrCities.map((city) => {
+      let length = city.length;
+      let letters = Math.floor(length / 4);
+      let exp = new RegExp(".{1," + letters + "}", "g");
+
+      arrCitiesDivided.push(city.match(exp));
+    });
+
+    let generateSlide = function (city) {
+      let frag1 = $(document.createDocumentFragment());
+      let frag2 = $(document.createDocumentFragment());
+      const numSlide = arrCities.indexOf(arrCities[city]) + 1;
+      const firstLetter = arrCitiesDivided[city][0].charAt(0);
+
+      const $slide =
+        $(`<div data-target="${numSlide}" class="slide slide--${numSlide}">
+                    <div class="slide__darkbg slide--${numSlide}__darkbg"></div>
+                    <div class="slide__text-wrapper slide--${numSlide}__text-wrapper"></div>
+                </div>`);
+
+      const letter =
+        $(`<div class="slide__letter slide--${numSlide}__letter">
+                    ${firstLetter}
+                </div>`);
+      /*
+                      for (let i = 0, length = arrCitiesDivided[city].length; i < length; i++) {
+                          const text =
+                              $(`<div class="slide__text slide__text--${i + 1}">
+                                  ${arrCitiesDivided[city][i]}
+                              </div>`);
+                          frag1.append(text);
+                      }
+      */
+      const navSlide = $(`<li data-target="${numSlide}" class="nav__slide nav__slide--${numSlide}"></li>`);
+      frag2.append(navSlide);
+      $nav.append(frag2);
+
+      $slide.find(`.slide--${numSlide}__text-wrapper`).append(letter).append(frag1);
+      $slider.append($slide);
+
+      if (arrCities[city].length <= 4) {
+        $('.slide--' + numSlide).find('.slide__text').css("font-size", "12vw");
+      }
+    };
+
+    for (let i = 0, length = numOfCities; i < length; i++) {
+      generateSlide(i);
+    }
+
+    $('.nav__slide--1').addClass('nav-active');
+
+    // Navigation
+    function bullets(dir) {
+      $('.nav__slide--' + curSlide).removeClass('nav-active');
+      $('.nav__slide--' + dir).addClass('nav-active');
+    }
+
+    function timeout() {
+      animation = true;
+    }
+
+    function pagination(direction) {
+      animation = true;
+      diff = 0;
+      $slider.addClass('animation');
+      $slider.css({
+        'transform': 'translate3d(-' + ((curSlide - direction) * 100) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__darkbg').css({
+        'transform': 'translate3d(' + ((curSlide - direction) * 50) + '%, 0, 0)'
+      });
+
+      $slider.find('.slide__letter').css({
+        'transform': 'translate3d(0, 0, 0)',
+      });
+
+      $slider.find('.slide__text').css({
+        'transform': 'translate3d(0, 0, 0)'
+      });
+    }
+
+    function navigateRight() {
+      if (!autoScrollVar) return;
+      if (curSlide >= numOfCities) return;
+      pagination(0);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide + 1);
+      curSlide++;
+    }
+
+    function navigateLeft() {
+      if (curSlide <= 1) return;
+      pagination(2);
+      setTimeout(timeout, animSpd);
+      bullets(curSlide - 1);
+      curSlide--;
+    }
+
+    function toDefault() {
+      pagination(1);
+      setTimeout(timeout, animSpd);
+    }
+
+
+
+    $(document).on('mouseup touchend', function (e) {
+      $(document).off('mousemove touchmove');
+
+      if (animation) return;
+
+      if (diff >= distOfLetGo) {
+        toDefault();
+      } else if (diff <= -distOfLetGo) {
+        toDefault();
+      } else {
+        toDefault();
+      }
+    });
+
+    $(document).on('click', '.nav__slide:not(.nav-active)', function () {
+      let target = +$(this).attr('data-target');
+      bullets(target);
+      curSlide = target;
+      pagination(1);
+    });
+
+    $(document).on('click', '.side-nav', function () {
+      let target = $(this).attr('data-target');
+
+      if (target === 'right') navigateRight();
+      if (target === 'left') navigateLeft();
+    });
+
+    $(document).on('keydown', function (e) {
+      if (e.which === 39) navigateRight();
+      if (e.which === 37) navigateLeft();
+    });
+
+    $(document).on('mousewheel DOMMouseScroll', function (e) {
+      if (animation) return;
+      let delta = e.originalEvent.wheelDelta;
+
+      if (delta > 0 || e.originalEvent.detail < 0) navigateLeft();
+      if (delta < 0 || e.originalEvent.detail > 0) navigateRight();
+    });
+  });
+</script>
+<script src="{{ url_for('static', filename = 'typing-container.js') }}"></script>
+<script>
+  const carouselText = [
+    { text: "Ideas alone won't change the world; action will.", color: "rgba(255, 255, 255, 0.679)" },
+
+  ]
+
+  $(document).ready(async function () {
+    carousel(carouselText, "#feature-text")
+  });
+
+  async function typeSentence(sentence, eleRef, delay = 100) {
+    const letters = sentence.split("");
+    let i = 0;
+    while (i < letters.length) {
+      await waitForMs(delay);
+      $(eleRef).append(letters[i]);
+      i++;
+    }
+  }
+
+
+  async function deleteSentence(eleRef) {
+    const sentence = $(eleRef).html();
+    const letters = sentence.split("");
+    let i = 0;
+    while (letters.length > 0) {
+      await waitForMs(1000000);
+      letters.pop();
+      $(eleRef).html(letters.join(""));
+    }
+  }
+
+  async function carousel(carouselList, eleRef) {
+    var i = 0;
+    while (true) {
+      updateFontColor(eleRef, carouselList[i].color)
+      await typeSentence(carouselList[i].text, eleRef);
+      await waitForMs(1500);
+      await deleteSentence(eleRef);
+      await waitForMs(500);
+      i++
+      if (i >= carouselList.length) { i = 0; }
+    }
+  }
+
+  function updateFontColor(eleRef, color) {
+    $(eleRef).css('color', color);
+  }
+
+  function waitForMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+</script>
+<script>
+  $(function () {
+    $('.scroll-down').click(function () {
+      $('html, body').animate({ scrollTop: $('section.content').offset().top }, 'slow');
+      return false;
+    });
+  });
+</script>
+
+<div id="content">
+  <section class="banner-container">
+    <div class="cont">
+      <div class="slider"></div>
+    </div>
+    <div class="typing-container" style="top: 50px;">
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+      <span class="input-cursor"></span>
+    </div>
+    <div class="typing-container" style="margin-top: -270px;
+    color: aliceblue;
+    /* font-style: unset; */
+    font-size: xx-large;
+    font-weight: 800;
+    letter-spacing: 8px;
+    font-size: 110px;
+    font-family: inherit;
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 120px;"
+>
+      Hardware
+      <span id="sentence" class="sentence"></span>
+      <span id="feature-text" style="font-family: Open Sans, sans-serif;font-weight: bold;font-size: 30px;"></span>
+
+    </div>
+    <a href="#" class="scroll-down" address="true"></a>
+  </section>
+  <section class="content">
+    <div class="main-left">
+      <div class="sidebar">
+        <ul>
+          <li><a href="#Background" class="sidebaritem">Background</a></li>
+          <li><a href="#Hardware - Circmostat" class="sidebaritem">Hardware - Circmostat</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton1"></button>
+          <div id="sidebaritem_item1" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#Goal_Hardware">Goal</a></li>
+              <li class="sidebaritem_item"><a href="#Implementation_Hardware">Implementation</a></li>
+              <li class="sidebaritem_item"><a href="#Material_Hardware">Material</a></li>
+              <li class="sidebaritem_item"><a href="#Result_Hardware">Result</a></li>
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton1 = document.getElementById("sideexpandbutton1");
+            const sidebaritem_item1 = document.getElementById("sidebaritem_item1");
+
+            sideexpandbutton1.addEventListener("click", function () {
+              if (sidebaritem_item1.style.display == "none") {
+                sidebaritem_item1.style.display = "block";
+                sideexpandbutton1.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item1.style.display = "none";
+                sideexpandbutton1.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+          <li><a href="#Software - Circmos Dx" class="sidebaritem">Software - Circmos Dx</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton2"></button>
+          <div id="sidebaritem_item2" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#Goal_Software">Goal</a></li>
+              <li class="sidebaritem_item"><a href="#Implementation_Software">Implementation</a></li>
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton2 = document.getElementById("sideexpandbutton2");
+            const sidebaritem_item2 = document.getElementById("sidebaritem_item2");
+
+            sideexpandbutton2.addEventListener("click", function () {
+              if (sidebaritem_item2.style.display == "none") {
+                sidebaritem_item2.style.display = "block";
+                sideexpandbutton2.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item2.style.display = "none";
+                sideexpandbutton2.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+          <li><a href="#Machine_Learning_Model" class="sidebaritem">Machine Learning Model</a></li>
+          <button class="sideexpandbutton" id="sideexpandbutton3"></button>
+          <div id="sidebaritem_item3" style="display:none;background-color:rgba(0, 0, 0, 0.242);">
+            <ul>
+              <li class="sidebaritem_item"><a href="#TEST1">TEST1</a></li>
+              <li class="sidebaritem_item"><a href="#TEST2">TEST2</a></li>
+            </ul>
+          </div>
+          <script>
+            const sideexpandbutton3 = document.getElementById("sideexpandbutton3");
+            const sidebaritem_item3 = document.getElementById("sidebaritem_item3");
+
+            sideexpandbutton3.addEventListener("click", function () {
+              if (sidebaritem_item3.style.display == "none") {
+                sidebaritem_item3.style.display = "block";
+                sideexpandbutton3.style.transform = "rotate(-180deg)";
+              } else {
+                sidebaritem_item3.style.display = "none";
+                sideexpandbutton3.style.transform = "rotate(-360deg)";
+              }
+            });
+          </script>
+          <li><a href="#Handbook" class="sidebaritem">Handbook</a></li>
+          <li><a href="#Advantages" class="sidebaritem">Advantages</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="main-right" id="effort">
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Background">Background</h1>
+        <button class="expandbutton" id="expandbutton1"></button>
+      </div>
+      <div id="article1">
+        <p class="des-paragraph fade_from_right">
+          When doing RT-RPA or RCA, the Eppendorf needs to go through several heating duration at specific temperatures.
+          And at the end, we have to inspect the color of gold nanoparticles or strips of PCRD manually. However, those
+          processes are too complicated, and it might be challenging for some users to observe the color change and the
+          number of strips.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/hardware/progress.png">
+        </div>
+        <p class="des-figure">
+          Figure 1. Workflow of hardware and software.
+        </p>
+      </div>
+      <script>
+        const expandbutton1 = document.getElementById("expandbutton1");
+        const article1 = document.getElementById("article1");
+
+        expandbutton1.addEventListener("click", function () {
+          if (article1.style.display == "block") {
+            article1.style.display = "none";
+            expandbutton1.style.transform = "rotate(-180deg)";
+          } else {
+            article1.style.display = "block";
+            expandbutton1.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Hardware - Circmostat">Hardware - Circmostat</h1>
+        <button class="expandbutton" id="expandbutton2"></button>
+      </div>
+      <div id="article2">
+        <h1 class="des-heading2" id="Goal_Hardware"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Goal</h1>
+        <p class="des-paragraph fade_from_right">
+          We want to build a device which can control several heating temperature and time automatically. That is, the
+          device is able to monitor the entire process, including amplification, heating, and the addition of various
+          solutions. Thus, users no longer need to monitor the heating process constantly. Because the hardware is
+          related to CircRNA and thermostat, we name it “Circmostat”.
+        </p>
+        <h1 class="des-heading2" id="Implementation_Hardware"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Implementation</h1>
+        <p class="des-paragraph fade_from_right">
+          When the device is turned on, the temperature sensor will detect the temperature of the Eppendorf and send the
+          data to ESP32. Then, ESP32 compare the data with the default value to determine whether to turn on or turn off
+          the heater (Figure 2).
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/hardware/hardwareimplement-new.png">
+        </div>
+        <p class="des-figure">
+          Figure 2. Suppose Circmostat is turned on at 34.75°C, and we want the temperature to be maintained between
+          35.5~38.5°C. Thus, we can set the default value to 36.0 and 38.0°C. When the temperature is 38°C, the heater
+          would be turned off. Then, temperature will be decreased, and vice versa. (The heater needs some time to cool
+          down or heat up, so the range of the default value is smaller than the range of the maintained value)
+        </p>
+        <p class="des-paragraph fade_from_right">
+          After the heating, the device will add the solution of gold nanoparticles and salt. First, the syringe that is
+          filled with gold nanoparticles solution is pushed by the rotating disk above (Figure3). Then, the syringe
+          filled with salt solution will be switched above the Eppendorf and be pushed by the rotating disk again.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/hardware/rotate.gif">
+        </div>
+        <p class="des-figure">
+          Figure 3. rotate disk (3D/2D).
+        </p>
+        
+        <h1 class="des-heading2" id="Material_Hardware"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Material</h1>
+        <table>
+          <tr>
+            <th>Materials</span></th>
+            <th>Numbers</span></th>
+            <th>Function</span></th>
+            <th>Picture</span></th>
+          </tr>
+          <tr>
+            <td>ESP32</td>
+            <td>1</td>
+            <td>Control entire system</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/esp32.jpg">
+            </td>
+          </tr>
+          <tr>
+            <td>Relay</td>
+            <td>1</td>
+            <td>Control the heater</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/relay.jpg">
+            </td>
+          </tr>
+          <tr>
+            <td>Buck converter Module</td>
+            <td>1</td>
+            <td>Supply power</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/buck-converter-module.jpg">
+            </td>
+          </tr>
+          <tr>
+            <td>Temperature sensor (DS18B20)</td>
+            <td>1</td>
+            <td>Detect Temperature of Eppendorf</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/temperature-sensor-ds18b20.jpg">
+            </td>
+          </tr>
+          <tr>
+            <td>Heater</td>
+            <td>1</td>
+            <td>Heat the Eppendorf</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/heater.jpg">
+            </td>
+          </tr>
+          <tr>
+            <td>Liquid Crystal Display (LCD1602)</td>
+            <td>1</td>
+            <td>Display the temperature and time</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/liquid-crystal-display-lcd1602.jpg"
+             >
+            </td>
+          </tr>
+          <tr>
+            <td>DC Motor</td>
+            <td>2</td>
+            <td>Rotate the disks to push syringe</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/dc-motor.jpg">
+            </td>
+          </tr>
+          <tr>
+            <td>Syringe</td>
+            <td>2</td>
+            <td>Add the solutions into the eppendorf</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/syringe.jpg">
+            </td>
+          </tr>
+          <tr>
+            <td>Fin</td>
+            <td>1</td>
+            <td>Dissipate heat</td>
+            <td>
+              <img src="https://static.igem.wiki/teams/4636/wiki/hardware/fin.jpg">
+            </td>
+          </tr>
+        </table>
+
+        <h1 class="des-heading2" id="Result_Hardware"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Result</h1>
+        <p class="des-paragraph fade_from_right">
+          Arduino IDE GitLab: <a href="https://gitlab.igem.org/2023/software-tools/nthu-taiwan/-/tree/main/Circmostat">https://gitlab.igem.org/2023/software-tools/nthu-taiwan/-/tree/main/Circmostat</a>
+        </p>
+        <div class="containerfig">
+          <img style="height: 600px; width: auto; padding-left: 300px;" src="https://static.igem.wiki/teams/4636/wiki/hardware/3d-model.gif">
+          <img style="height: 600px; width: auto; padding-right: 300px;" src="https://static.igem.wiki/teams/4636/wiki/hardware/3d-printer.gif">
+        </div>
+        <p class="des-figure">
+          Figure 4. 3D model(Left)/ 3D printer result(right)
+        </p>
+      </div>
+      <script>
+        const expandbutton2 = document.getElementById("expandbutton2");
+        const article2 = document.getElementById("article2");
+
+        expandbutton2.addEventListener("click", function () {
+          if (article2.style.display == "block") {
+            article2.style.display = "none";
+            expandbutton1.style.transform = "rotate(-180deg)";
+          } else {
+            article2.style.display = "block";
+            expandbutton2.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Software - Circmos Dx">Software - Circmos Dx</h1>
+        <button class="expandbutton" id="expandbutton3"></button>
+      </div>
+      <div id="article3">
+        <h1 class="des-heading2" id="Goal_Software"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Goal</h1>
+        <p class="des-paragraph fade_from_right">
+          We hope to make an APP, named Circmos Dx, which is able to recognize the color and connect to the hardware.
+          Narrowly speaking, the user can control the device with a button, obtain all information about the heating
+          process and recognize the picture of PCRD or gold nanoparticles. Finally, Circmos Dx will show the result of
+          whether the user get the cancer or not.
+        </p>
+        <h1 class="des-heading2" id="Implementation_Software"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Implementation</h1>
+        <p class="des-paragraph fade_from_right">
+          We use Flutter to design Circmos Dx. There are two main functions : 1. Connecting to the hardware 2.
+          Recognizing the PCRD and gold nanoparticles.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          First, for connecting to the hardware, we use Bluetooth to implement it. Circmos Dx will list all the devices
+          within the Bluetooth range. After the users have chosen Circmostat (hardware) they want, Circmostat will
+          exchange the information with Circmos Dx each second. Finally, Circmos displays the temperature and heating
+          time.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Then, for recognizing the PCRD and gold nanoparticles, we use machine learning model to implement it.
+        </p>
+      </div>
+      <script>
+        const expandbutton3 = document.getElementById("expandbutton3");
+        const article3 = document.getElementById("article3");
+
+        expandbutton3.addEventListener("click", function () {
+          if (article3.style.display == "block") {
+            article3.style.display = "none";
+            expandbutton3.style.transform = "rotate(-180deg)";
+          } else {
+            article3.style.display = "block";
+            expandbutton3.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Machine Learning Model">Machine Learning Model</h1>
+        <button class="expandbutton" id="expandbutton4"></button>
+      </div>
+      <div id="article4">
+        <h1 class="des-heading2" id="Implementation_Software"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Goal</h1>
+        <p class="des-paragraph fade_from_right">
+          Due to the capability to handle multi-dimensional and multi-variety data of artificial intelligence, we use machine learning models to support the result recognition in CircmosDx.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          By utilizing the machine learning model, the users only need to take a picture of their detection kit and then they will get the result immediately.
+        </p>
+        <h1 class="des-heading2" id="Implementation_Software"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Implementation</h1>
+        <p class="des-paragraph fade_from_right">
+          We implement our machine learning model in two ways, the single model and the two-step model.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/hardware/mlmodels.png">
+        </div>
+        <p class="des-figure">
+          Figure 5. Architecture of the single and the two-step models.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          In the Two-Step model, there are two sub-models, the preprocessing model and the result-recognizing model. The preprocessing model will determine whether the photo the user has just taken is valid, that is, the detection kit is in the middle of the photo and is not covered by any objects. Next, the result-recognizing model will tell the result based on the valid image.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Combining the function of the Two-Step model, the single model will tell whether the image is valid and the result of diagnosis in just one step.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          We train these models separately and the source codes can be found on our <a href="https://gitlab.igem.org/2023/software-tools/nthu-taiwan/-/tree/main">GitLab</a> page. The following describes the details:
+        </p>
+        <p class="des-paragraph fade_from_right">
+          <b>1. Photo preprocessing</b>
+        </p>
+        <p class="des-paragraph-item fade_from_right">
+          <b>Read dataset</b>
+          <br>First, we reduced the size of the image and saved it as a PNG file. 
+          <br>For the PCRD kit, we further cut the image into a smaller size, in a way that the image only contained the PCRD kit and small background, to reduce the training dimension.
+          <br>The final size of the dataset for PCRD and AuNP machine learning models are 158 and 283, respectively.
+        </p>
+        <p class="des-paragraph-item fade_from_right">
+          <b>Data label</b>
+          <br>We label the data with different classes. Figure 3 is the example of the rules that we used for labeling.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/hardware/label.png">
+        </div>
+        <p class="des-figure">
+          Figure 6. Labeling criteria of the PCRD Two-Step model.
+        </p>
+        <p class="des-paragraph-item fade_from_right">
+          These labels serve as the goal of the machine learning model.
+        </p>
+        <p class="des-paragraph-item fade_from_right">
+          <b>Split training and testing data</b>
+          <br>Due to the limited number of data, we only leave 10% of the data for testing. The remaining 90% would be used to train the model.
+        </p>
+        <p class="des-paragraph-item fade_from_right">
+          <b>Data augmentation</b>
+          <br>Before training, we perform data augmentation on the training dataset in order to increase the amount of data. Also, data augmentation could generalize the images into various aspects, which the machine learning model can learn from. This step could improve the downstream performance of the machine learning model on a small dataset.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          <b>2. Training</b>
+          <br>We use traditional linear regression, random forest, and CNN as our main model architectures.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          <b>3. Save model</b>
+          <br>After training, we save the models into TFLITE files, which enables the utilization of machine learning models in mobile apps.
+        </p>
+        <h1 class="des-heading2" id="Implementation_Software"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>Result</h1>
+        <p class="des-paragraph fade_from_right">
+          In the preprocessing model of the PCRD two-step model, the random forest can better predict the result with an AUC value of 0.883, followed by CNN with an AUC value of 0.688.
+        </p>
+        <div class="containerfig">
+          <img src="https://static.igem.wiki/teams/4636/wiki/hardware/roccurve.png" style="width: 50%;">
+        </div>
+        <p class="des-figure">
+          Figure 7. ROC curve of the preprocessing model in the PCRD Two-Step model.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Due to the time limit, we haven't collected enough image data and fine-tuned every model to have over 80% accuracy. In the future, we will keep testing different architectures to achieve higher accuracies so that the machine learning model can be utilized in Circmos Dx.
+        </p>
+        
+      </div>
+      <script>
+        const expandbutton4 = document.getElementById("expandbutton4");
+        const article4 = document.getElementById("article4");
+
+        expandbutton4.addEventListener("click", function () {
+          if (article4.style.display == "block") {
+            article4.style.display = "none";
+            expandbutton4.style.transform = "rotate(-180deg)";
+          } else {
+            article4.style.display = "block";
+            expandbutton4.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Handbook">Handbook</h1>
+        <button class="expandbutton" id="expandbutton5"></button>
+      </div>
+      <div id="article5">
+        <div class="containerfig" style="padding-top: 40px;">
+          <iframe 
+            src="https://static.igem.wiki/teams/4636/wiki/proposed-implementation/proposed-implementation/proposed-implementation/manual-aunps.pdf"
+            style="width: 50%;
+    height: 500px;
+    padding-left: 10px;
+    ">
+          </iframe>
+          <iframe 
+            src="https://static.igem.wiki/teams/4636/wiki/proposed-implementation/proposed-implementation/proposed-implementation/manual-pcrd.pdf"
+            style="width: 50%;
+            height: 500px;
+            padding-left: 10px;
+            float: right;">
+          </iframe>
+        </div>
+        <p class="des-figure">
+          Figure 8. Handbook(AuNPs) (left) and Handbook(PCRD) (right).
+        </p>
+      </div>
+      <script>
+        const expandbutton5 = document.getElementById("expandbutton5");
+        const article5 = document.getElementById("article5");
+
+        expandbutton5.addEventListener("click", function () {
+          if (article5.style.display == "block") {
+            article5.style.display = "none";
+            expandbutton5.style.transform = "rotate(-180deg)";
+          } else {
+            article5.style.display = "block";
+            expandbutton5.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+
+      <div class="headingbox">
+        <h1 class="des-heading1" id="Advantages">Advantages</h1>
+        <button class="expandbutton" id="expandbutton6"></button>
+      </div>
+      <div id="article6">
+        <h1 class="des-heading3 fade_from_left" id="Convenience">Convenience</h1>
+        <p class="des-paragraph fade_from_right">
+          Because of its simple structure, the hardware can be built easily not only in the hospitals but also in rural
+          health centers. Also, the users can get the software on the Internet and use it offline at anytime and
+          anywhere.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Additionally, a complete test only takes 2.5 hours and does not need for complex hospital procedures. That is,
+          it can be implemented in less developed regions, and promote a positive connection and equality between urban
+          and rural areas.
+        </p>
+        <h1 class="des-heading3 fade_from_left" id="Inexpensive">Inexpensive</h1>
+        <p class="des-paragraph fade_from_right">
+          It does not need lots of money to build the hardware, and the software APP can be downloaded free. Thus,
+          anyone or anywhere that needs the hardware and software is able to afford them.
+        </p>
+        <p class="des-paragraph fade_from_right">
+          Moreover, we believe if the device is introduced to Taiwan, it can significantly reduce the economic burden on
+          Taiwan's healthcare system.
+        </p>
+        <h1 class="des-heading3 fade_from_left" id="Simplicity">Simplicity</h1>
+        <p class="des-paragraph fade_from_right">
+          The device is so simple that everyone can operate the hardware without specialized knowledge. And all the
+          information will be listed on the APP. Therefore, whoever use the hardware and software, he/she is capable of
+          understanding what to do and reading the result.
+        </p>
+      </div>
+      <script>
+        const expandbutton6 = document.getElementById("expandbutton6");
+        const article6 = document.getElementById("article6");
+
+        expandbutton6.addEventListener("click", function () {
+          if (article6.style.display == "block") {
+            article6.style.display = "none";
+            expandbutton1.style.transform = "rotate(-180deg)";
+          } else {
+            article6.style.display = "block";
+            expandbutton1.style.transform = "rotate(-360deg)";
+          }
+        });
+      </script>
+  </section>
+</div>
+{% endblock %}
